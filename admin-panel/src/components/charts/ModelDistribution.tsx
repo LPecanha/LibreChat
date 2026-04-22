@@ -1,4 +1,4 @@
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, LabelList } from 'recharts';
 import type { ModelUsage } from '~/lib/api';
 import { formatUsd } from '~/lib/utils';
 
@@ -8,26 +8,35 @@ const COLORS = [
   '#fb923c', '#34d399', '#60a5fa',
 ];
 
+function compactUsd(tokenCredits: number): string {
+  const usd = tokenCredits / 1_000_000;
+  if (usd >= 1000) {
+    return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(usd);
+  }
+  return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'USD', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(usd);
+}
+
 interface Props {
   data: ModelUsage[];
 }
 
 export function ModelDistribution({ data }: Props) {
   const chartData = [...data]
+    .filter((d) => d.model && d.model !== 'unknown' && d.model !== 'null')
     .sort((a, b) => b.tokenValue - a.tokenValue)
     .slice(0, 15)
-    .map((d) => ({ name: d.model ?? 'unknown', value: d.tokenValue }));
+    .map((d) => ({ name: d.model, value: d.tokenValue }));
 
-  const chartHeight = Math.max(180, chartData.length * 30 + 40);
+  const chartHeight = Math.max(180, chartData.length * 32 + 40);
 
   return (
     <ResponsiveContainer width="100%" height={chartHeight}>
-      <BarChart data={chartData} layout="vertical" margin={{ left: 0, right: 24, top: 4, bottom: 4 }}>
+      <BarChart data={chartData} layout="vertical" margin={{ left: 0, right: 90, top: 4, bottom: 4 }}>
         <XAxis type="number" hide />
         <YAxis
           type="category"
           dataKey="name"
-          width={150}
+          width={160}
           tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
           tickLine={false}
           axisLine={false}
@@ -42,6 +51,12 @@ export function ModelDistribution({ data }: Props) {
           }}
         />
         <Bar dataKey="value" radius={[0, 4, 4, 0]} maxBarSize={20}>
+          <LabelList
+            dataKey="value"
+            position="right"
+            formatter={(v: number) => compactUsd(v)}
+            style={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
+          />
           {chartData.map((_, i) => (
             <Cell key={i} fill={COLORS[i % COLORS.length]} />
           ))}
