@@ -10,6 +10,8 @@
 #   /root/fibbo/           → new Fibbo stack directory
 #
 # Usage (run from the repo root on the server):
+#   NAVVIA_MONGO_USER=user NAVVIA_MONGO_PASS=pass \
+#   FIBBO_MONGO_USER=user  FIBBO_MONGO_PASS=pass  \
 #   bash deploy/migrate.sh
 
 set -euo pipefail
@@ -52,14 +54,26 @@ MONGO_CONTAINER=$(docker ps -q -f name=mongodb_mongodb 2>/dev/null | head -1)
 [ -n "$MONGO_CONTAINER" ] || abort "Container do MongoDB (mongodb_mongodb) não encontrado ou não está rodando"
 ok "MongoDB encontrado: $MONGO_CONTAINER"
 
-# Credenciais do MongoDB autenticado (preencha antes de rodar)
-MONGO_USER="${MONGO_USER:-}"
-MONGO_PASS="${MONGO_PASS:-}"
+# Credenciais por banco — cada banco tem seu próprio usuário
+# Passe via variável de ambiente antes de rodar:
+#   NAVVIA_MONGO_USER=... NAVVIA_MONGO_PASS=... FIBBO_MONGO_USER=... FIBBO_MONGO_PASS=... bash deploy/migrate.sh
+NAVVIA_MONGO_USER="${NAVVIA_MONGO_USER:-}"
+NAVVIA_MONGO_PASS="${NAVVIA_MONGO_PASS:-}"
+FIBBO_MONGO_USER="${FIBBO_MONGO_USER:-}"
+FIBBO_MONGO_PASS="${FIBBO_MONGO_PASS:-}"
 
-_mongo_auth_args() {
-    if [ -n "$MONGO_USER" ] && [ -n "$MONGO_PASS" ]; then
-        echo "--username $MONGO_USER --password $MONGO_PASS --authenticationDatabase admin"
+_dump_db() {
+    local db="$1" user="$2" pass="$3"
+    local auth_args=""
+    if [ -n "$user" ] && [ -n "$pass" ]; then
+        auth_args="--username $user --password $pass --authenticationDatabase $db"
     fi
+    # shellcheck disable=SC2086
+    docker exec "$MONGO_CONTAINER" mongodump \
+        $auth_args \
+        --db "$db" \
+        --out /tmp/mongo-backup \
+        --quiet
 }
 
 # ── Backup MongoDB ────────────────────────────────────────────────────────────
@@ -68,22 +82,12 @@ step "Backup dos bancos de dados → $BACKUP_DIR"
 mkdir -p "$BACKUP_DIR"
 
 echo "    Fazendo dump do banco 'IXLab' (Navvia)..."
-# shellcheck disable=SC2046
-docker exec "$MONGO_CONTAINER" mongodump \
-    $(_mongo_auth_args) \
-    --db IXLab \
-    --out /tmp/mongo-backup \
-    --quiet
+_dump_db "IXLab" "$NAVVIA_MONGO_USER" "$NAVVIA_MONGO_PASS"
 docker cp "$MONGO_CONTAINER:/tmp/mongo-backup/IXLab" "$BACKUP_DIR/IXLab"
 ok "Backup concluído: $BACKUP_DIR/IXLab"
 
 echo "    Fazendo dump do banco 'LibreChat' (Fibbo)..."
-# shellcheck disable=SC2046
-docker exec "$MONGO_CONTAINER" mongodump \
-    $(_mongo_auth_args) \
-    --db LibreChat \
-    --out /tmp/mongo-backup \
-    --quiet
+_dump_db "LibreChat" "$FIBBO_MONGO_USER" "$FIBBO_MONGO_PASS"
 docker cp "$MONGO_CONTAINER:/tmp/mongo-backup/LibreChat" "$BACKUP_DIR/LibreChat"
 ok "Backup concluído: $BACKUP_DIR/LibreChat"
 
@@ -150,9 +154,13 @@ step "Preparando arquivos .env"
 
 if [ -f "$SRC_NAVVIA/.env" ] && [ ! -f "$DST_NAVVIA/.env" ]; then
     cp "$SRC_NAVVIA/.env" "$DST_NAVVIA/.env"
-    # Atualiza apenas o host/db; preserva user:pass se já estiver na URI original
-    sed -i 's|MONGO_URI=mongodb://\([^@]*@\)\{0,1\}[^/]*/[^ ]*|MONGO_URI=mongodb://\1mongodb_mongodb:27017/IXLab?authSource=admin|' "$DST_NAVVIA/.env"
-    ok "Copiado .env Navvia — MONGO_URI atualizado para mongodb_mongodb"
+    if [ -n "$NAVVIA_MONGO_USER" ] && [ -n "$NAVVIA_MONGO_PASS" ]; then
+        sed -i "s|MONGO_URI=.*|MONGO_URI=mongodb://${NAVVIA_MONGO_USER}:${NAVVIA_MONGO_PASS}@mongodb_mongodb:27017/IXLab?authSource=IXLab|" "$DST_NAVVIA/.env"
+    else
+        sed -i 's|MONGO_URI=mongodb://\([^@]*@\)\{0,1\}[^/]*/[^ ]*|MONGO_URI=mongodb://mongodb_mongodb:27017/IXLab|' "$DST_NAVVIA/.env"
+        warn "MONGO_URI Navvia sem credenciais — preencha manualmente em $DST_NAVVIA/.env"
+    fi
+    ok "Copiado .env Navvia — MONGO_URI atualizado"
 elif [ ! -f "$DST_NAVVIA/.env" ]; then
     cp "$REPO_DIR/deploy/navvia/.env.example" "$DST_NAVVIA/.env"
     warn ".env Navvia criado a partir do template — preencha os secrets antes de subir"
@@ -160,9 +168,13 @@ fi
 
 if [ -f "$SRC_FIBBO/.env" ] && [ ! -f "$DST_FIBBO/.env" ]; then
     cp "$SRC_FIBBO/.env" "$DST_FIBBO/.env"
-    # Atualiza apenas o host/db; preserva user:pass se já estiver na URI original
-    sed -i 's|MONGO_URI=mongodb://\([^@]*@\)\{0,1\}[^/]*/[^ ]*|MONGO_URI=mongodb://\1mongodb_mongodb:27017/LibreChat?authSource=admin|' "$DST_FIBBO/.env"
-    ok "Copiado .env Fibbo — MONGO_URI atualizado para mongodb_mongodb"
+    if [ -n "$FIBBO_MONGO_USER" ] && [ -n "$FIBBO_MONGO_PASS" ]; then
+        sed -i "s|MONGO_URI=.*|MONGO_URI=mongodb://${FIBBO_MONGO_USER}:${FIBBO_MONGO_PASS}@mongodb_mongodb:27017/LibreChat?authSource=LibreChat|" "$DST_FIBBO/.env"
+    else
+        sed -i 's|MONGO_URI=mongodb://\([^@]*@\)\{0,1\}[^/]*/[^ ]*|MONGO_URI=mongodb://mongodb_mongodb:27017/LibreChat|' "$DST_FIBBO/.env"
+        warn "MONGO_URI Fibbo sem credenciais — preencha manualmente em $DST_FIBBO/.env"
+    fi
+    ok "Copiado .env Fibbo — MONGO_URI atualizado"
 elif [ ! -f "$DST_FIBBO/.env" ]; then
     cp "$REPO_DIR/deploy/fibbo/.env.example" "$DST_FIBBO/.env"
     warn ".env Fibbo criado a partir do template — preencha os secrets antes de subir"
