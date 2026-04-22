@@ -45,13 +45,16 @@ export function ModelDistribution({ data }: Props) {
           axisLine={false}
         />
         <Tooltip
+          cursor={false}
           formatter={(v: number) => [formatUsd(v), 'consumo']}
           contentStyle={{
             background: 'hsl(var(--card))',
             border: '1px solid hsl(var(--border))',
             borderRadius: 8,
             fontSize: 12,
+            color: 'hsl(var(--foreground))',
           }}
+          itemStyle={{ color: 'hsl(var(--foreground))' }}
         />
         <Bar dataKey="value" radius={[0, 4, 4, 0]} maxBarSize={20}>
           <LabelList

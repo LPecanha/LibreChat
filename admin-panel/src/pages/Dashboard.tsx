@@ -23,7 +23,7 @@ import { formatUsd, cn } from '~/lib/utils';
 
 // ── Date range helpers ─────────────────────────────────────────────────────────
 
-type Preset = '7d' | '30d' | '90d' | 'month' | 'custom';
+type Preset = '7d' | '30d' | '90d' | 'month' | 'lastMonth' | 'custom';
 interface DateRange { from: string; to: string; }
 
 function toIso(d: Date): string { return d.toISOString().slice(0, 10); }
@@ -34,6 +34,11 @@ function presetToRange(preset: Exclude<Preset, 'custom'>): DateRange {
   if (preset === '7d') return { from: toIso(new Date(now.getTime() - 7 * 86_400_000)), to };
   if (preset === '90d') return { from: toIso(new Date(now.getTime() - 90 * 86_400_000)), to };
   if (preset === 'month') return { from: toIso(new Date(now.getFullYear(), now.getMonth(), 1)), to };
+  if (preset === 'lastMonth') {
+    const firstOfLast = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    const lastOfLast = new Date(now.getFullYear(), now.getMonth(), 0);
+    return { from: toIso(firstOfLast), to: toIso(lastOfLast) };
+  }
   return { from: toIso(new Date(now.getTime() - 30 * 86_400_000)), to };
 }
 
@@ -47,6 +52,7 @@ function rangeLabel(preset: Preset, range: DateRange): string {
   if (preset === '30d') return 'últimos 30 dias';
   if (preset === '90d') return 'últimos 90 dias';
   if (preset === 'month') return 'este mês';
+  if (preset === 'lastMonth') return 'mês anterior';
   const fmt = new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'short' });
   return `${fmt.format(new Date(range.from + 'T12:00:00'))} – ${fmt.format(new Date(range.to + 'T12:00:00'))}`;
 }
@@ -58,6 +64,7 @@ const PRESETS: { key: Preset; label: string }[] = [
   { key: '30d', label: '30 dias' },
   { key: '90d', label: '90 dias' },
   { key: 'month', label: 'Este mês' },
+  { key: 'lastMonth', label: 'Mês anterior' },
   { key: 'custom', label: 'Personalizado' },
 ];
 

@@ -35,15 +35,64 @@ function getBalanceModel() {
   return db.model('Balance', schema);
 }
 
+// In LibreChat, usage transactions have tokenValue < 0 (debits from balance).
+// We filter for only those and negate to get positive consumption values.
+const NEGATE_TV = { $multiply: ['$tokenValue', -1] };
+
+function buildDateMatch(from?: string, to?: string, days?: string): Record<string, unknown> {
+  if (from) {
+    const since = new Date(from);
+    const until = to ? new Date(to) : new Date();
+    return { createdAt: { $gte: since, $lte: until } };
+  }
+  const since = new Date();
+  since.setDate(since.getDate() - parseInt(days ?? '30', 10));
+  return { createdAt: { $gte: since } };
+}
+
+// Resolve agent_* model strings to the agent's actual underlying model.
+// Transactions store model as "agent_<id>" when routed through an agent.
+async function resolveAgentModels(
+  raw: Array<{ _id: string | null; tokenValue: number; transactions: number }>,
+): Promise<Array<{ model: string; tokenValue: number; transactions: number }>> {
+  const agentPrefixed = raw.filter((d) => d._id?.startsWith('agent_'));
+  const agentIds = agentPrefixed.map((d) => d._id!.slice(6));
+
+  const agentModelMap = new Map<string, string>();
+  if (agentIds.length > 0) {
+    const db = tenantContext.getDb();
+    const agents = await db
+      .collection('agents')
+      .find({ id: { $in: agentIds } }, { projection: { id: 1, model: 1 } })
+      .toArray() as Array<{ id: string; model?: string }>;
+    for (const a of agents) {
+      if (a.id && a.model) agentModelMap.set(`agent_${a.id}`, a.model);
+    }
+  }
+
+  const merged = new Map<string, { tokenValue: number; transactions: number }>();
+  for (const d of raw) {
+    const model = (d._id && agentModelMap.get(d._id)) ?? d._id ?? null;
+    if (!model) continue;
+    const existing = merged.get(model) ?? { tokenValue: 0, transactions: 0 };
+    existing.tokenValue += d.tokenValue;
+    existing.transactions += d.transactions;
+    merged.set(model, existing);
+  }
+
+  return [...merged.entries()]
+    .map(([model, s]) => ({ model, tokenValue: s.tokenValue, transactions: s.transactions }))
+    .sort((a, b) => b.tokenValue - a.tokenValue);
+}
+
+// ── /summary ──────────────────────────────────────────────────────────────────
+
 router.get('/summary', async (req: AuthenticatedRequest, res) => {
   try {
     const Tx = getTransactionModel();
     const { from, to } = req.query as { from?: string; to?: string };
-
-    const dateFilter: Record<string, Date> = {};
-    if (from) dateFilter.$gte = new Date(from);
-    if (to) dateFilter.$lte = new Date(to);
-    const match = Object.keys(dateFilter).length ? { createdAt: dateFilter } : {};
+    const dateFilter = from ? buildDateMatch(from, to) : {};
+    const match = { tokenValue: { $lt: 0 }, ...dateFilter };
 
     const [totals, Balance] = await Promise.all([
       Tx.aggregate([
@@ -51,7 +100,7 @@ router.get('/summary', async (req: AuthenticatedRequest, res) => {
         {
           $group: {
             _id: null,
-            totalTokenValue: { $sum: '$tokenValue' },
+            totalTokenValue: { $sum: NEGATE_TV },
             totalTransactions: { $sum: 1 },
             uniqueUsers: { $addToSet: '$user' },
           },
@@ -77,10 +126,14 @@ router.get('/summary', async (req: AuthenticatedRequest, res) => {
   }
 });
 
+// ── /over-time ────────────────────────────────────────────────────────────────
+
 router.get('/over-time', async (req: AuthenticatedRequest, res) => {
   try {
     const Tx = getTransactionModel();
-    const { period, days = '30', from, to } = req.query as { period?: string; days?: string; from?: string; to?: string };
+    const { period, days = '30', from, to } = req.query as {
+      period?: string; days?: string; from?: string; to?: string;
+    };
 
     let since: Date;
     let until: Date | undefined;
@@ -106,11 +159,11 @@ router.get('/over-time', async (req: AuthenticatedRequest, res) => {
     if (until) dateMatch.$lte = until;
 
     const data = await Tx.aggregate([
-      { $match: { createdAt: dateMatch } },
+      { $match: { createdAt: dateMatch, tokenValue: { $lt: 0 } } },
       {
         $group: {
           _id: groupBy,
-          tokenValue: { $sum: '$tokenValue' },
+          tokenValue: { $sum: NEGATE_TV },
           transactions: { $sum: 1 },
           uniqueUsers: { $addToSet: '$user' },
         },
@@ -125,22 +178,21 @@ router.get('/over-time', async (req: AuthenticatedRequest, res) => {
   }
 });
 
+// ── /by-user ──────────────────────────────────────────────────────────────────
+
 router.get('/by-user', async (req: AuthenticatedRequest, res) => {
   try {
     const Tx = getTransactionModel();
     const { limit = '20', from, to } = req.query as { limit?: string; from?: string; to?: string };
-
-    const dateFilter: Record<string, Date> = {};
-    if (from) dateFilter.$gte = new Date(from);
-    if (to) dateFilter.$lte = new Date(to);
-    const match = Object.keys(dateFilter).length ? { createdAt: dateFilter } : {};
+    const dateMatch = from ? buildDateMatch(from, to) : {};
+    const match = { tokenValue: { $lt: 0 }, ...dateMatch };
 
     const data = await Tx.aggregate([
       { $match: match },
       {
         $group: {
           _id: '$user',
-          tokenValue: { $sum: '$tokenValue' },
+          tokenValue: { $sum: NEGATE_TV },
           transactions: { $sum: 1 },
         },
       },
@@ -172,45 +224,45 @@ router.get('/by-user', async (req: AuthenticatedRequest, res) => {
   }
 });
 
+// ── /by-model ─────────────────────────────────────────────────────────────────
+
 router.get('/by-model', async (req: AuthenticatedRequest, res) => {
   try {
     const Tx = getTransactionModel();
     const { from, to } = req.query as { from?: string; to?: string };
+    const dateMatch = from ? buildDateMatch(from, to) : {};
+    const match = { tokenValue: { $lt: 0 }, ...dateMatch };
 
-    const dateFilter: Record<string, Date> = {};
-    if (from) dateFilter.$gte = new Date(from);
-    if (to) dateFilter.$lte = new Date(to);
-    const match = Object.keys(dateFilter).length ? { createdAt: dateFilter } : {};
-
-    const data = await Tx.aggregate([
-      { $match: match },
-      {
-        $group: {
-          _id: '$model',
-          tokenValue: { $sum: '$tokenValue' },
-          transactions: { $sum: 1 },
+    const raw: Array<{ _id: string | null; tokenValue: number; transactions: number }> =
+      await Tx.aggregate([
+        { $match: match },
+        {
+          $group: {
+            _id: '$model',
+            tokenValue: { $sum: NEGATE_TV },
+            transactions: { $sum: 1 },
+          },
         },
-      },
-      { $sort: { tokenValue: -1 } },
-      { $limit: 20 },
-    ]);
+        { $sort: { tokenValue: -1 } },
+        { $limit: 40 },
+      ]);
 
-    res.json(data.map((d) => ({ model: d._id ?? 'unknown', tokenValue: d.tokenValue, transactions: d.transactions })));
+    const resolved = await resolveAgentModels(raw);
+    res.json(resolved.slice(0, 20));
   } catch (err) {
     logger.error('[usage/by-model]', { err });
     res.status(500).json({ error: 'Failed to fetch usage by model' });
   }
 });
 
+// ── /by-group ─────────────────────────────────────────────────────────────────
+
 router.get('/by-group', async (req: AuthenticatedRequest, res) => {
   try {
     const Tx = getTransactionModel();
     const { from, to } = req.query as { from?: string; to?: string };
-
-    const dateFilter: Record<string, Date> = {};
-    if (from) dateFilter.$gte = new Date(from);
-    if (to) dateFilter.$lte = new Date(to);
-    const match = Object.keys(dateFilter).length ? { createdAt: dateFilter } : {};
+    const dateMatch = from ? buildDateMatch(from, to) : {};
+    const match = { tokenValue: { $lt: 0 }, ...dateMatch };
 
     const data = await Tx.aggregate([
       { $match: match },
@@ -230,7 +282,7 @@ router.get('/by-group', async (req: AuthenticatedRequest, res) => {
         $group: {
           _id: '$groups._id',
           groupName: { $first: '$groups.name' },
-          tokenValue: { $sum: '$tokenValue' },
+          tokenValue: { $sum: NEGATE_TV },
           transactions: { $sum: 1 },
           uniqueUsers: { $addToSet: '$user' },
         },
@@ -251,22 +303,21 @@ router.get('/by-group', async (req: AuthenticatedRequest, res) => {
   }
 });
 
+// ── /by-agent ─────────────────────────────────────────────────────────────────
+
 router.get('/by-agent', async (req: AuthenticatedRequest, res) => {
   try {
     const Tx = getTransactionModel();
     const { limit = '20', from, to } = req.query as { limit?: string; from?: string; to?: string };
-
-    const dateFilter: Record<string, Date> = {};
-    if (from) dateFilter.$gte = new Date(from);
-    if (to) dateFilter.$lte = new Date(to);
-    const matchBase = Object.keys(dateFilter).length ? { createdAt: dateFilter } : {};
+    const dateMatch = from ? buildDateMatch(from, to) : {};
+    const match = { tokenValue: { $lt: 0 }, ...dateMatch };
 
     const data = await Tx.aggregate([
-      { $match: { ...matchBase, conversationId: { $exists: true, $ne: null } } },
+      { $match: { ...match, conversationId: { $exists: true, $ne: null } } },
       {
         $group: {
           _id: '$conversationId',
-          tokenValue: { $sum: '$tokenValue' },
+          tokenValue: { $sum: NEGATE_TV },
           transactions: { $sum: 1 },
           users: { $addToSet: '$user' },
         },
@@ -286,7 +337,7 @@ router.get('/by-agent', async (req: AuthenticatedRequest, res) => {
         $group: {
           _id: '$conv.agent_id',
           tokenValue: { $sum: '$tokenValue' },
-          transactions: { $sum: 1 },
+          transactions: { $sum: '$transactions' },
           uniqueUsers: { $addToSet: { $arrayElemAt: ['$users', 0] } },
           conversationCount: { $sum: 1 },
         },
@@ -320,22 +371,21 @@ router.get('/by-agent', async (req: AuthenticatedRequest, res) => {
   }
 });
 
+// ── /by-conversation ──────────────────────────────────────────────────────────
+
 router.get('/by-conversation', async (req: AuthenticatedRequest, res) => {
   try {
     const Tx = getTransactionModel();
     const { limit = '20', from, to } = req.query as { limit?: string; from?: string; to?: string };
-
-    const dateFilter: Record<string, Date> = {};
-    if (from) dateFilter.$gte = new Date(from);
-    if (to) dateFilter.$lte = new Date(to);
-    const matchBase = Object.keys(dateFilter).length ? { createdAt: dateFilter } : {};
+    const dateMatch = from ? buildDateMatch(from, to) : {};
+    const match = { tokenValue: { $lt: 0 }, ...dateMatch };
 
     const data = await Tx.aggregate([
-      { $match: { ...matchBase, conversationId: { $exists: true, $ne: null } } },
+      { $match: { ...match, conversationId: { $exists: true, $ne: null } } },
       {
         $group: {
           _id: '$conversationId',
-          tokenValue: { $sum: '$tokenValue' },
+          tokenValue: { $sum: NEGATE_TV },
           transactions: { $sum: 1 },
           userId: { $first: '$user' },
         },
@@ -380,6 +430,8 @@ router.get('/by-conversation', async (req: AuthenticatedRequest, res) => {
   }
 });
 
+// ── /user/:userId ─────────────────────────────────────────────────────────────
+
 router.get('/user/:userId', async (req: AuthenticatedRequest, res) => {
   try {
     const Tx = getTransactionModel();
@@ -389,24 +441,25 @@ router.get('/user/:userId', async (req: AuthenticatedRequest, res) => {
     const since = new Date();
     since.setDate(since.getDate() - parseInt(days, 10));
     const userOid = new mongoose.Types.ObjectId(userId);
+    const recentMatch = { user: userOid, createdAt: { $gte: since }, tokenValue: { $lt: 0 } };
 
-    const [totals, byModel, byConversation] = await Promise.all([
+    const [totals, byModelRaw, byConversation] = await Promise.all([
       Tx.aggregate([
-        { $match: { user: userOid } },
-        { $group: { _id: null, tokenValue: { $sum: '$tokenValue' }, transactions: { $sum: 1 } } },
+        { $match: { user: userOid, tokenValue: { $lt: 0 } } },
+        { $group: { _id: null, tokenValue: { $sum: NEGATE_TV }, transactions: { $sum: 1 } } },
       ]),
       Tx.aggregate([
-        { $match: { user: userOid, createdAt: { $gte: since } } },
-        { $group: { _id: '$model', tokenValue: { $sum: '$tokenValue' }, transactions: { $sum: 1 } } },
+        { $match: recentMatch },
+        { $group: { _id: '$model', tokenValue: { $sum: NEGATE_TV }, transactions: { $sum: 1 } } },
         { $sort: { tokenValue: -1 } },
-        { $limit: 10 },
+        { $limit: 20 },
       ]),
       Tx.aggregate([
-        { $match: { user: userOid, createdAt: { $gte: since }, conversationId: { $exists: true, $ne: null } } },
+        { $match: { ...recentMatch, conversationId: { $exists: true, $ne: null } } },
         {
           $group: {
             _id: '$conversationId',
-            tokenValue: { $sum: '$tokenValue' },
+            tokenValue: { $sum: NEGATE_TV },
             transactions: { $sum: 1 },
           },
         },
@@ -425,9 +478,11 @@ router.get('/user/:userId', async (req: AuthenticatedRequest, res) => {
       ]),
     ]);
 
+    const byModel = await resolveAgentModels(byModelRaw);
+
     res.json({
       total: { tokenValue: totals[0]?.tokenValue ?? 0, transactions: totals[0]?.transactions ?? 0 },
-      byModel: byModel.map((d) => ({ model: d._id ?? 'unknown', tokenValue: d.tokenValue, transactions: d.transactions })),
+      byModel,
       byConversation: byConversation.map((d) => ({
         conversationId: d._id,
         title: d.conv?.title ?? 'Conversa sem título',
@@ -441,6 +496,8 @@ router.get('/user/:userId', async (req: AuthenticatedRequest, res) => {
     res.status(500).json({ error: 'Failed to fetch user usage' });
   }
 });
+
+// ── /group/:groupId ───────────────────────────────────────────────────────────
 
 router.get('/group/:groupId', async (req: AuthenticatedRequest, res) => {
   try {
@@ -466,13 +523,16 @@ router.get('/group/:groupId', async (req: AuthenticatedRequest, res) => {
       try { return new mongoose.Types.ObjectId(id); } catch { return null; }
     }).filter(Boolean);
 
-    const [totals, overTime, byMember, byModel] = await Promise.all([
+    const memberMatch = { user: { $in: memberIds }, tokenValue: { $lt: 0 } };
+    const recentMemberMatch = { ...memberMatch, createdAt: { $gte: since } };
+
+    const [totals, overTime, byMember, byModelRaw] = await Promise.all([
       Tx.aggregate([
-        { $match: { user: { $in: memberIds } } },
-        { $group: { _id: null, tokenValue: { $sum: '$tokenValue' }, transactions: { $sum: 1 } } },
+        { $match: memberMatch },
+        { $group: { _id: null, tokenValue: { $sum: NEGATE_TV }, transactions: { $sum: 1 } } },
       ]),
       Tx.aggregate([
-        { $match: { user: { $in: memberIds }, createdAt: { $gte: since } } },
+        { $match: recentMemberMatch },
         {
           $group: {
             _id: {
@@ -480,15 +540,15 @@ router.get('/group/:groupId', async (req: AuthenticatedRequest, res) => {
               month: { $month: '$createdAt' },
               day: { $dayOfMonth: '$createdAt' },
             },
-            tokenValue: { $sum: '$tokenValue' },
+            tokenValue: { $sum: NEGATE_TV },
             transactions: { $sum: 1 },
           },
         },
         { $sort: { '_id.year': 1, '_id.month': 1, '_id.day': 1 } },
       ]),
       Tx.aggregate([
-        { $match: { user: { $in: memberIds }, createdAt: { $gte: since } } },
-        { $group: { _id: '$user', tokenValue: { $sum: '$tokenValue' }, transactions: { $sum: 1 } } },
+        { $match: recentMemberMatch },
+        { $group: { _id: '$user', tokenValue: { $sum: NEGATE_TV }, transactions: { $sum: 1 } } },
         { $sort: { tokenValue: -1 } },
         { $limit: 20 },
         {
@@ -503,12 +563,14 @@ router.get('/group/:groupId', async (req: AuthenticatedRequest, res) => {
         { $unwind: { path: '$user', preserveNullAndEmptyArrays: true } },
       ]),
       Tx.aggregate([
-        { $match: { user: { $in: memberIds }, createdAt: { $gte: since } } },
-        { $group: { _id: '$model', tokenValue: { $sum: '$tokenValue' }, transactions: { $sum: 1 } } },
+        { $match: recentMemberMatch },
+        { $group: { _id: '$model', tokenValue: { $sum: NEGATE_TV }, transactions: { $sum: 1 } } },
         { $sort: { tokenValue: -1 } },
-        { $limit: 10 },
+        { $limit: 20 },
       ]),
     ]);
+
+    const byModel = await resolveAgentModels(byModelRaw);
 
     res.json({
       groupId,
@@ -524,7 +586,7 @@ router.get('/group/:groupId', async (req: AuthenticatedRequest, res) => {
         tokenValue: d.tokenValue,
         transactions: d.transactions,
       })),
-      byModel: byModel.map((d) => ({ model: d._id ?? 'unknown', tokenValue: d.tokenValue, transactions: d.transactions })),
+      byModel,
     });
   } catch (err) {
     logger.error('[usage/group]', { err });

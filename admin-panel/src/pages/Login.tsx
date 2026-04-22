@@ -77,7 +77,6 @@ export function Login() {
                 className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-primary"
                 value={selectedTenant?.id ?? ''}
                 onChange={(e) => {
-                  setError('');
                   setSelectedTenant(tenants.find((x) => x.id === e.target.value) ?? null);
                 }}
                 required
@@ -100,7 +99,7 @@ export function Login() {
               type="email"
               placeholder="admin@exemplo.com"
               value={email}
-              onChange={(e) => { setError(''); setEmail(e.target.value); }}
+              onChange={(e) => setEmail(e.target.value)}
               className={cn(error && 'border-destructive focus-visible:ring-destructive')}
               required
               autoComplete="email"
@@ -116,7 +115,7 @@ export function Login() {
               type="password"
               placeholder="••••••••"
               value={password}
-              onChange={(e) => { setError(''); setPassword(e.target.value); }}
+              onChange={(e) => setPassword(e.target.value)}
               className={cn(error && 'border-destructive focus-visible:ring-destructive')}
               required
               autoComplete="current-password"
