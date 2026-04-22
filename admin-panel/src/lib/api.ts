@@ -101,7 +101,7 @@ export function fetchUsageSummary(params?: { from?: string; to?: string }) {
   return request<UsageSummary>(`${extUrl()}/ext/admin/usage/summary${q ? `?${q}` : ''}`);
 }
 
-export function fetchUsageOverTime(params?: { period?: string; days?: string }) {
+export function fetchUsageOverTime(params?: { period?: string; days?: string; from?: string; to?: string }) {
   const q = new URLSearchParams(params as Record<string, string>).toString();
   return request<UsagePoint[]>(`${extUrl()}/ext/admin/usage/over-time${q ? `?${q}` : ''}`);
 }
@@ -224,7 +224,7 @@ export function fetchRevenueSummary() {
   return request<RevenueSummary>(`${extUrl()}/ext/admin/revenue/summary`);
 }
 
-export function fetchRevenueOverTime(params?: { period?: string; days?: string }) {
+export function fetchRevenueOverTime(params?: { period?: string; days?: string; from?: string; to?: string }) {
   const q = new URLSearchParams(params as Record<string, string>).toString();
   return request<RevenuePoint[]>(`${extUrl()}/ext/admin/revenue/over-time${q ? `?${q}` : ''}`);
 }

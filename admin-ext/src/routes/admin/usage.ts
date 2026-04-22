@@ -80,10 +80,20 @@ router.get('/summary', async (req: AuthenticatedRequest, res) => {
 router.get('/over-time', async (req: AuthenticatedRequest, res) => {
   try {
     const Tx = getTransactionModel();
-    const { period = 'day', days = '30' } = req.query as { period?: string; days?: string };
+    const { period, days = '30', from, to } = req.query as { period?: string; days?: string; from?: string; to?: string };
 
-    const since = new Date();
-    since.setDate(since.getDate() - parseInt(days, 10));
+    let since: Date;
+    let until: Date | undefined;
+    if (from) {
+      since = new Date(from);
+      until = to ? new Date(to) : new Date();
+    } else {
+      since = new Date();
+      since.setDate(since.getDate() - parseInt(days, 10));
+    }
+
+    const rangeDays = Math.ceil(((until ?? new Date()).getTime() - since.getTime()) / 86_400_000);
+    const resolvedPeriod = period ?? (rangeDays > 90 ? 'month' : 'day');
 
     const dateFormats: Record<string, object> = {
       day: { year: { $year: '$createdAt' }, month: { $month: '$createdAt' }, day: { $dayOfMonth: '$createdAt' } },
@@ -91,10 +101,12 @@ router.get('/over-time', async (req: AuthenticatedRequest, res) => {
       month: { year: { $year: '$createdAt' }, month: { $month: '$createdAt' } },
     };
 
-    const groupBy = dateFormats[period] ?? dateFormats.day;
+    const groupBy = dateFormats[resolvedPeriod] ?? dateFormats.day;
+    const dateMatch: Record<string, Date> = { $gte: since };
+    if (until) dateMatch.$lte = until;
 
     const data = await Tx.aggregate([
-      { $match: { createdAt: { $gte: since } } },
+      { $match: { createdAt: dateMatch } },
       {
         $group: {
           _id: groupBy,

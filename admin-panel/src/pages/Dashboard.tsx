@@ -1,6 +1,7 @@
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import {
-  Users, Coins, Activity, TrendingUp, Bot, MessageSquare, DollarSign, RefreshCw,
+  Users, Coins, Activity, TrendingUp, Bot, MessageSquare, DollarSign, RefreshCw, Wallet,
 } from 'lucide-react';
 import {
   fetchUsageSummary,
@@ -14,10 +15,115 @@ import {
 } from '~/lib/api';
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card';
 import { Skeleton } from '~/components/ui/skeleton';
+import { Button } from '~/components/ui/button';
 import { UsageOverTime } from '~/components/charts/UsageOverTime';
 import { ModelDistribution } from '~/components/charts/ModelDistribution';
 import { RevenueOverTime } from '~/components/charts/RevenueOverTime';
-import { formatUsd } from '~/lib/utils';
+import { formatUsd, cn } from '~/lib/utils';
+
+// ── Date range helpers ─────────────────────────────────────────────────────────
+
+type Preset = '7d' | '30d' | '90d' | 'month' | 'custom';
+interface DateRange { from: string; to: string; }
+
+function toIso(d: Date): string { return d.toISOString().slice(0, 10); }
+
+function presetToRange(preset: Exclude<Preset, 'custom'>): DateRange {
+  const now = new Date();
+  const to = toIso(now);
+  if (preset === '7d') return { from: toIso(new Date(now.getTime() - 7 * 86_400_000)), to };
+  if (preset === '90d') return { from: toIso(new Date(now.getTime() - 90 * 86_400_000)), to };
+  if (preset === 'month') return { from: toIso(new Date(now.getFullYear(), now.getMonth(), 1)), to };
+  return { from: toIso(new Date(now.getTime() - 30 * 86_400_000)), to };
+}
+
+function periodForRange(from: string, to: string): string {
+  const days = Math.ceil((new Date(to).getTime() - new Date(from).getTime()) / 86_400_000);
+  return days > 90 ? 'month' : 'day';
+}
+
+function rangeLabel(preset: Preset, range: DateRange): string {
+  if (preset === '7d') return 'últimos 7 dias';
+  if (preset === '30d') return 'últimos 30 dias';
+  if (preset === '90d') return 'últimos 90 dias';
+  if (preset === 'month') return 'este mês';
+  const fmt = new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: 'short' });
+  return `${fmt.format(new Date(range.from + 'T12:00:00'))} – ${fmt.format(new Date(range.to + 'T12:00:00'))}`;
+}
+
+// ── Date filter component ──────────────────────────────────────────────────────
+
+const PRESETS: { key: Preset; label: string }[] = [
+  { key: '7d', label: '7 dias' },
+  { key: '30d', label: '30 dias' },
+  { key: '90d', label: '90 dias' },
+  { key: 'month', label: 'Este mês' },
+  { key: 'custom', label: 'Personalizado' },
+];
+
+function DateFilter({
+  preset,
+  range,
+  onPreset,
+  onRange,
+}: {
+  preset: Preset;
+  range: DateRange;
+  onPreset: (p: Preset) => void;
+  onRange: (r: DateRange) => void;
+}) {
+  const [customFrom, setCustomFrom] = useState(range.from);
+  const [customTo, setCustomTo] = useState(range.to);
+  const today = toIso(new Date());
+
+  return (
+    <div className="flex flex-wrap items-center gap-2">
+      {PRESETS.map(({ key, label }) => (
+        <button
+          key={key}
+          onClick={() => onPreset(key)}
+          className={cn(
+            'rounded-md px-3 py-1.5 text-xs font-medium transition-colors',
+            preset === key
+              ? 'bg-primary text-primary-foreground'
+              : 'bg-muted text-muted-foreground hover:bg-muted/80',
+          )}
+        >
+          {label}
+        </button>
+      ))}
+      {preset === 'custom' && (
+        <div className="flex flex-wrap items-center gap-2">
+          <input
+            type="date"
+            value={customFrom}
+            max={customTo}
+            onChange={(e) => setCustomFrom(e.target.value)}
+            className="rounded-md border border-border bg-card px-2 py-1 text-xs text-text-primary focus:outline-none focus:ring-1 focus:ring-primary"
+          />
+          <span className="text-xs text-muted-foreground">até</span>
+          <input
+            type="date"
+            value={customTo}
+            min={customFrom}
+            max={today}
+            onChange={(e) => setCustomTo(e.target.value)}
+            className="rounded-md border border-border bg-card px-2 py-1 text-xs text-text-primary focus:outline-none focus:ring-1 focus:ring-primary"
+          />
+          <Button
+            size="sm"
+            onClick={() => { if (customFrom && customTo && customFrom <= customTo) onRange({ from: customFrom, to: customTo }); }}
+            disabled={!customFrom || !customTo || customFrom > customTo}
+          >
+            Aplicar
+          </Button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ── Shared components ──────────────────────────────────────────────────────────
 
 function StatCard({
   title,
@@ -62,35 +168,48 @@ function formatBrl(cents: number) {
   return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(cents / 100);
 }
 
+// ── Dashboard ──────────────────────────────────────────────────────────────────
+
 export function Dashboard() {
+  const [preset, setPreset] = useState<Preset>('30d');
+  const [range, setRange] = useState<DateRange>(presetToRange('30d'));
+
+  function handlePreset(p: Preset) {
+    setPreset(p);
+    if (p !== 'custom') setRange(presetToRange(p as Exclude<Preset, 'custom'>));
+  }
+
+  const period = periodForRange(range.from, range.to);
+  const label = rangeLabel(preset, range);
+
   const { data: summary, isLoading: loadingSummary } = useQuery({
-    queryKey: ['usage', 'summary'],
-    queryFn: () => fetchUsageSummary(),
+    queryKey: ['usage', 'summary', range],
+    queryFn: () => fetchUsageSummary(range),
   });
 
   const { data: overTime, isLoading: loadingOverTime } = useQuery({
-    queryKey: ['usage', 'over-time'],
-    queryFn: () => fetchUsageOverTime({ period: 'day', days: '30' }),
+    queryKey: ['usage', 'over-time', range],
+    queryFn: () => fetchUsageOverTime({ period, from: range.from, to: range.to }),
   });
 
   const { data: byModel } = useQuery({
-    queryKey: ['usage', 'by-model'],
-    queryFn: () => fetchUsageByModel(),
+    queryKey: ['usage', 'by-model', range],
+    queryFn: () => fetchUsageByModel(range),
   });
 
   const { data: topUsers } = useQuery({
-    queryKey: ['usage', 'by-user'],
-    queryFn: () => fetchUsageByUser({ limit: '5' }),
+    queryKey: ['usage', 'by-user', range],
+    queryFn: () => fetchUsageByUser({ limit: '5', ...range }),
   });
 
   const { data: topAgents } = useQuery({
-    queryKey: ['usage', 'by-agent'],
-    queryFn: () => fetchUsageByAgent({ limit: '10' }),
+    queryKey: ['usage', 'by-agent', range],
+    queryFn: () => fetchUsageByAgent({ limit: '10', ...range }),
   });
 
   const { data: topConversations } = useQuery({
-    queryKey: ['usage', 'by-conversation'],
-    queryFn: () => fetchUsageByConversation({ limit: '10' }),
+    queryKey: ['usage', 'by-conversation', range],
+    queryFn: () => fetchUsageByConversation({ limit: '10', ...range }),
   });
 
   const { data: revenue, isLoading: loadingRevenue } = useQuery({
@@ -99,15 +218,18 @@ export function Dashboard() {
   });
 
   const { data: revenueOverTime, isLoading: loadingRevenueChart } = useQuery({
-    queryKey: ['revenue', 'over-time'],
-    queryFn: () => fetchRevenueOverTime({ period: 'day', days: '30' }),
+    queryKey: ['revenue', 'over-time', range],
+    queryFn: () => fetchRevenueOverTime({ period, from: range.from, to: range.to }),
   });
 
   return (
     <div className="space-y-8">
+      {/* Date filter */}
+      <DateFilter preset={preset} range={range} onPreset={handlePreset} onRange={setRange} />
+
       {/* Usage stats */}
       <section className="space-y-4">
-        <SectionTitle>Uso de API</SectionTitle>
+        <SectionTitle>Uso de API — {label}</SectionTitle>
         <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
           <StatCard
             title="Consumo total"
@@ -128,40 +250,41 @@ export function Dashboard() {
             loading={loadingSummary}
           />
           <StatCard
-            title="Saldo disponível"
+            title="Saldo dos usuários"
             value={formatUsd(summary?.totalCreditsRemaining ?? 0)}
-            icon={TrendingUp}
+            icon={Wallet}
             loading={loadingSummary}
+            sub="total atual de todos os saldos"
           />
         </div>
 
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-          <Card className="lg:col-span-2">
-            <CardHeader>
-              <CardTitle className="text-sm">Uso nos últimos 30 dias</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {loadingOverTime ? (
-                <Skeleton className="h-[220px] w-full" />
-              ) : (
-                <UsageOverTime data={overTime ?? []} />
-              )}
-            </CardContent>
-          </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm">Uso ao longo do tempo — {label}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {loadingOverTime ? (
+              <Skeleton className="h-[220px] w-full" />
+            ) : (
+              <UsageOverTime data={overTime ?? []} />
+            )}
+          </CardContent>
+        </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-sm">Distribuição por modelo</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {!byModel ? (
-                <Skeleton className="h-[220px] w-full" />
-              ) : (
-                <ModelDistribution data={byModel} />
-              )}
-            </CardContent>
-          </Card>
-        </div>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-sm">Consumo por modelo — {label}</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {!byModel ? (
+              <Skeleton className="h-[220px] w-full" />
+            ) : byModel.length === 0 ? (
+              <p className="py-8 text-center text-sm text-muted-foreground">Sem dados no período</p>
+            ) : (
+              <ModelDistribution data={byModel} />
+            )}
+          </CardContent>
+        </Card>
 
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
           <Card>
@@ -317,7 +440,7 @@ export function Dashboard() {
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
           <Card className="lg:col-span-2">
             <CardHeader>
-              <CardTitle className="text-sm">Receita nos últimos 30 dias</CardTitle>
+              <CardTitle className="text-sm">Receita ao longo do tempo — {label}</CardTitle>
             </CardHeader>
             <CardContent>
               {loadingRevenueChart ? (

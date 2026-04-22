@@ -17,11 +17,11 @@ export function formatCredits(value: number): string {
  * 1,000,000 tokenCredits = $1.00 USD.
  */
 export function formatUsd(tokenCredits: number): string {
-  return new Intl.NumberFormat('en-US', {
+  return new Intl.NumberFormat('pt-BR', {
     style: 'currency',
     currency: 'USD',
     minimumFractionDigits: 2,
-    maximumFractionDigits: 4,
+    maximumFractionDigits: 2,
   }).format(tokenCredits / 1_000_000);
 }
 
