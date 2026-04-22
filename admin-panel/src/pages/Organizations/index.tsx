@@ -21,6 +21,8 @@ import { Badge } from '~/components/ui/badge';
 import { Button } from '~/components/ui/button';
 import { Input } from '~/components/ui/input';
 import { Skeleton } from '~/components/ui/skeleton';
+import { ModelIcon } from '~/components/ModelIcon';
+import { cleanModelName } from '~/lib/models';
 import { formatUsd } from '~/lib/utils';
 import type { Organization } from '~/lib/api';
 
@@ -486,8 +488,11 @@ function OrgUsageSection({ groupId }: { groupId: string }) {
             <div className="divide-y divide-border">
               {(usage?.byModel ?? []).map((m) => (
                 <div key={m.model} className="flex items-center justify-between px-4 py-2.5">
-                  <span className="truncate text-sm text-text-primary max-w-[200px]">{m.model}</span>
-                  <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                  <div className="flex min-w-0 items-center gap-2">
+                    <ModelIcon model={m.model} size={20} />
+                    <span className="truncate text-sm text-text-primary">{cleanModelName(m.model)}</span>
+                  </div>
+                  <div className="ml-2 flex shrink-0 items-center gap-4 text-xs text-muted-foreground">
                     <span>{m.transactions} req</span>
                     <span className="font-medium text-text-primary">{formatUsd(m.tokenValue)}</span>
                   </div>

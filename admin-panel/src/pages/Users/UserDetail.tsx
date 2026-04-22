@@ -5,6 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card';
 import { Badge } from '~/components/ui/badge';
 import { Button } from '~/components/ui/button';
 import { Skeleton } from '~/components/ui/skeleton';
+import { ModelIcon, AgentIcon } from '~/components/ModelIcon';
+import { cleanModelName } from '~/lib/models';
 import { formatUsd, formatDate, formatRelative } from '~/lib/utils';
 import type { AdminUserItem } from '~/lib/api';
 
@@ -127,8 +129,11 @@ export function UserDetail({ user, onBack }: Props) {
               <div className="divide-y divide-border">
                 {(usage?.byModel ?? []).map((m) => (
                   <div key={m.model} className="flex items-center justify-between px-4 py-2.5">
-                    <span className="text-sm text-text-primary truncate max-w-[160px]">{m.model}</span>
-                    <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                    <div className="flex min-w-0 items-center gap-2">
+                      <ModelIcon model={m.model} size={20} />
+                      <span className="truncate text-sm text-text-primary">{cleanModelName(m.model)}</span>
+                    </div>
+                    <div className="ml-2 flex shrink-0 items-center gap-4 text-xs text-muted-foreground">
                       <span>{m.transactions} req</span>
                       <span className="font-medium text-text-primary">{formatUsd(m.tokenValue)}</span>
                     </div>
@@ -177,13 +182,16 @@ export function UserDetail({ user, onBack }: Props) {
             <div className="divide-y divide-border">
               {(usage?.byConversation ?? []).map((c) => (
                 <div key={c.conversationId} className="flex items-center justify-between px-4 py-2.5">
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm text-text-primary">{c.title}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {c.model ?? '—'}{c.agentId ? ' · via agente' : ''}
-                    </p>
+                  <div className="flex min-w-0 flex-1 items-start gap-2">
+                    {c.agentId ? <AgentIcon size={18} /> : c.model ? <ModelIcon model={c.model} size={18} /> : null}
+                    <div className="min-w-0">
+                      <p className="truncate text-sm text-text-primary">{c.title}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {c.model ? cleanModelName(c.model) : '—'}{c.agentId ? ' · via agente' : ''}
+                      </p>
+                    </div>
                   </div>
-                  <div className="ml-4 text-right shrink-0">
+                  <div className="ml-4 shrink-0 text-right">
                     <span className="text-sm font-medium text-text-primary">{formatUsd(c.tokenValue)}</span>
                   </div>
                 </div>

@@ -7,6 +7,8 @@ import { Badge } from '~/components/ui/badge';
 import { Button } from '~/components/ui/button';
 import { Input } from '~/components/ui/input';
 import { Skeleton } from '~/components/ui/skeleton';
+import { ModelIcon, AgentIcon } from '~/components/ModelIcon';
+import { cleanModelName } from '~/lib/models';
 import { toast } from '~/hooks/useToast';
 import { formatDate } from '~/lib/utils';
 import type { AgentItem } from '~/lib/api';
@@ -206,8 +208,9 @@ function AgentDetail({ agent, onBack }: { agent: AgentItem; onBack: () => void }
         </div>
       </div>
 
-      <div className="flex gap-2 flex-wrap">
-        <Badge variant="outline" className="text-xs">{agent.model}</Badge>
+      <div className="flex gap-2 flex-wrap items-center">
+        {agent.model && <ModelIcon model={agent.model} size={20} />}
+        <Badge variant="outline" className="text-xs">{agent.model ? cleanModelName(agent.model) : '—'}</Badge>
         {agent.authorName && <Badge variant="secondary" className="text-xs">por {agent.authorName}</Badge>}
         {agent.access_level != null && (
           <Badge variant="secondary" className="text-xs">{ACCESS_LEVELS[agent.access_level] ?? `level:${agent.access_level}`}</Badge>
@@ -298,12 +301,13 @@ export function Agents() {
                   onClick={() => setSelected(agent)}
                 >
                   <div className="flex items-center gap-3">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-muted">
-                      <Bot className="h-4 w-4 text-muted-foreground" />
-                    </div>
+                    <AgentIcon size={32} />
                     <div>
                       <p className="text-sm font-medium text-text-primary">{agent.name}</p>
-                      <p className="text-xs text-muted-foreground">{agent.model}</p>
+                      <div className="flex items-center gap-1.5">
+                        {agent.model && <ModelIcon model={agent.model} size={13} />}
+                        <p className="text-xs text-muted-foreground">{agent.model ? cleanModelName(agent.model) : '—'}</p>
+                      </div>
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
