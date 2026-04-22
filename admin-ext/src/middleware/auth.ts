@@ -1,5 +1,6 @@
 import jwt from 'jsonwebtoken';
 import mongoose from 'mongoose';
+import type { Model } from 'mongoose';
 import type { Request, Response, NextFunction } from 'express';
 import { tenantContext } from '../lib/tenantContext';
 
@@ -15,16 +16,23 @@ export interface AuthenticatedRequest extends Request {
   user?: AdminJwtPayload;
 }
 
-const adminUserSchema = new mongoose.Schema({ role: String }, { collection: 'users', strict: false });
+interface AdminUserDoc {
+  role?: string;
+}
+
+const adminUserSchema = new mongoose.Schema<AdminUserDoc>(
+  { role: String },
+  { collection: 'users', strict: false },
+);
 
 function getSecret(): string | null {
   return tenantContext.get()?.jwtSecret ?? process.env.JWT_SECRET ?? null;
 }
 
-function getAdminUserModel() {
+function getAdminUserModel(): Model<AdminUserDoc> {
   const db = tenantContext.getDb();
-  if (db.models['AdminAuthUser']) return db.models['AdminAuthUser'];
-  return db.model('AdminAuthUser', adminUserSchema);
+  if (db.models['AdminAuthUser']) return db.models['AdminAuthUser'] as Model<AdminUserDoc>;
+  return db.model<AdminUserDoc>('AdminAuthUser', adminUserSchema);
 }
 
 export async function requireAdminJwt(
@@ -57,7 +65,7 @@ export async function requireAdminJwt(
 
   try {
     const UserModel = getAdminUserModel();
-    const user = await UserModel.findById(payload.id).select('role').lean() as { role?: string } | null;
+    const user = await UserModel.findById(payload.id).select('role').lean<AdminUserDoc>();
     if (!user || user.role !== 'ADMIN') {
       res.status(403).json({ error: 'Admin access required' });
       return;
