@@ -317,21 +317,21 @@ export function Users() {
   const [detailTarget, setDetailTarget] = useState<AdminUserItem | null>(null);
   const [usageTarget, setUsageTarget] = useState<AdminUserItem | null>(null);
 
-  if (usageTarget) {
-    return <UserDetail user={usageTarget} onBack={() => setUsageTarget(null)} />;
-  }
-
   const { data: all, isLoading } = useQuery({
     queryKey: ['users', 'list', offset],
     queryFn: () => fetchUsers({ limit: PAGE_SIZE, offset }),
-    enabled: search.length === 0,
+    enabled: search.length === 0 && !usageTarget,
   });
 
   const { data: searched } = useQuery({
     queryKey: ['users', 'search', search],
     queryFn: () => searchUsers(search),
-    enabled: search.length >= 2,
+    enabled: search.length >= 2 && !usageTarget,
   });
+
+  if (usageTarget) {
+    return <UserDetail user={usageTarget} onBack={() => setUsageTarget(null)} />;
+  }
 
   const users = search.length >= 2 ? (searched?.users ?? []) : (all?.users ?? []);
   const total = all?.total ?? 0;

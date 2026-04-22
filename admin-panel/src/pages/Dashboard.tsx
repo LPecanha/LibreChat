@@ -22,7 +22,7 @@ import { Button } from '~/components/ui/button';
 import { UsageOverTime } from '~/components/charts/UsageOverTime';
 import { ModelDistribution } from '~/components/charts/ModelDistribution';
 import { RevenueOverTime } from '~/components/charts/RevenueOverTime';
-import { ModelIcon } from '~/components/ModelIcon';
+import { ModelIcon, AgentIcon } from '~/components/ModelIcon';
 import { formatUsd, cn } from '~/lib/utils';
 import { cleanModelName, resolveAvatarUrl } from '~/lib/models';
 
@@ -411,13 +411,16 @@ export function Dashboard() {
                 <div className="space-y-1">
                   {topAgents.map((a) => (
                     <div key={a.agentId} className="flex items-center justify-between rounded-lg px-3 py-2 hover:bg-surface-hover">
-                      <div className="min-w-0">
-                        <p className="truncate text-sm font-medium text-text-primary">{a.name}</p>
-                        <div className="flex items-center gap-1.5">
-                          {a.model && <ModelIcon model={a.model} size={14} />}
-                          <p className="truncate text-xs text-muted-foreground">
-                            {a.model ? cleanModelName(a.model) : '—'} · {a.conversationCount} conversas · {a.uniqueUsers} usuários
-                          </p>
+                      <div className="flex min-w-0 items-start gap-2">
+                        <AgentIcon size={28} />
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-medium text-text-primary">{a.name}</p>
+                          <div className="flex items-center gap-1.5">
+                            {a.model && <ModelIcon model={a.model} size={13} />}
+                            <p className="truncate text-xs text-muted-foreground">
+                              {a.model ? cleanModelName(a.model) : '—'} · {a.conversationCount} conversas · {a.uniqueUsers} usuários
+                            </p>
+                          </div>
                         </div>
                       </div>
                       <div className="ml-2 shrink-0 text-right">
