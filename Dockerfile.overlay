@@ -1,0 +1,79 @@
+# Dockerfile.overlay
+# Builds LibreChat from local sources with our [EXT] overlay applied.
+# Based on Dockerfile.multi, with the ghcr.io/uv dependency removed
+# (uv is only needed for MCP server support, not for our overlay).
+
+ARG NODE_MAX_OLD_SPACE_SIZE=4096
+
+FROM node:20-alpine AS base-min
+RUN apk upgrade --no-cache && apk add --no-cache jemalloc curl
+ENV LD_PRELOAD=/usr/lib/libjemalloc.so.2
+WORKDIR /app
+RUN npm config set fetch-retry-maxtimeout 600000 && \
+    npm config set fetch-retries 5 && \
+    npm config set fetch-retry-mintimeout 15000
+COPY package*.json ./
+COPY packages/data-provider/package*.json ./packages/data-provider/
+COPY packages/api/package*.json ./packages/api/
+COPY packages/data-schemas/package*.json ./packages/data-schemas/
+COPY packages/client/package*.json ./packages/client/
+COPY client/package*.json ./client/
+COPY api/package*.json ./api/
+
+FROM base-min AS base
+RUN npm ci
+
+FROM base AS data-provider-build
+WORKDIR /app/packages/data-provider
+COPY packages/data-provider ./
+RUN npm run build
+
+FROM base AS data-schemas-build
+WORKDIR /app/packages/data-schemas
+COPY packages/data-schemas ./
+COPY --from=data-provider-build /app/packages/data-provider/dist /app/packages/data-provider/dist
+RUN npm run build
+
+FROM base AS api-package-build
+WORKDIR /app/packages/api
+COPY packages/api ./
+COPY --from=data-provider-build /app/packages/data-provider/dist /app/packages/data-provider/dist
+COPY --from=data-schemas-build /app/packages/data-schemas/dist /app/packages/data-schemas/dist
+RUN npm run build
+
+FROM base AS client-package-build
+WORKDIR /app/packages/client
+COPY packages/client ./
+RUN npm run build
+
+FROM base AS client-build
+ARG WHITELABEL_CLIENT
+WORKDIR /app
+COPY client ./client
+COPY --from=data-provider-build /app/packages/data-provider/dist ./packages/data-provider/dist
+COPY --from=client-package-build /app/packages/client/dist ./packages/client/dist
+COPY --from=client-package-build /app/packages/client/src ./packages/client/src
+# Whitelabel injection — only active when WHITELABEL_CLIENT build arg is set
+COPY whitelabel ./whitelabel
+COPY whitelabel_color_generator.py ./
+RUN if [ -n "$WHITELABEL_CLIENT" ]; then \
+      apk add --no-cache python3 && \
+      sh whitelabel/apply.sh "$WHITELABEL_CLIENT"; \
+    fi
+ARG NODE_MAX_OLD_SPACE_SIZE
+ENV NODE_OPTIONS="--max-old-space-size=${NODE_MAX_OLD_SPACE_SIZE}"
+WORKDIR /app/client
+RUN npm run build
+
+FROM base-min AS api-build
+WORKDIR /app
+RUN npm ci --omit=dev
+COPY api ./api
+COPY config ./config
+COPY --from=data-provider-build /app/packages/data-provider/dist ./packages/data-provider/dist
+COPY --from=data-schemas-build /app/packages/data-schemas/dist ./packages/data-schemas/dist
+COPY --from=api-package-build /app/packages/api/dist ./packages/api/dist
+COPY --from=client-build /app/client/dist ./client/dist
+EXPOSE 3080
+ENV HOST=0.0.0.0
+CMD ["node", "api/server/index.js"]

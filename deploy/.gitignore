@@ -1,0 +1,9 @@
+# Secrets — nunca versionar
+**/.env
+
+# Dados de runtime gerados no servidor
+**/data-node/
+**/uploads/
+**/images/
+**/logs/
+**/meili_data*/

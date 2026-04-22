@@ -1,0 +1,46 @@
+{
+  "name": "@librechat/admin-panel",
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@radix-ui/react-avatar": "^1.0.3",
+    "@radix-ui/react-dialog": "1.0.2",
+    "@radix-ui/react-dropdown-menu": "^2.1.1",
+    "@radix-ui/react-label": "^2.0.0",
+    "@radix-ui/react-select": "^2.0.0",
+    "@radix-ui/react-separator": "^1.0.3",
+    "@radix-ui/react-slot": "^1.0.2",
+    "@radix-ui/react-tabs": "^1.0.3",
+    "@radix-ui/react-toast": "^1.1.5",
+    "@tanstack/react-query": "^4.28.0",
+    "@tanstack/react-table": "^8.11.7",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "date-fns": "^3.3.1",
+    "lucide-react": "^0.394.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.30.3",
+    "recharts": "^2.12.7",
+    "tailwind-merge": "^1.9.1",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.0",
+    "@types/react": "^18.2.11",
+    "@types/react-dom": "^18.2.4",
+    "@vitejs/plugin-react": "^4.3.4",
+    "autoprefixer": "^10.4.20",
+    "postcss": "^8.4.31",
+    "tailwindcss": "^3.4.1",
+    "tailwindcss-animate": "^1.0.5",
+    "tailwindcss-radix": "^2.8.0",
+    "typescript": "^5.3.3",
+    "vite": "^5.4.0"
+  }
+}

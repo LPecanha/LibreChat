@@ -22,6 +22,7 @@ import { UnifiedSidebar } from '~/components/UnifiedSidebar';
 import { TermsAndConditionsModal } from '~/components/ui';
 import { useHealthCheck } from '~/data-provider';
 import { Banner } from '~/components/Banners';
+import { PaymentToast } from '~/components/Nav/BuyCredits'; // [EXT]
 
 export default function Root() {
   const [showTerms, setShowTerms] = useState(false);
@@ -100,6 +101,7 @@ export default function Root() {
           )}
         </AssistantsMapContext.Provider>
       </FileMapContext.Provider>
+      <PaymentToast /> {/* [EXT] */}
     </SetConvoProvider>
   );
 }

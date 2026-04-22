@@ -7,6 +7,7 @@ import { useGetStartupConfig, useGetUserBalance } from '~/data-provider';
 import { useAuthContext } from '~/hooks/AuthContext';
 import { useLocalize } from '~/hooks';
 import Settings from './Settings';
+import { ExtBalanceDisplay } from './BuyCredits'; // [EXT]
 
 function AccountSettings({ collapsed = false }: { collapsed?: boolean }) {
   const localize = useLocalize();
@@ -62,10 +63,8 @@ function AccountSettings({ collapsed = false }: { collapsed?: boolean }) {
         <DropdownMenuSeparator />
         {startupConfig?.balance?.enabled === true && balanceQuery.data != null && (
           <>
-            <div className="text-token-text-secondary ml-3 mr-2 py-2 text-sm" role="note">
-              {localize('com_nav_balance')}:{' '}
-              {new Intl.NumberFormat().format(Math.round(balanceQuery.data.tokenCredits))}
-            </div>
+            {/* [EXT] balance display with buy-credits button */}
+            <ExtBalanceDisplay tokenCredits={balanceQuery.data.tokenCredits} />
             <DropdownMenuSeparator />
           </>
         )}

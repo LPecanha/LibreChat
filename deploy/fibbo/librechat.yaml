@@ -1,0 +1,447 @@
+# Fibbo — LibreChat runtime configuration
+# https://www.librechat.ai/docs/configuration/librechat_yaml
+version: 1.3.8
+cache: true
+
+# ==============================================================================
+# FILE STRATEGIES
+# ==============================================================================
+fileStrategies:
+  default: "local"
+  avatar: "local"
+  image: "local"
+  document: "local"
+
+# ==============================================================================
+# FILE CONFIGURATION
+# ==============================================================================
+fileConfig:
+  serverFileSizeLimit: 1000
+  avatarSizeLimit: 10
+  fileTokenLimit: 200000
+
+  endpoints:
+    default:
+      fileLimit: 50
+      fileSizeLimit: 1000
+      totalSizeLimit: 1500
+
+  imageGeneration:
+    percentage: 100
+
+  clientImageResize:
+    enabled: true
+    maxWidth: 2048
+    maxHeight: 2048
+    quality: 0.9
+
+  ocr:
+    enabled: true
+    supportedMimeTypes:
+      - "^image/(jpeg|gif|png|webp|heic|heif)$"
+      - "^application/pdf$"
+      - "^application/vnd\\.openxmlformats-officedocument\\.(wordprocessingml\\.document|presentationml\\.presentation|spreadsheetml\\.sheet)$"
+      - "^application/vnd\\.ms-(word|powerpoint|excel)$"
+      - "^application/epub\\+zip$"
+
+  text:
+    enabled: true
+    supportedMimeTypes:
+      - "^text/(plain|markdown|csv|json|xml|html|css|javascript|typescript|x-python|x-java|x-csharp|x-php|x-ruby|x-go|x-rust|x-kotlin|x-swift|x-scala|x-perl|x-lua|x-shell|x-sql|x-yaml|x-toml)$"
+
+  stt:
+    enabled: true
+    supportedMimeTypes:
+      - "^audio/(mp3|mpeg|mpeg3|wav|wave|x-wav|ogg|vorbis|mp4|x-m4a|flac|x-flac|webm)$"
+
+# ==============================================================================
+# INTERFACE  (v1.3.8: sidePanel e endpointsMenu removidos)
+# ==============================================================================
+interface:
+  customWelcome: |-
+    Olá, {{user.name}}! Bem-vindo ao Fibbo.
+
+  artifacts: true
+  fileSearch: true
+  fileCitations: true
+  modelSelect: true
+  parameters: true
+  presets: false
+  bookmarks: true
+  multiConvo: true
+  runCode: true
+
+  prompts:
+    use: true
+    create: true
+    share: true
+    public: false
+
+  agents:
+    use: true
+    create: true
+    share: true
+    public: false
+
+  peoplePicker:
+    users: true
+    groups: true
+    roles: true
+
+  marketplace:
+    use: true
+
+  mcpServers:
+    use: true
+    create: true
+    share: true
+    public: false
+
+  temporaryChatRetention: 720
+
+# ==============================================================================
+# SPEECH
+# ==============================================================================
+speech:
+  tts:
+    openai:
+      url: ''
+      apiKey: '${TTS_API_KEY}'
+      model: 'tts-1'
+      voices: ['alloy', 'echo', 'fable', 'onyx', 'nova', 'shimmer']
+  stt:
+    openai:
+      url: ''
+      apiKey: '${OPENAI_API_KEY}'
+      model: 'whisper-1'
+
+# ==============================================================================
+# MEMORY
+# ==============================================================================
+memory:
+  disabled: false
+  validKeys: ["user_preferences", "conversation_context", "learned_facts", "personal_information"]
+  tokenLimit: 300000
+  charLimit: 15000
+  personalize: true
+  agent:
+    provider: "openAI"
+    model: "gpt-5.4-mini"
+    instructions: |
+      Store memory using only the specified validKeys.
+      Prioritize retaining context from uploaded files and user instructions.
+      Delete outdated or incorrect information promptly.
+    model_parameters:
+      temperature: 0.2
+      max_tokens: 2500
+      top_p: 0.8
+      frequency_penalty: 0.1
+
+# ==============================================================================
+# REGISTRATION & SECURITY
+# ==============================================================================
+registration:
+  socialLogins: ['github', 'google', 'discord', 'openid', 'facebook', 'apple', 'saml']
+  ipLimit:
+    max: 0
+  userLimit:
+    max: 0
+
+actions:
+  allowedDomains:
+    - 'api.github.com'
+    - 'api.stackexchange.com'
+    - 'librechat.ai'
+    - 'api.apify.com'
+
+# ==============================================================================
+# BALANCE & TRANSACTIONS  (admin-ext depende de ambos)
+# ==============================================================================
+balance:
+  enabled: true
+  startBalance: 0
+  autoRefillEnabled: false
+  refillIntervalValue: 30
+  refillIntervalUnit: 'days'
+  refillAmount: 0
+
+transactions:
+  enabled: true
+
+# ==============================================================================
+# ENDPOINTS
+# ==============================================================================
+endpoints:
+  agents:
+    recursionLimit: 50
+    maxRecursionLimit: 100
+    disableBuilder: false
+    maxCitations: 30
+    maxCitationsPerFile: 7
+    minRelevanceScore: 0.45
+    capabilities:
+      - "deferred_tools"
+      - "execute_code"
+      - "file_search"
+      - "context"
+      - "ocr"
+      - "artifacts"
+      - "web_search"
+      - "tools"
+      - "actions"
+
+  openAI:
+    apiKey: "${OPENAI_API_KEY}"
+    baseURL: "https://api.openai.com/v1"
+    models:
+      default:
+        - "gpt-5.4"
+        - "gpt-5.4-mini"
+        - "gpt-5.4-nano"
+      fetch: false
+    titleConvo: true
+    titleMethod: "completion"
+
+  anthropic:
+    apiKey: "${ANTHROPIC_API_KEY}"
+    models:
+      default:
+        - "claude-opus-4-7"
+        - "claude-sonnet-4-6"
+      fetch: false
+
+  google:
+    apiKey: "${GEMINI_API_KEY}"
+    models:
+      default:
+        - "gemini-3.1-pro-preview"
+        - "gemini-3-flash-preview"
+        - "gemini-2.5-pro"
+        - "gemini-2.5-flash"
+        - "gemini-2.5-flash-lite"
+        - "gemini-2.5-flash-image"
+        - "imagen-4"
+      fetch: false
+
+  custom:
+    - name: "xai"
+      apiKey: "${XAI_API_KEY}"
+      baseURL: "https://api.x.ai/v1"
+      models:
+        default:
+          - "grok-4.20-0309-reasoning"
+          - "grok-4.20-0309-non-reasoning"
+          - "grok-4-1-fast-reasoning"
+          - "grok-4-1-fast-non-reasoning"
+          - "grok-imagine-image-pro"
+          - "grok-imagine-image"
+        fetch: false
+      titleConvo: true
+      titleMethod: "completion"
+      titleModel: "grok-4-1-fast-non-reasoning"
+      modelDisplayLabel: "Grok"
+
+# ==============================================================================
+# MODEL SPECS
+# ==============================================================================
+modelSpecs:
+  hideBaseModels: true
+  list:
+
+    # ── OpenAI ──────────────────────────────────────────────────────────────────
+    - name: "gpt-5.4-geral"
+      label: "GPT-5.4"
+      webSearch: false
+      fileSearch: false
+      preset:
+        endpoint: openAI
+        model: "gpt-5.4"
+        max_tokens: 8192
+        temperature: 0.7
+        top_p: 0.9
+
+    - name: "gpt-5.4-pro"
+      label: "GPT-5.4 (Raciocínio Profundo)"
+      preset:
+        endpoint: openAI
+        model: "gpt-5.4"
+        dropParams: ["temperature", "top_p", "frequency_penalty", "presence_penalty", "max_tokens"]
+        addParams:
+          reasoning:
+            effort: "high"
+
+    - name: "gpt-5.4-mini"
+      label: "GPT-5.4 Mini"
+      preset:
+        endpoint: openAI
+        model: "gpt-5.4-mini"
+        max_tokens: 4096
+        temperature: 0.7
+        top_p: 0.9
+
+    - name: "gpt-5.4-nano"
+      label: "GPT-5.4 Nano"
+      preset:
+        endpoint: openAI
+        model: "gpt-5.4-nano"
+        max_tokens: 4096
+        temperature: 0.7
+        top_p: 0.9
+
+    # ── Anthropic ───────────────────────────────────────────────────────────────
+    - name: "claude-opus-47"
+      label: "Claude Opus 4.7"
+      webSearch: false
+      fileSearch: false
+      preset:
+        endpoint: anthropic
+        model: "claude-opus-4-7"
+        maxContextTokens: 200000
+        max_tokens: 16000
+
+    - name: "claude-opus-47-thinking"
+      label: "Claude Opus 4.7 (Raciocínio)"
+      webSearch: false
+      fileSearch: false
+      preset:
+        endpoint: anthropic
+        model: "claude-opus-4-7"
+        maxContextTokens: 200000
+        max_tokens: 16000
+        addParams:
+          thinking:
+            type: "enabled"
+            budget_tokens: 10000
+
+    - name: "claude-sonnet-46-1m"
+      label: "Claude Sonnet 4.6 (1M ctx)"
+      webSearch: false
+      fileSearch: false
+      preset:
+        endpoint: anthropic
+        model: "claude-sonnet-4-6"
+        maxContextTokens: 1000000
+        max_tokens: 8192
+
+    - name: "claude-sonnet-46-200k"
+      label: "Claude Sonnet 4.6 MAX - 200K"
+      preset:
+        endpoint: anthropic
+        model: "claude-sonnet-4-6"
+        maxContextTokens: 200000
+        max_tokens: 8192
+
+    # ── Google ──────────────────────────────────────────────────────────────────
+    - name: "gemini-31-pro"
+      label: "Gemini 3.1 Pro (Preview)"
+      preset:
+        endpoint: google
+        model: "gemini-3.1-pro-preview"
+        maxContextTokens: 1048576
+        maxOutputTokens: 65536
+
+    - name: "gemini-3-flash"
+      label: "Gemini 3 Flash (Preview)"
+      preset:
+        endpoint: google
+        model: "gemini-3-flash-preview"
+        maxContextTokens: 1048576
+        maxOutputTokens: 65536
+
+    - name: "gemini-25-pro"
+      label: "Gemini 2.5 Pro"
+      preset:
+        endpoint: google
+        model: "gemini-2.5-pro"
+        maxContextTokens: 1048576
+        maxOutputTokens: 65536
+
+    - name: "gemini-25-flash"
+      label: "Gemini 2.5 Flash"
+      preset:
+        endpoint: google
+        model: "gemini-2.5-flash"
+        maxContextTokens: 1048576
+        maxOutputTokens: 65536
+
+    - name: "gemini-25-flash-lite"
+      label: "Gemini 2.5 Flash Lite"
+      preset:
+        endpoint: google
+        model: "gemini-2.5-flash-lite"
+        maxContextTokens: 1048576
+        maxOutputTokens: 65536
+
+    - name: "gemini-25-flash-img"
+      label: "Gemini 2.5 Flash (Gerar Imagem)"
+      preset:
+        endpoint: google
+        model: "gemini-2.5-flash-image"
+        addParams:
+          responseModalities: ["image", "text"]
+
+    - name: "imagen-4"
+      label: "Imagen 4 (Gerar Imagem)"
+      preset:
+        endpoint: google
+        model: "imagen-4"
+
+    # ── xAI ─────────────────────────────────────────────────────────────────────
+    - name: "grok-4.20-res"
+      label: "Grok 4.20 (Raciocínio)"
+      preset:
+        endpoint: xai
+        model: "grok-4.20-0309-reasoning"
+        maxContextTokens: 2000000
+        temperature: 0.7
+
+    - name: "grok-4.20-nonres"
+      label: "Grok 4.20"
+      preset:
+        endpoint: xai
+        model: "grok-4.20-0309-non-reasoning"
+        maxContextTokens: 2000000
+        temperature: 0.7
+
+    - name: "grok-4-1-fast-res"
+      label: "Grok 4.1 Fast (Raciocínio)"
+      preset:
+        endpoint: xai
+        model: "grok-4-1-fast-reasoning"
+        maxContextTokens: 2000000
+        temperature: 0.7
+
+    - name: "grok-4-1-fast-nonres"
+      label: "Grok 4.1 Fast"
+      preset:
+        endpoint: xai
+        model: "grok-4-1-fast-non-reasoning"
+        maxContextTokens: 2000000
+        temperature: 0.7
+
+    - name: "grok-imagine-pro"
+      label: "Grok Imagine Pro (Gerar Imagem)"
+      preset:
+        endpoint: xai
+        model: "grok-imagine-image-pro"
+
+    - name: "grok-imagine"
+      label: "Grok Imagine (Gerar Imagem)"
+      preset:
+        endpoint: xai
+        model: "grok-imagine-image"
+
+# ==============================================================================
+# WEB SEARCH
+# ==============================================================================
+webSearch:
+  serperApiKey: "${SERPER_API_KEY}"
+  searchProvider: "serper"
+  firecrawlApiKey: "${FIRECRAWL_API_KEY}"
+  firecrawlApiUrl: "${FIRECRAWL_API_URL}"
+  scraperProvider: "firecrawl"
+  jinaApiKey: "${JINA_API_KEY}"
+  cohereApiKey: "${COHERE_API_KEY}"
+  rerankerType: "jina"
+  scraperTimeout: 15000
+  safeSearch: 0

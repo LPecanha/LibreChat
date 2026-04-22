@@ -1,0 +1,54 @@
+services:
+  admin-ext:
+    container_name: librechat-admin-ext
+    build:
+      context: ../../admin-ext
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "3092:3092"
+    environment:
+      - EXT_PORT=3092
+      - CORS_ORIGINS=${CORS_ORIGINS}
+      - STRIPE_SECRET_KEY=${STRIPE_SECRET_KEY:-}
+      - STRIPE_WEBHOOK_SECRET=${STRIPE_WEBHOOK_SECRET:-}
+      - PAGARME_API_KEY=${PAGARME_API_KEY:-}
+      - PAGARME_WEBHOOK_SECRET=${PAGARME_WEBHOOK_SECRET:-}
+      - CREDIT_SCHEDULER_CRON=${CREDIT_SCHEDULER_CRON:-0 * * * *}
+      - TENANTS_CONFIG=${TENANTS_CONFIG}
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3092/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    networks:
+      - 4leads_network
+
+  admin-panel:
+    container_name: librechat-admin-panel
+    build:
+      context: ../../admin-panel
+      dockerfile: Dockerfile
+      args:
+        VITE_EXT_URL: ${VITE_EXT_URL}
+        VITE_TENANTS: ${VITE_TENANTS}
+        VITE_LIBRECHAT_URL: ${VITE_LIBRECHAT_URL:-}
+    restart: always
+    ports:
+      - "3091:3091"
+    depends_on:
+      admin-ext:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3091"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    networks:
+      - 4leads_network
+
+networks:
+  4leads_network:
+    external: true

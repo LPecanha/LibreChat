@@ -1,0 +1,41 @@
+export const EXT_URL = (window as Window & { __EXT_URL__?: string }).__EXT_URL__ ?? '';
+
+export interface ActiveSubscription {
+  _id: string;
+  plan: string;
+  creditsPerCycle: number;
+  cycleIntervalDays: number;
+  status: string;
+  currentPeriodEnd: string;
+  nextRefillAt: string;
+}
+
+export interface ExtCreditPlan {
+  id: string;
+  name: string;
+  type: 'subscription' | 'one_time';
+  credits: number;
+  pricesBRL: number;
+  pricesUSD: number;
+  popular?: boolean;
+  discountPct: number;
+}
+
+export interface ExtUserProfile {
+  subscription: ActiveSubscription | null;
+  isOrgMember: boolean;
+  orgId?: string;
+}
+
+export async function extFetch<T>(path: string, token?: string, options: RequestInit = {}): Promise<T> {
+  const res = await fetch(`${EXT_URL}${path}`, {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...(options.headers as Record<string, string>),
+    },
+  });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json() as Promise<T>;
+}
