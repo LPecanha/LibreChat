@@ -64,7 +64,7 @@ async function resolveAgentModels(
     const agents = await db
       .collection('agents')
       .find({ id: { $in: agentIds } }, { projection: { id: 1, model: 1 } })
-      .toArray() as Array<{ id: string; model?: string }>;
+      .toArray() as unknown as Array<{ id: string; model?: string }>;
     for (const a of agents) {
       if (a.id && a.model) agentModelMap.set(`agent_${a.id}`, a.model);
     }
