@@ -50,8 +50,28 @@ function buildDateMatch(from?: string, to?: string, days?: string): Record<strin
   return { createdAt: { $gte: since } };
 }
 
+// LibreChat model IDs can be "provider__modelId___Friendly Name" — extract the friendly part.
+function cleanModelName(model: string): string {
+  const idx = model.indexOf('___');
+  if (idx !== -1) return model.slice(idx + 3);
+  return model;
+}
+
+interface AgentDoc { id: string; name?: string; model?: string; }
+
+function getAgentModel() {
+  const db = tenantContext.getDb();
+  if (db.models['Agent']) return db.models['Agent'] as mongoose.Model<AgentDoc>;
+  const schema = new mongoose.Schema<AgentDoc>(
+    { id: String, name: String, model: String },
+    { collection: 'agents', strict: false },
+  );
+  return db.model<AgentDoc>('Agent', schema);
+}
+
 // Resolve agent_* model strings to the agent's actual underlying model.
 // Transactions store model as "agent_<id>" when routed through an agent.
+// Entries that cannot be resolved are dropped so the model chart stays clean.
 async function resolveAgentModels(
   raw: Array<{ _id: string | null; tokenValue: number; transactions: number }>,
 ): Promise<Array<{ model: string; tokenValue: number; transactions: number }>> {
@@ -60,20 +80,18 @@ async function resolveAgentModels(
 
   const agentModelMap = new Map<string, string>();
   if (agentIds.length > 0) {
-    const db = tenantContext.getDb();
-    const agents = await db
-      .collection('agents')
-      .find({ id: { $in: agentIds } }, { projection: { id: 1, model: 1 } })
-      .toArray() as unknown as Array<{ id: string; model?: string }>;
+    const Agent = getAgentModel();
+    const agents = await Agent.find({ id: { $in: agentIds } }).select('id model').lean();
     for (const a of agents) {
-      if (a.id && a.model) agentModelMap.set(`agent_${a.id}`, a.model);
+      if (a.id && a.model) agentModelMap.set(`agent_${a.id}`, cleanModelName(a.model));
     }
   }
 
   const merged = new Map<string, { tokenValue: number; transactions: number }>();
   for (const d of raw) {
-    const model = (d._id && agentModelMap.get(d._id)) ?? d._id ?? null;
-    if (!model) continue;
+    if (!d._id) continue;
+    if (d._id.startsWith('agent_') && !agentModelMap.has(d._id)) continue;
+    const model = agentModelMap.get(d._id) ?? cleanModelName(d._id);
     const existing = merged.get(model) ?? { tokenValue: 0, transactions: 0 };
     existing.tokenValue += d.tokenValue;
     existing.transactions += d.transactions;
@@ -359,7 +377,7 @@ router.get('/by-agent', async (req: AuthenticatedRequest, res) => {
     res.json(data.map((d) => ({
       agentId: d._id,
       name: d.agent?.name ?? d._id ?? 'Unknown Agent',
-      model: d.agent?.model,
+      model: d.agent?.model ? cleanModelName(d.agent.model) : undefined,
       tokenValue: d.tokenValue,
       transactions: d.transactions,
       conversationCount: d.conversationCount,
@@ -436,12 +454,9 @@ router.get('/user/:userId', async (req: AuthenticatedRequest, res) => {
   try {
     const Tx = getTransactionModel();
     const { userId } = req.params as { userId: string };
-    const { days = '30' } = req.query as { days?: string };
-
-    const since = new Date();
-    since.setDate(since.getDate() - parseInt(days, 10));
+    const { days = '30', from, to } = req.query as { days?: string; from?: string; to?: string };
     const userOid = new mongoose.Types.ObjectId(userId);
-    const recentMatch = { user: userOid, createdAt: { $gte: since }, tokenValue: { $lt: 0 } };
+    const recentMatch = { user: userOid, ...buildDateMatch(from, to, days), tokenValue: { $lt: 0 } };
 
     const [totals, byModelRaw, byConversation] = await Promise.all([
       Tx.aggregate([

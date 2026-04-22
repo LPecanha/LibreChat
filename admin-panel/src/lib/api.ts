@@ -195,9 +195,9 @@ export function fetchUsageByConversation(params?: { limit?: string; from?: strin
   return request<ConversationUsage[]>(`${extUrl()}/ext/admin/usage/by-conversation${q ? `?${q}` : ''}`);
 }
 
-export function fetchUserUsageDetailV2(userId: string, days?: string) {
-  const q = days ? `?days=${days}` : '';
-  return request<UserUsageDetailV2>(`${extUrl()}/ext/admin/usage/user/${encodeURIComponent(userId)}${q}`);
+export function fetchUserUsageDetailV2(userId: string, params?: { days?: string; from?: string; to?: string }) {
+  const q = params ? new URLSearchParams(params as Record<string, string>).toString() : '';
+  return request<UserUsageDetailV2>(`${extUrl()}/ext/admin/usage/user/${encodeURIComponent(userId)}${q ? `?${q}` : ''}`);
 }
 
 export function fetchGroupUsageDetail(groupId: string, days?: string) {

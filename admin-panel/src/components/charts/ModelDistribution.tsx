@@ -2,6 +2,7 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, LabelL
 import type { ModelUsage } from '~/lib/api';
 import { BRAND_COLOR } from '~/lib/brand';
 import { formatUsd } from '~/lib/utils';
+import { cleanModelName, modelProvider, PROVIDER_COLORS, PROVIDER_INITIALS } from '~/lib/models';
 
 const PALETTE = [
   '#ab68ff', '#3b82f6', '#f59e0b', '#ef4444', '#6ee7b7',
@@ -19,6 +20,32 @@ function compactUsd(tokenCredits: number): string {
   return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'USD', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(usd);
 }
 
+interface TickProps {
+  x: number;
+  y: number;
+  payload: { value: string };
+}
+
+function ModelTick({ x, y, payload }: TickProps) {
+  const name = cleanModelName(payload.value);
+  const provider = modelProvider(payload.value);
+  const color = PROVIDER_COLORS[provider];
+  const letter = PROVIDER_INITIALS[provider][0];
+  const truncated = name.length > 17 ? `${name.slice(0, 17)}…` : name;
+
+  return (
+    <g transform={`translate(${x},${y})`}>
+      <circle cx={-9} cy={0} r={7} fill={color} />
+      <text x={-9} dy="0.35em" textAnchor="middle" fontSize={8} fill="white" fontWeight="bold">
+        {letter}
+      </text>
+      <text x={-21} dy="0.35em" textAnchor="end" fontSize={11} fill="hsl(var(--muted-foreground))">
+        {truncated}
+      </text>
+    </g>
+  );
+}
+
 interface Props {
   data: ModelUsage[];
 }
@@ -28,9 +55,9 @@ export function ModelDistribution({ data }: Props) {
     .filter((d) => d.model && d.model !== 'unknown' && d.model !== 'null')
     .sort((a, b) => b.tokenValue - a.tokenValue)
     .slice(0, 15)
-    .map((d) => ({ name: d.model, value: d.tokenValue }));
+    .map((d) => ({ name: cleanModelName(d.model), raw: d.model, value: d.tokenValue }));
 
-  const chartHeight = Math.max(180, chartData.length * 32 + 40);
+  const chartHeight = Math.max(180, chartData.length * 34 + 40);
 
   return (
     <ResponsiveContainer width="100%" height={chartHeight}>
@@ -39,8 +66,8 @@ export function ModelDistribution({ data }: Props) {
         <YAxis
           type="category"
           dataKey="name"
-          width={160}
-          tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
+          width={170}
+          tick={(props) => <ModelTick {...props} />}
           tickLine={false}
           axisLine={false}
         />
@@ -63,8 +90,8 @@ export function ModelDistribution({ data }: Props) {
             formatter={(v: number) => compactUsd(v)}
             style={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
           />
-          {chartData.map((_, i) => (
-            <Cell key={i} fill={COLORS[i % COLORS.length]} />
+          {chartData.map((entry, i) => (
+            <Cell key={entry.raw} fill={COLORS[i % COLORS.length]} />
           ))}
         </Bar>
       </BarChart>

@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import {
-  Users, Coins, Activity, TrendingUp, Bot, MessageSquare, DollarSign, RefreshCw, Wallet,
+  Users, Coins, Activity, TrendingUp, Bot, MessageSquare, DollarSign,
+  RefreshCw, Wallet, ChevronDown,
 } from 'lucide-react';
 import {
   fetchUsageSummary,
@@ -12,14 +13,18 @@ import {
   fetchUsageByConversation,
   fetchRevenueSummary,
   fetchRevenueOverTime,
+  fetchUserUsageDetailV2,
 } from '~/lib/api';
+import type { UserUsage } from '~/lib/api';
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card';
 import { Skeleton } from '~/components/ui/skeleton';
 import { Button } from '~/components/ui/button';
 import { UsageOverTime } from '~/components/charts/UsageOverTime';
 import { ModelDistribution } from '~/components/charts/ModelDistribution';
 import { RevenueOverTime } from '~/components/charts/RevenueOverTime';
+import { ModelIcon } from '~/components/ModelIcon';
 import { formatUsd, cn } from '~/lib/utils';
+import { cleanModelName, resolveAvatarUrl } from '~/lib/models';
 
 // ── Date range helpers ─────────────────────────────────────────────────────────
 
@@ -69,10 +74,7 @@ const PRESETS: { key: Preset; label: string }[] = [
 ];
 
 function DateFilter({
-  preset,
-  range,
-  onPreset,
-  onRange,
+  preset, range, onPreset, onRange,
 }: {
   preset: Preset;
   range: DateRange;
@@ -133,11 +135,7 @@ function DateFilter({
 // ── Shared components ──────────────────────────────────────────────────────────
 
 function StatCard({
-  title,
-  value,
-  icon: Icon,
-  loading,
-  sub,
+  title, value, icon: Icon, loading, sub,
 }: {
   title: string;
   value: string;
@@ -147,19 +145,19 @@ function StatCard({
 }) {
   return (
     <Card>
-      <CardContent className="pt-6">
+      <CardContent className="pt-5">
         <div className="flex items-center justify-between">
-          <div className="space-y-1">
+          <div className="min-w-0 space-y-1">
             <p className="text-xs text-muted-foreground">{title}</p>
             {loading ? (
               <Skeleton className="h-7 w-24" />
             ) : (
-              <p className="text-2xl font-semibold text-text-primary">{value}</p>
+              <p className="text-xl font-semibold text-text-primary sm:text-2xl">{value}</p>
             )}
             {sub && !loading && <p className="text-xs text-muted-foreground">{sub}</p>}
           </div>
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-muted">
-            <Icon className="h-5 w-5 text-muted-foreground" />
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-muted">
+            <Icon className="h-4 w-4 text-muted-foreground" />
           </div>
         </div>
       </CardContent>
@@ -175,11 +173,88 @@ function formatBrl(cents: number) {
   return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(cents / 100);
 }
 
+// ── User row with expandable conversations ─────────────────────────────────────
+
+function ExpandableUserRow({
+  u, range, expanded, onToggle,
+}: {
+  u: UserUsage;
+  range: DateRange;
+  expanded: boolean;
+  onToggle: () => void;
+}) {
+  const { data: detail, isLoading } = useQuery({
+    queryKey: ['usage', 'user-detail', u.userId, range],
+    queryFn: () => fetchUserUsageDetailV2(u.userId, { from: range.from, to: range.to }),
+    enabled: expanded,
+  });
+
+  const avatar = resolveAvatarUrl(u.avatar);
+
+  return (
+    <div>
+      <div
+        onClick={onToggle}
+        className="flex cursor-pointer items-center justify-between rounded-lg px-3 py-2 hover:bg-surface-hover"
+      >
+        <div className="flex items-center gap-3 min-w-0">
+          {avatar ? (
+            <img src={avatar} alt={u.name} className="h-7 w-7 shrink-0 rounded-full object-cover" />
+          ) : (
+            <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-medium">
+              {u.name.charAt(0).toUpperCase()}
+            </div>
+          )}
+          <div className="min-w-0">
+            <p className="truncate text-sm font-medium text-text-primary">{u.name}</p>
+            <p className="truncate text-xs text-muted-foreground">{u.email}</p>
+          </div>
+        </div>
+        <div className="ml-2 flex shrink-0 items-center gap-2">
+          <div className="text-right">
+            <p className="text-sm font-medium text-text-primary">{formatUsd(u.tokenValue)}</p>
+            <p className="text-xs text-muted-foreground">{u.transactions} tx</p>
+          </div>
+          <ChevronDown className={cn('h-4 w-4 text-muted-foreground transition-transform', expanded && 'rotate-180')} />
+        </div>
+      </div>
+
+      {expanded && (
+        <div className="mb-1 ml-10 border-l border-border pl-3">
+          {isLoading ? (
+            <div className="space-y-1.5 py-2">
+              {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-8 w-full" />)}
+            </div>
+          ) : !detail?.byConversation.length ? (
+            <p className="py-2 text-xs text-muted-foreground">Sem conversas no período</p>
+          ) : (
+            <div className="divide-y divide-border">
+              {detail.byConversation.map((c) => (
+                <div key={c.conversationId} className="flex items-center justify-between py-2">
+                  <div className="min-w-0 flex-1 flex items-center gap-2">
+                    {c.model && <ModelIcon model={c.model} size={16} />}
+                    <p className="truncate text-xs text-text-primary">{c.title}</p>
+                  </div>
+                  <div className="ml-2 shrink-0 text-right">
+                    <p className="text-xs font-medium text-text-primary">{formatUsd(c.tokenValue)}</p>
+                    <p className="text-xs text-muted-foreground">{c.transactions} msgs</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ── Dashboard ──────────────────────────────────────────────────────────────────
 
 export function Dashboard() {
   const [preset, setPreset] = useState<Preset>('30d');
   const [range, setRange] = useState<DateRange>(presetToRange('30d'));
+  const [expandedUserId, setExpandedUserId] = useState<string | null>(null);
 
   function handlePreset(p: Preset) {
     setPreset(p);
@@ -230,14 +305,13 @@ export function Dashboard() {
   });
 
   return (
-    <div className="space-y-8">
-      {/* Date filter */}
+    <div className="space-y-6 md:space-y-8">
       <DateFilter preset={preset} range={range} onPreset={handlePreset} onRange={setRange} />
 
       {/* Usage stats */}
       <section className="space-y-4">
         <SectionTitle>Uso de API — {label}</SectionTitle>
-        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 md:gap-4 lg:grid-cols-4">
           <StatCard
             title="Consumo total"
             value={formatUsd(summary?.totalTokenValue ?? 0)}
@@ -301,32 +375,18 @@ export function Dashboard() {
             <CardContent>
               {!topUsers ? (
                 <div className="space-y-3">
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <Skeleton key={i} className="h-10 w-full" />
-                  ))}
+                  {Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-10 w-full" />)}
                 </div>
               ) : (
-                <div className="space-y-2">
+                <div className="space-y-0.5">
                   {topUsers.map((u) => (
-                    <div key={u.userId} className="flex items-center justify-between rounded-lg px-3 py-2 hover:bg-surface-hover">
-                      <div className="flex items-center gap-3">
-                        {u.avatar ? (
-                          <img src={u.avatar} alt={u.name} className="h-7 w-7 rounded-full" />
-                        ) : (
-                          <div className="flex h-7 w-7 items-center justify-center rounded-full bg-muted text-xs font-medium">
-                            {u.name.charAt(0).toUpperCase()}
-                          </div>
-                        )}
-                        <div>
-                          <p className="text-sm font-medium text-text-primary">{u.name}</p>
-                          <p className="text-xs text-muted-foreground">{u.email}</p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-sm font-medium text-text-primary">{formatUsd(u.tokenValue)}</p>
-                        <p className="text-xs text-muted-foreground">{u.transactions} transações</p>
-                      </div>
-                    </div>
+                    <ExpandableUserRow
+                      key={u.userId}
+                      u={u}
+                      range={range}
+                      expanded={expandedUserId === u.userId}
+                      onToggle={() => setExpandedUserId(expandedUserId === u.userId ? null : u.userId)}
+                    />
                   ))}
                 </div>
               )}
@@ -343,25 +403,26 @@ export function Dashboard() {
             <CardContent>
               {!topAgents ? (
                 <div className="space-y-3">
-                  {Array.from({ length: 5 }).map((_, i) => (
-                    <Skeleton key={i} className="h-10 w-full" />
-                  ))}
+                  {Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-10 w-full" />)}
                 </div>
               ) : topAgents.length === 0 ? (
                 <p className="text-center text-sm text-muted-foreground py-8">Nenhum agente com uso registrado</p>
               ) : (
-                <div className="space-y-2">
+                <div className="space-y-1">
                   {topAgents.map((a) => (
                     <div key={a.agentId} className="flex items-center justify-between rounded-lg px-3 py-2 hover:bg-surface-hover">
-                      <div>
-                        <p className="text-sm font-medium text-text-primary">{a.name}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {a.model ?? '—'} · {a.conversationCount} conversas · {a.uniqueUsers} usuários
-                        </p>
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-medium text-text-primary">{a.name}</p>
+                        <div className="flex items-center gap-1.5">
+                          {a.model && <ModelIcon model={a.model} size={14} />}
+                          <p className="truncate text-xs text-muted-foreground">
+                            {a.model ? cleanModelName(a.model) : '—'} · {a.conversationCount} conversas · {a.uniqueUsers} usuários
+                          </p>
+                        </div>
                       </div>
-                      <div className="text-right">
+                      <div className="ml-2 shrink-0 text-right">
                         <p className="text-sm font-medium text-text-primary">{formatUsd(a.tokenValue)}</p>
-                        <p className="text-xs text-muted-foreground">{a.transactions} transações</p>
+                        <p className="text-xs text-muted-foreground">{a.transactions} tx</p>
                       </div>
                     </div>
                   ))}
@@ -381,9 +442,7 @@ export function Dashboard() {
           <CardContent>
             {!topConversations ? (
               <div className="space-y-3">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <Skeleton key={i} className="h-10 w-full" />
-                ))}
+                {Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-10 w-full" />)}
               </div>
             ) : topConversations.length === 0 ? (
               <p className="text-center text-sm text-muted-foreground py-8">Nenhuma conversa com custo registrado</p>
@@ -391,14 +450,18 @@ export function Dashboard() {
               <div className="divide-y divide-border">
                 {topConversations.map((c) => (
                   <div key={c.conversationId} className="flex items-center justify-between px-1 py-2.5 hover:bg-surface-hover">
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium text-text-primary">{c.title}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {c.userName} · {c.model ?? '—'}
-                        {c.agentId && ' · via agente'}
-                      </p>
+                    <div className="min-w-0 flex-1 flex items-start gap-2">
+                      {c.model && <ModelIcon model={c.model} size={18} />}
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-medium text-text-primary">{c.title}</p>
+                        <p className="text-xs text-muted-foreground">
+                          {c.userName}
+                          {c.model && ` · ${cleanModelName(c.model)}`}
+                          {c.agentId && ' · via agente'}
+                        </p>
+                      </div>
                     </div>
-                    <div className="ml-4 text-right shrink-0">
+                    <div className="ml-4 shrink-0 text-right">
                       <p className="text-sm font-medium text-text-primary">{formatUsd(c.tokenValue)}</p>
                       <p className="text-xs text-muted-foreground">{c.transactions} msgs</p>
                     </div>
@@ -414,7 +477,7 @@ export function Dashboard() {
       <section className="space-y-4">
         <SectionTitle>Receita & Assinaturas</SectionTitle>
 
-        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 md:gap-4 lg:grid-cols-4">
           <StatCard
             title="Receita total"
             value={formatBrl(revenue?.allTime.totalAmount ?? 0)}

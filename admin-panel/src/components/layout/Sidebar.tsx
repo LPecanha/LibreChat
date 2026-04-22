@@ -14,6 +14,7 @@ import {
   LogOut,
   Server,
   ArrowLeftRight,
+  X,
 } from 'lucide-react';
 import { cn } from '~/lib/utils';
 import { BRAND_NAME } from '~/lib/brand';
@@ -34,7 +35,12 @@ const navItems = [
   { to: '/settings', icon: Settings, label: 'Sistema' },
 ];
 
-export function Sidebar() {
+interface Props {
+  open: boolean;
+  onClose: () => void;
+}
+
+export function Sidebar({ open, onClose }: Props) {
   const tenant = getActiveTenant();
   const multi = isMultiTenant();
 
@@ -51,9 +57,21 @@ export function Sidebar() {
   }
 
   return (
-    <aside className="flex h-screen w-56 flex-col border-r border-border bg-surface-secondary">
-      <div className="flex h-14 items-center border-b border-border px-4">
+    <aside
+      className={cn(
+        'flex h-screen w-56 shrink-0 flex-col border-r border-border bg-surface-secondary',
+        'fixed inset-y-0 left-0 z-30 transition-transform duration-200 md:relative md:translate-x-0',
+        open ? 'translate-x-0' : '-translate-x-full',
+      )}
+    >
+      <div className="flex h-14 items-center justify-between border-b border-border px-4">
         <img src="/logo.svg" alt={BRAND_NAME} className="h-6 w-auto" />
+        <button
+          onClick={onClose}
+          className="rounded p-1 text-muted-foreground hover:bg-surface-hover md:hidden"
+        >
+          <X className="h-4 w-4" />
+        </button>
       </div>
 
       {tenant && (
@@ -82,6 +100,7 @@ export function Sidebar() {
             key={to}
             to={to}
             end={to === '/'}
+            onClick={onClose}
             className={({ isActive }) =>
               cn(
                 'flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors',
