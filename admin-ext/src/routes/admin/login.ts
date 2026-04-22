@@ -21,7 +21,19 @@ router.post('/', async (req, res) => {
       body: JSON.stringify(req.body),
     });
 
-    const data = await upstream.json();
+    const data = await upstream.json().catch(() => ({})) as Record<string, string>;
+
+    if (!upstream.ok) {
+      // Normalize 404 to 401 — the upstream may return 404 when the user is not
+      // found or when requireAdminAccess fires before password validation.
+      const status = upstream.status === 404 ? 401 : upstream.status;
+      const error = status === 401
+        ? 'E-mail ou senha incorretos.'
+        : (data.message ?? data.error ?? `HTTP ${upstream.status}`);
+      res.status(status).json({ error });
+      return;
+    }
+
     res.status(upstream.status).json(data);
   } catch (err) {
     logger.error('[admin/login] proxy error', { err, tenantId: tenant.id });

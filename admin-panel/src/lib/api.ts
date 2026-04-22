@@ -48,9 +48,13 @@ export interface LoginResponse {
 }
 
 export async function loginWithPassword(email: string, password: string): Promise<LoginResponse> {
+  const tenant = getActiveTenant();
   const res = await fetch(`${extUrl()}/ext/admin/login`, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      ...(tenant ? { 'X-Tenant-ID': tenant.id } : {}),
+    },
     body: JSON.stringify({ email, password }),
   });
   if (!res.ok) {
