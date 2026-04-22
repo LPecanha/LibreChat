@@ -1,12 +1,15 @@
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, LabelList } from 'recharts';
 import type { ModelUsage } from '~/lib/api';
+import { BRAND_COLOR } from '~/lib/brand';
 import { formatUsd } from '~/lib/utils';
 
-const COLORS = [
-  '#10a37f', '#ab68ff', '#3b82f6', '#f59e0b', '#ef4444', '#6ee7b7',
+const PALETTE = [
+  '#ab68ff', '#3b82f6', '#f59e0b', '#ef4444', '#6ee7b7',
   '#f97316', '#8b5cf6', '#ec4899', '#06b6d4', '#84cc16', '#a78bfa',
   '#fb923c', '#34d399', '#60a5fa',
 ];
+
+const COLORS = [BRAND_COLOR, ...PALETTE];
 
 function compactUsd(tokenCredits: number): string {
   const usd = tokenCredits / 1_000_000;

@@ -8,6 +8,7 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import type { UsagePoint } from '~/lib/api';
+import { BRAND_COLOR } from '~/lib/brand';
 
 interface Props {
   data: UsagePoint[];
@@ -27,8 +28,8 @@ export function UsageOverTime({ data }: Props) {
       <AreaChart data={chartData} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
         <defs>
           <linearGradient id="uvGrad" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="5%" stopColor="#10a37f" stopOpacity={0.3} />
-            <stop offset="95%" stopColor="#10a37f" stopOpacity={0} />
+            <stop offset="5%" stopColor={BRAND_COLOR} stopOpacity={0.3} />
+            <stop offset="95%" stopColor={BRAND_COLOR} stopOpacity={0} />
           </linearGradient>
         </defs>
         <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
@@ -38,7 +39,7 @@ export function UsageOverTime({ data }: Props) {
           contentStyle={{ background: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: 8, fontSize: 12 }}
           labelStyle={{ color: 'hsl(var(--foreground))' }}
         />
-        <Area type="monotone" dataKey="tokenValue" stroke="#10a37f" fill="url(#uvGrad)" strokeWidth={2} name="Créditos" />
+        <Area type="monotone" dataKey="tokenValue" stroke={BRAND_COLOR} fill="url(#uvGrad)" strokeWidth={2} name="Créditos" />
       </AreaChart>
     </ResponsiveContainer>
   );

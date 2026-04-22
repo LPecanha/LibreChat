@@ -35,6 +35,8 @@ services:
         VITE_EXT_URL: ${VITE_EXT_URL}
         VITE_TENANTS: ${VITE_TENANTS}
         VITE_LIBRECHAT_URL: ${VITE_LIBRECHAT_URL:-}
+        VITE_BRAND_NAME: ${VITE_BRAND_NAME:-Admin}
+        VITE_BRAND_COLOR: ${VITE_BRAND_COLOR:-#2469E2}
     restart: always
     ports:
       - "3091:3091"

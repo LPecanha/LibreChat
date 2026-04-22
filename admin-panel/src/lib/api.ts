@@ -48,10 +48,16 @@ export interface LoginResponse {
 }
 
 export async function loginWithPassword(email: string, password: string): Promise<LoginResponse> {
-  return request<LoginResponse>(`${extUrl()}/ext/admin/login`, {
+  const res = await fetch(`${extUrl()}/ext/admin/login`, {
     method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, password }),
   });
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({})) as Record<string, string>;
+    throw new Error(body.error ?? `HTTP ${res.status}`);
+  }
+  return res.json() as Promise<LoginResponse>;
 }
 
 // ── Usage ─────────────────────────────────────────────────────────────────────

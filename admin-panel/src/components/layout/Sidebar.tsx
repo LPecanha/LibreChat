@@ -16,6 +16,7 @@ import {
   ArrowLeftRight,
 } from 'lucide-react';
 import { cn } from '~/lib/utils';
+import { BRAND_NAME } from '~/lib/brand';
 import { clearAuth } from '~/lib/auth';
 import { getActiveTenant, clearTenant, isMultiTenant } from '~/lib/tenant';
 
@@ -52,7 +53,7 @@ export function Sidebar() {
   return (
     <aside className="flex h-screen w-56 flex-col border-r border-border bg-surface-secondary">
       <div className="flex h-14 items-center border-b border-border px-4">
-        <span className="text-sm font-semibold text-text-primary">LibreChat Admin</span>
+        <img src="/logo.svg" alt={BRAND_NAME} className="h-6 w-auto" />
       </div>
 
       {tenant && (
