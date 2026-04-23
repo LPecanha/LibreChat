@@ -2,7 +2,7 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, LabelL
 import type { ModelUsage } from '~/lib/api';
 import { BRAND_COLOR } from '~/lib/brand';
 import { formatUsd } from '~/lib/utils';
-import { cleanModelName, modelProvider, PROVIDER_COLORS, PROVIDER_INITIALS } from '~/lib/models';
+import { cleanModelName, modelProvider, PROVIDER_COLORS } from '~/lib/models';
 
 const PALETTE = [
   '#ab68ff', '#3b82f6', '#f59e0b', '#ef4444', '#6ee7b7',
@@ -30,16 +30,23 @@ function ModelTick({ x, y, payload }: TickProps) {
   const name = cleanModelName(payload.value);
   const provider = modelProvider(payload.value);
   const color = PROVIDER_COLORS[provider];
-  const letter = PROVIDER_INITIALS[provider][0];
   const truncated = name.length > 17 ? `${name.slice(0, 17)}…` : name;
+  const r = 8;
+  const iconSize = 12;
 
   return (
     <g transform={`translate(${x},${y})`}>
-      <circle cx={-9} cy={0} r={7} fill={color} />
-      <text x={-9} dy="0.35em" textAnchor="middle" fontSize={8} fill="white" fontWeight="bold">
-        {letter}
-      </text>
-      <text x={-21} dy="0.35em" textAnchor="end" fontSize={11} fill="hsl(var(--muted-foreground))">
+      <circle cx={-10} cy={0} r={r} fill={color} />
+      {/* SVG <image> is required here — HTML <img> is invalid inside SVG context */}
+      <image
+        href={`/icons/${provider}.svg`}
+        x={-10 - iconSize / 2}
+        y={-iconSize / 2}
+        width={iconSize}
+        height={iconSize}
+        style={{ filter: 'brightness(0) invert(1)' }}
+      />
+      <text x={-22} dy="0.35em" textAnchor="end" fontSize={11} fill="hsl(var(--muted-foreground))">
         {truncated}
       </text>
     </g>
