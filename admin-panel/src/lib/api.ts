@@ -871,3 +871,74 @@ export function toggleScopeActive(principalType: string, principalId: string, is
     body: JSON.stringify({ isActive }),
   });
 }
+
+// ── Model Access ──────────────────────────────────────────────────────────────
+
+export interface ModelSpec { name: string; label: string; }
+
+export interface ModelPreset {
+  id: string;
+  name: string;
+  description?: string;
+  blockedSpecs: string[];
+  agentsDisabled: boolean;
+  userCount: number;
+  createdAt: string;
+}
+
+export interface UserModelAccess {
+  userId: string;
+  presetId?: string;
+  presetName?: string;
+  blockedSpecsOverride: string[];
+  agentsDisabled: boolean;
+  effectiveBlockedSpecs: string[];
+}
+
+export function fetchModelSpecs() {
+  return request<ModelSpec[]>(`${extUrl()}/ext/admin/model-access/specs`);
+}
+
+export function fetchModelPresets() {
+  return request<ModelPreset[]>(`${extUrl()}/ext/admin/model-access/presets`);
+}
+
+export function createModelPreset(data: { name: string; description?: string; blockedSpecs: string[]; agentsDisabled: boolean }) {
+  return request<ModelPreset>(`${extUrl()}/ext/admin/model-access/presets`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+export function updateModelPreset(id: string, data: { name?: string; description?: string; blockedSpecs?: string[]; agentsDisabled?: boolean }) {
+  return request<ModelPreset>(`${extUrl()}/ext/admin/model-access/presets/${id}`, {
+    method: 'PATCH',
+    body: JSON.stringify(data),
+  });
+}
+
+export function deleteModelPreset(id: string) {
+  return request(`${extUrl()}/ext/admin/model-access/presets/${id}`, { method: 'DELETE' });
+}
+
+export function applyPresetToUsers(presetId: string, userIds: string[]) {
+  return request<{ ok: boolean; applied: number }>(`${extUrl()}/ext/admin/model-access/presets/${presetId}/apply`, {
+    method: 'POST',
+    body: JSON.stringify({ userIds }),
+  });
+}
+
+export function fetchUserModelAccess(userId: string) {
+  return request<UserModelAccess>(`${extUrl()}/ext/admin/model-access/user/${encodeURIComponent(userId)}`);
+}
+
+export function saveUserModelAccess(userId: string, data: { presetId?: string; blockedSpecsOverride: string[]; agentsDisabled?: boolean }) {
+  return request<{ ok: boolean; effectiveBlockedSpecs: string[] }>(`${extUrl()}/ext/admin/model-access/user/${encodeURIComponent(userId)}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  });
+}
+
+export function clearUserModelAccess(userId: string) {
+  return request(`${extUrl()}/ext/admin/model-access/user/${encodeURIComponent(userId)}`, { method: 'DELETE' });
+}

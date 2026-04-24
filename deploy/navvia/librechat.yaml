@@ -195,6 +195,7 @@ endpoints:
     baseURL: "https://api.openai.com/v1"
     models:
       default:
+        - "gpt-5"
         - "gpt-5.4"
         - "gpt-5.4-mini"
         - "gpt-5.4-nano"
@@ -205,7 +206,6 @@ endpoints:
   anthropic:
     apiKey: "${ANTHROPIC_API_KEY}"
     models:
-      - "claude-opus-4-7"
       - "claude-sonnet-4-6"
 
   google:
@@ -243,10 +243,20 @@ endpoints:
 # MODEL SPECS
 # ==============================================================================
 modelSpecs:
-  hideBaseModels: true
+  addedEndpoints:
+    - agents
   list:
 
     # ── OpenAI ──────────────────────────────────────────────────────────────────
+    - name: "gpt-5"
+      label: "GPT-5"
+      preset:
+        endpoint: openAI
+        model: "gpt-5"
+        max_tokens: 32768
+        temperature: 0.7
+        top_p: 0.9
+
     - name: "gpt-5.4-geral"
       label: "GPT-5.4"
       webSearch: false
@@ -287,30 +297,6 @@ modelSpecs:
         top_p: 0.9
 
     # ── Anthropic ───────────────────────────────────────────────────────────────
-    - name: "claude-opus-47"
-      label: "Claude Opus 4.7"
-      webSearch: false
-      fileSearch: false
-      preset:
-        endpoint: anthropic
-        model: "claude-opus-4-7"
-        maxContextTokens: 200000
-        max_tokens: 16000
-
-    - name: "claude-opus-47-thinking"
-      label: "Claude Opus 4.7 (Raciocínio)"
-      webSearch: false
-      fileSearch: false
-      preset:
-        endpoint: anthropic
-        model: "claude-opus-4-7"
-        maxContextTokens: 200000
-        max_tokens: 16000
-        addParams:
-          thinking:
-            type: "enabled"
-            budget_tokens: 10000
-
     - name: "claude-sonnet-46-1m"
       label: "Claude Sonnet 4.6 (1M ctx)"
       webSearch: false

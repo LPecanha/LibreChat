@@ -23,7 +23,7 @@ overlay/main   ──────────●──   (our 5 touch points + a
 
 | File | What changed | Marker |
 |---|---|---|
-| `api/server/index.js` | 1 line: mount `/api/ext-config.js` route | `// [EXT]` |
+| `api/server/index.js` | 3 lines: mount `/api/ext-config.js` route + `modelAccessFilter` middleware on `/api/config` | `// [EXT]` |
 | `client/index.html` | 1 line: load ext-config script | `<!-- [EXT] -->` |
 | `client/src/routes/Root.tsx` | 2 lines: import + mount `<PaymentToast />` | `// [EXT]` |
 | `client/src/components/Nav/AccountSettings.tsx` | 1 import + 1 JSX: `<ExtBalanceDisplay />` | `// [EXT]` |
@@ -59,7 +59,19 @@ git rebase --continue
 
 Each `[EXT]` marker corresponds to an exact pattern. If a conflict occurs, re-apply:
 
-**`api/server/index.js`** — after the `/api/config` route line, add:
+**`api/server/index.js`** — three additions:
+
+1. After the `optionalJwtAuth` require, add:
+```js
+const modelAccessFilter = require('./middleware/modelAccessFilter'); // [EXT]
+```
+
+2. On the `/api/config` route, inject the middleware between `optionalJwtAuth` and `routes.config`:
+```js
+app.use('/api/config', preAuthTenantMiddleware, optionalJwtAuth, modelAccessFilter, routes.config); // [EXT]
+```
+
+3. After the `/api/config` route line, add:
 ```js
 app.use('/api/ext-config.js', require('./routes/extConfig')); // [EXT] runtime config injection
 ```

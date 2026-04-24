@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { Building2, Users, Coins, ChevronRight, Share2, Plus, Pencil, Trash2, X, UserPlus, UserMinus, BarChart2 } from 'lucide-react';
+import { Building2, Users, Coins, ChevronRight, Share2, Plus, Pencil, Trash2, X, UserPlus, UserMinus, BarChart2, ShieldX } from 'lucide-react';
 import {
   fetchOrganizations,
   fetchOrganization,
@@ -14,6 +14,8 @@ import {
   adjustOrgCredits,
   distributeCredits,
   fetchGroupUsageDetail,
+  fetchModelPresets,
+  applyPresetToUsers,
 } from '~/lib/api';
 import { toast } from '~/hooks/useToast';
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card';
@@ -267,6 +269,82 @@ function DistributeForm({ orgId, poolCredits, memberIds }: { orgId: string; pool
   );
 }
 
+// ── Apply Preset Card ─────────────────────────────────────────────────────────
+
+function ApplyPresetCard({ memberIds }: { memberIds: string[] }) {
+  const [selectedPresetId, setSelectedPresetId] = useState('');
+  const [applied, setApplied] = useState(false);
+
+  const { data: presets = [] } = useQuery({ queryKey: ['model-presets'], queryFn: fetchModelPresets });
+
+  const mutation = useMutation({
+    mutationFn: () => applyPresetToUsers(selectedPresetId, memberIds),
+    onSuccess: (res) => {
+      toast({ variant: 'success', title: `Perfil aplicado a ${res.applied} membro(s)` });
+      setApplied(true);
+      setSelectedPresetId('');
+    },
+    onError: (err: Error) => toast({ variant: 'destructive', title: 'Erro ao aplicar', description: err.message }),
+  });
+
+  const selectedPreset = presets.find((p) => p.id === selectedPresetId);
+
+  return (
+    <Card>
+      <CardHeader className="pb-3">
+        <CardTitle className="text-sm flex items-center gap-2">
+          <ShieldX className="h-4 w-4" />Perfil de acesso a modelos
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-3">
+        {presets.length === 0 ? (
+          <p className="text-sm text-muted-foreground">
+            Nenhum perfil criado. Acesse <strong>Modelos</strong> para criar perfis de acesso.
+          </p>
+        ) : (
+          <>
+            <p className="text-sm text-muted-foreground">
+              Aplica um perfil a todos os {memberIds.length} membro(s) da organização de uma vez.
+            </p>
+            <div className="flex gap-2">
+              <select
+                className="flex-1 rounded-md border border-input bg-background px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                value={selectedPresetId}
+                onChange={(e) => { setSelectedPresetId(e.target.value); setApplied(false); }}
+              >
+                <option value="">Selecionar perfil…</option>
+                {presets.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.name}{p.blockedSpecs.length > 0 ? ` — ${p.blockedSpecs.length} modelo(s) bloqueado(s)` : ' — acesso total'}
+                    {p.agentsDisabled ? ', sem agentes' : ''}
+                  </option>
+                ))}
+              </select>
+              <Button
+                size="sm"
+                disabled={!selectedPresetId || memberIds.length === 0 || mutation.isPending}
+                onClick={() => mutation.mutate()}
+              >
+                {mutation.isPending ? 'Aplicando…' : 'Aplicar'}
+              </Button>
+            </div>
+            {selectedPreset && (
+              <p className="text-xs text-muted-foreground">
+                Bloqueios individuais existentes são preservados e somados ao perfil selecionado.
+              </p>
+            )}
+            {applied && (
+              <p className="text-xs text-green-600 dark:text-green-400">
+                ✓ Perfil aplicado com sucesso a todos os membros.
+              </p>
+            )}
+          </>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
 // ── Org Detail Page ───────────────────────────────────────────────────────────
 
 function OrgDetail({ org, onBack }: { org: Organization; onBack: () => void }) {
@@ -398,6 +476,8 @@ function OrgDetail({ org, onBack }: { org: Organization; onBack: () => void }) {
           </Button>
         </CardContent>
       </Card>
+
+      <ApplyPresetCard memberIds={memberIds} />
 
       <OrgUsageSection groupId={org.id} />
     </div>

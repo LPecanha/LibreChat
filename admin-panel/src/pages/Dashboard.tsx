@@ -28,7 +28,7 @@ import { cleanModelName, resolveAvatarUrl } from '~/lib/models';
 
 // ── Date range helpers ─────────────────────────────────────────────────────────
 
-type Preset = '7d' | '30d' | '90d' | 'month' | 'lastMonth' | 'custom';
+type Preset = 'today' | '7d' | '30d' | '90d' | 'month' | 'lastMonth' | 'custom';
 interface DateRange { from: string; to: string; }
 
 function toIso(d: Date): string { return d.toISOString().slice(0, 10); }
@@ -36,6 +36,7 @@ function toIso(d: Date): string { return d.toISOString().slice(0, 10); }
 function presetToRange(preset: Exclude<Preset, 'custom'>): DateRange {
   const now = new Date();
   const to = toIso(now);
+  if (preset === 'today') return { from: to, to };
   if (preset === '7d') return { from: toIso(new Date(now.getTime() - 7 * 86_400_000)), to };
   if (preset === '90d') return { from: toIso(new Date(now.getTime() - 90 * 86_400_000)), to };
   if (preset === 'month') return { from: toIso(new Date(now.getFullYear(), now.getMonth(), 1)), to };
@@ -53,6 +54,7 @@ function periodForRange(from: string, to: string): string {
 }
 
 function rangeLabel(preset: Preset, range: DateRange): string {
+  if (preset === 'today') return 'hoje';
   if (preset === '7d') return 'últimos 7 dias';
   if (preset === '30d') return 'últimos 30 dias';
   if (preset === '90d') return 'últimos 90 dias';
@@ -65,6 +67,7 @@ function rangeLabel(preset: Preset, range: DateRange): string {
 // ── Date filter component ──────────────────────────────────────────────────────
 
 const PRESETS: { key: Preset; label: string }[] = [
+  { key: 'today', label: 'Hoje' },
   { key: '7d', label: '7 dias' },
   { key: '30d', label: '30 dias' },
   { key: '90d', label: '90 dias' },

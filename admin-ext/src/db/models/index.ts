@@ -6,6 +6,8 @@ export { getCreditAllocationModel } from './creditAllocation';
 export { getCreditAuditModel } from './creditAudit';
 export { getCreditPlanModel } from './creditPlan';
 export { getUserProfileModel } from './userProfile';
+export { getModelPresetModel } from './modelPreset';
+export { getUserModelAccessModel } from './userModelAccess';
 
 export type { IOrgProfile } from './orgProfile';
 export type { IOrgBalance } from './orgBalance';
@@ -15,3 +17,5 @@ export type { ICreditAllocation } from './creditAllocation';
 export type { ICreditAudit } from './creditAudit';
 export type { ICreditPlan } from './creditPlan';
 export type { IUserProfile, AccountType } from './userProfile';
+export type { IModelPreset } from './modelPreset';
+export type { IUserModelAccess } from './userModelAccess';

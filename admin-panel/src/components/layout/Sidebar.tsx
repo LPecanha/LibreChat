@@ -15,6 +15,7 @@ import {
   Server,
   ArrowLeftRight,
   X,
+  ShieldX,
 } from 'lucide-react';
 import { cn } from '~/lib/utils';
 import { BRAND_NAME } from '~/lib/brand';
@@ -29,6 +30,7 @@ const navItems = [
   { to: '/billing', icon: CreditCard, label: 'Faturamento' },
   { to: '/agents', icon: Bot, label: 'Agentes' },
   { to: '/plans', icon: PackageOpen, label: 'Planos' },
+  { to: '/model-access', icon: ShieldX, label: 'Modelos' },
   { to: '/access', icon: ShieldCheck, label: 'Acesso' },
   { to: '/grants', icon: KeyRound, label: 'Permissões' },
   { to: '/configuration', icon: SlidersHorizontal, label: 'Configuração' },

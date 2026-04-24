@@ -42,7 +42,7 @@ const NEGATE_TV = { $multiply: ['$tokenValue', -1] };
 function buildDateMatch(from?: string, to?: string, days?: string): Record<string, unknown> {
   if (from) {
     const since = new Date(from);
-    const until = to ? new Date(to) : new Date();
+    const until = to ? new Date(new Date(to).getTime() + 86_400_000 - 1) : new Date();
     return { createdAt: { $gte: since, $lte: until } };
   }
   const since = new Date();

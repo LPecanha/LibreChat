@@ -1,57 +1,44 @@
-import { modelProvider, PROVIDER_COLORS } from '~/lib/models';
-
-const PROVIDER_ICONS: Record<string, string> = {
-  anthropic: '/icons/anthropic.svg',
-  openai: '/icons/openai.svg',
-  google: '/icons/google.svg',
-  meta: '/icons/meta.svg',
-  mistral: '/icons/mistral.svg',
-  xai: '/icons/xai.svg',
-  deepseek: '/icons/deepseek.svg',
-  unknown: '/icons/agent.svg',
-};
+import { modelProvider, PROVIDER_COLORS, PROVIDER_ICON_DATA } from '~/lib/models';
 
 interface Props {
   model: string;
   size?: number;
-  /** Pass true when model belongs to an agent (shows robot icon instead of LLM icon) */
   isAgent?: boolean;
+}
+
+function ProviderSvg({ iconKey, size }: { iconKey: keyof typeof PROVIDER_ICON_DATA; size: number }) {
+  const { path, vw, vh } = PROVIDER_ICON_DATA[iconKey];
+  return (
+    <svg viewBox={`0 0 ${vw} ${vh}`} width={size} height={size} aria-hidden="true">
+      <path d={path} fill="white" />
+    </svg>
+  );
 }
 
 export function ModelIcon({ model, size = 20, isAgent = false }: Props) {
   const provider = isAgent ? 'unknown' : modelProvider(model);
   const color = isAgent ? '#6366f1' : PROVIDER_COLORS[provider];
-  const icon = isAgent ? '/icons/agent.svg' : (PROVIDER_ICONS[provider] ?? PROVIDER_ICONS.unknown);
+  const innerSize = Math.round(size * 0.6);
 
   return (
     <span
       title={model}
-      style={{ background: color, width: size, height: size, padding: Math.round(size * 0.18) }}
+      style={{ background: color, width: size, height: size }}
       className="inline-flex shrink-0 items-center justify-center rounded-full"
     >
-      <img
-        src={icon}
-        style={{ width: '100%', height: '100%', filter: 'brightness(0) invert(1)' }}
-        alt=""
-        aria-hidden="true"
-      />
+      <ProviderSvg iconKey={provider} size={innerSize} />
     </span>
   );
 }
 
-/** Dedicated robot icon for agents (no model lookup needed). */
 export function AgentIcon({ size = 20 }: { size?: number }) {
+  const innerSize = Math.round(size * 0.6);
   return (
     <span
-      style={{ background: '#6366f1', width: size, height: size, padding: Math.round(size * 0.18) }}
+      style={{ background: '#6366f1', width: size, height: size }}
       className="inline-flex shrink-0 items-center justify-center rounded-full"
     >
-      <img
-        src="/icons/agent.svg"
-        style={{ width: '100%', height: '100%', filter: 'brightness(0) invert(1)' }}
-        alt=""
-        aria-hidden="true"
-      />
+      <ProviderSvg iconKey="agent" size={innerSize} />
     </span>
   );
 }
