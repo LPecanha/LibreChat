@@ -213,6 +213,7 @@ export default function AgentPanel() {
   const {
     activePanel,
     agentsConfig,
+    startupConfig,
     setActivePanel,
     endpointsConfig,
     setCurrentAgentId,
@@ -237,7 +238,21 @@ export default function AgentPanel() {
 
   const agentQuery = canEdit && expandedAgentQuery.data ? expandedAgentQuery : basicAgentQuery;
 
-  const models = useMemo(() => modelsQuery.data ?? {}, [modelsQuery.data]);
+  const models = useMemo(() => {
+    const specList = startupConfig?.modelSpecs?.list;
+    if (specList?.length) {
+      const map: Record<string, string[]> = {};
+      for (const spec of specList) {
+        const endpoint = spec.preset?.endpoint as string | undefined;
+        const model = spec.preset?.model as string | undefined;
+        if (!endpoint || !model) continue;
+        if (!map[endpoint]) map[endpoint] = [];
+        if (!map[endpoint].includes(model)) map[endpoint].push(model);
+      }
+      return map;
+    }
+    return modelsQuery.data ?? {};
+  }, [startupConfig?.modelSpecs?.list, modelsQuery.data]);
   const methods = useForm<AgentForm>({
     defaultValues: getDefaultAgentFormValues(),
     mode: 'onChange',
