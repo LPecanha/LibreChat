@@ -1,3 +1,4 @@
+import jwt from 'jsonwebtoken';
 import { Router } from 'express';
 import mongoose from 'mongoose';
 import { tenantContext } from '../../lib/tenantContext';
@@ -18,8 +19,11 @@ async function fetchAvailableSpecs(): Promise<SpecItem[]> {
   }
   const url = tenant.internalLibrechatUrl ?? tenant.librechatUrl;
   logger.info(`[modelAccess] fetching specs from ${url}/api/config`);
+  const sysToken = jwt.sign({ id: 'system', role: 'ADMIN' }, tenant.jwtSecret, { expiresIn: '60s' });
   try {
-    const resp = await fetch(`${url}/api/config`);
+    const resp = await fetch(`${url}/api/config`, {
+      headers: { Authorization: `Bearer ${sysToken}` },
+    });
     if (!resp.ok) {
       logger.warn(`[modelAccess] /api/config responded ${resp.status}`);
       return [];
