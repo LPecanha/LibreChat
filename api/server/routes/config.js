@@ -129,6 +129,7 @@ router.get('/', async function (req, res) {
         ...sharedPayload,
         socialLogins: baseConfig?.registration?.socialLogins ?? defaultSocialLogins,
         turnstile: baseConfig?.turnstileConfig,
+        modelSpecs: baseConfig?.modelSpecs, // [EXT] included for admin-ext server-to-server spec fetch
       };
 
       const interfaceConfig = baseConfig?.interfaceConfig;

@@ -24,6 +24,7 @@ overlay/main   ──────────●──   (our 5 touch points + a
 | File | What changed | Marker |
 |---|---|---|
 | `api/server/index.js` | 3 lines: mount `/api/ext-config.js` route + `modelAccessFilter` middleware on `/api/config` | `// [EXT]` |
+| `api/server/routes/config.js` | 1 line: include `modelSpecs` in unauthenticated `/api/config` response | `// [EXT]` |
 | `client/index.html` | 1 line: load ext-config script | `<!-- [EXT] -->` |
 | `client/src/routes/Root.tsx` | 2 lines: import + mount `<PaymentToast />` | `// [EXT]` |
 | `client/src/components/Nav/AccountSettings.tsx` | 1 import + 1 JSX: `<ExtBalanceDisplay />` | `// [EXT]` |
