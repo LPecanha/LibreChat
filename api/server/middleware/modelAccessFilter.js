@@ -1,27 +1,11 @@
 const mongoose = require('mongoose');
-const { logger } = require('@librechat/data-schemas');
 
 const SCHEMA = new mongoose.Schema(
   { userId: { type: String, index: true }, effectiveBlockedSpecs: [String], agentsDisabled: Boolean },
   { collection: 'ext_user_model_access', strict: false },
 );
 
-let _extConn = null;
-
-function getExtConnection() {
-  if (_extConn) return _extConn;
-  const uri = process.env.EXT_MONGO_URI;
-  if (uri) {
-    _extConn = mongoose.createConnection(uri);
-  }
-  return _extConn;
-}
-
 function getModel() {
-  const conn = getExtConnection();
-  if (conn) {
-    return conn.models['ExtUserModelAccess'] ?? conn.model('ExtUserModelAccess', SCHEMA);
-  }
   return mongoose.models['ExtUserModelAccess'] ?? mongoose.model('ExtUserModelAccess', SCHEMA);
 }
 
@@ -29,8 +13,7 @@ async function getBlockedSpecs(userId) {
   try {
     const doc = await getModel().findOne({ userId: userId.toString() }).lean();
     return { blocked: doc?.effectiveBlockedSpecs ?? [], agentsDisabled: doc?.agentsDisabled ?? false };
-  } catch (err) {
-    logger.error('[modelAccessFilter] getBlockedSpecs error', { err });
+  } catch {
     return { blocked: [], agentsDisabled: false };
   }
 }
