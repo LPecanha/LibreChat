@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 import { tenantContext } from '../../lib/tenantContext';
 import { getModelPresetModel } from '../../db/models/modelPreset';
 import { getUserModelAccessModel } from '../../db/models/userModelAccess';
+import logger from '../../lib/logger';
 import type { AuthenticatedRequest } from '../../middleware/auth';
 
 const router = Router();
@@ -11,12 +12,26 @@ interface SpecItem { name: string; label: string; }
 
 async function fetchAvailableSpecs(): Promise<SpecItem[]> {
   const tenant = tenantContext.get();
-  if (!tenant) return [];
+  if (!tenant) {
+    logger.warn('[modelAccess] fetchAvailableSpecs: no tenant in context');
+    return [];
+  }
   const url = tenant.internalLibrechatUrl ?? tenant.librechatUrl;
-  const resp = await fetch(`${url}/api/config`);
-  if (!resp.ok) return [];
-  const cfg = await resp.json() as { modelSpecs?: { list?: { name: string; label?: string }[] } };
-  return (cfg.modelSpecs?.list ?? []).map((s) => ({ name: s.name, label: s.label ?? s.name }));
+  logger.info(`[modelAccess] fetching specs from ${url}/api/config`);
+  try {
+    const resp = await fetch(`${url}/api/config`);
+    if (!resp.ok) {
+      logger.warn(`[modelAccess] /api/config responded ${resp.status}`);
+      return [];
+    }
+    const cfg = await resp.json() as { modelSpecs?: { list?: { name: string; label?: string }[] } };
+    const list = cfg.modelSpecs?.list ?? [];
+    logger.info(`[modelAccess] got ${list.length} specs`);
+    return list.map((s) => ({ name: s.name, label: s.label ?? s.name }));
+  } catch (err) {
+    logger.error('[modelAccess] failed to fetch specs', { err });
+    return [];
+  }
 }
 
 function computeEffective(presetBlocked: string[], overrides: string[]): string[] {
