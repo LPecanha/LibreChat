@@ -230,10 +230,9 @@ endpoints:
         default:
           - "grok-4.20-0309-reasoning"
           - "grok-4.20-0309-non-reasoning"
+          - "grok-4.20-multi-agent-0309"
           - "grok-4-1-fast-reasoning"
           - "grok-4-1-fast-non-reasoning"
-          - "grok-imagine-image-pro"
-          - "grok-imagine-image"
         fetch: false
       titleConvo: true
       titleMethod: "completion"
@@ -381,20 +380,6 @@ modelSpecs:
         maxContextTokens: 1048576
         maxOutputTokens: 65536
 
-    - name: "gemini-25-flash-img"
-      label: "Gemini 2.5 Flash (Gerar Imagem)"
-      preset:
-        endpoint: google
-        model: "gemini-2.5-flash-image"
-        addParams:
-          responseModalities: ["image", "text"]
-
-    - name: "imagen-4"
-      label: "Imagen 4 (Gerar Imagem)"
-      preset:
-        endpoint: google
-        model: "imagen-4"
-
     # ── xAI ─────────────────────────────────────────────────────────────────────
     - name: "grok-4.20-res"
       label: "Grok 4.20 (Raciocínio)"
@@ -409,6 +394,14 @@ modelSpecs:
       preset:
         endpoint: xai
         model: "grok-4.20-0309-non-reasoning"
+        maxContextTokens: 2000000
+        temperature: 0.7
+
+    - name: "grok-4.20-multiagent"
+      label: "Grok 4.20 Multi-Agent"
+      preset:
+        endpoint: xai
+        model: "grok-4.20-multi-agent-0309"
         maxContextTokens: 2000000
         temperature: 0.7
 
@@ -428,17 +421,15 @@ modelSpecs:
         maxContextTokens: 2000000
         temperature: 0.7
 
-    - name: "grok-imagine-pro"
-      label: "Grok Imagine Pro (Gerar Imagem)"
-      preset:
-        endpoint: xai
-        model: "grok-imagine-image-pro"
-
-    - name: "grok-imagine"
-      label: "Grok Imagine (Gerar Imagem)"
-      preset:
-        endpoint: xai
-        model: "grok-imagine-image"
+    # ── Geração de Imagem ────────────────────────────────────────────────────────
+    # Para ativar: crie um agente com a tool "image_gen_oai", copie o agent_id
+    # da URL (/agents/<id>) e substitua abaixo. Requer IMAGE_GEN_OAI_API_KEY no .env.
+    #
+    # - name: "grok-imagine"
+    #   label: "Grok Imagine (Gerar Imagem)"
+    #   preset:
+    #     endpoint: agents
+    #     agent_id: "COLE_O_AGENT_ID_AQUI"
 
 # ==============================================================================
 # WEB SEARCH
