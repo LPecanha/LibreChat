@@ -11,7 +11,11 @@ function getModel() {
 
 async function getBlockedSpecs(userId) {
   try {
-    const doc = await getModel().findOne({ userId: userId.toString() }).lean();
+    const userIdStr = userId.toString();
+    const query = mongoose.Types.ObjectId.isValid(userIdStr)
+      ? { $or: [{ userId: userIdStr }, { userId: new mongoose.Types.ObjectId(userIdStr) }] }
+      : { userId: userIdStr };
+    const doc = await getModel().findOne(query).lean();
     return { blocked: doc?.effectiveBlockedSpecs ?? [], agentsDisabled: doc?.agentsDisabled ?? false };
   } catch {
     return { blocked: [], agentsDisabled: false };
