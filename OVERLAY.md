@@ -25,7 +25,9 @@ overlay/main   ──────────●──   (our 5 touch points + a
 |---|---|---|
 | `api/server/index.js` | 3 lines: require `modelAccessFilter` + inject on `/api/config` + mount `/api/ext-config.js` | `// [EXT]` |
 | `api/server/routes/config.js` | 1 line: include `modelSpecs` in unauthenticated `/api/config` response | `// [EXT]` |
-| `client/src/components/SidePanel/Agents/AgentPanel.tsx` | 1 destructure + 1 useMemo: derive agent model list from `modelSpecs` | `// [EXT]` |
+| `client/src/components/SidePanel/Agents/AgentPanel.tsx` | `startupConfig` destructure + models/labels useMemo + providers filter | `// [EXT]` |
+| `client/src/components/SidePanel/Agents/ModelPanel.tsx` | accept `modelLabels` prop + use in dropdown items | `// [EXT]` |
+| `client/src/common/types.ts` | add `modelLabels` field to `AgentModelPanelProps` | `// [EXT]` |
 | `client/index.html` | 1 line: load ext-config script | `<!-- [EXT] -->` |
 | `client/src/routes/Root.tsx` | 2 lines: import + mount `<PaymentToast />` | `// [EXT]` |
 | `client/src/components/Nav/AccountSettings.tsx` | 1 import + 1 JSX: `<ExtBalanceDisplay />` | `// [EXT]` |

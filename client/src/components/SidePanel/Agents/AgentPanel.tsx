@@ -238,21 +238,23 @@ export default function AgentPanel() {
 
   const agentQuery = canEdit && expandedAgentQuery.data ? expandedAgentQuery : basicAgentQuery;
 
-  // [EXT] derive model list from modelSpecs (already filtered by modelAccessFilter) when available
-  const models = useMemo(() => {
+  // [EXT] derive model list and label map from modelSpecs (filtered by modelAccessFilter) when available
+  const { models, modelLabels } = useMemo(() => {
     const specList = startupConfig?.modelSpecs?.list;
     if (specList?.length) {
       const map: Record<string, string[]> = {};
+      const labels: Record<string, string> = {};
       for (const spec of specList) {
         const endpoint = spec.preset?.endpoint as string | undefined;
         const model = spec.preset?.model as string | undefined;
         if (!endpoint || !model) continue;
         if (!map[endpoint]) map[endpoint] = [];
         if (!map[endpoint].includes(model)) map[endpoint].push(model);
+        labels[model] = spec.label ?? model;
       }
-      return map;
+      return { models: map, modelLabels: labels };
     }
-    return modelsQuery.data ?? {};
+    return { models: modelsQuery.data ?? {}, modelLabels: {} as Record<string, string> };
   }, [startupConfig?.modelSpecs?.list, modelsQuery.data]);
   const methods = useForm<AgentForm>({
     defaultValues: getDefaultAgentFormValues(),
@@ -326,10 +328,11 @@ export default function AgentPanel() {
           (key) =>
             !isAssistantsEndpoint(key) &&
             (allowedProviders.size > 0 ? allowedProviders.has(key) : true) &&
-            key !== EModelEndpoint.agents,
+            key !== EModelEndpoint.agents &&
+            (startupConfig?.modelSpecs?.list?.length ? (models[key]?.length ?? 0) > 0 : true), // [EXT]
         )
         .map((provider) => createProviderOption(provider)),
-    [endpointsConfig, allowedProviders],
+    [endpointsConfig, allowedProviders, models, startupConfig?.modelSpecs?.list], // [EXT]
   );
 
   /* Mutations */
@@ -551,7 +554,7 @@ export default function AgentPanel() {
             </div>
           )}
           {canEditAgent && !agentQuery.isInitialLoading && activePanel === Panel.model && (
-            <ModelPanel models={models} providers={providers} setActivePanel={setActivePanel} />
+            <ModelPanel models={models} providers={providers} modelLabels={modelLabels} setActivePanel={setActivePanel} />
           )}
           {canEditAgent && !agentQuery.isInitialLoading && activePanel === Panel.builder && (
             <AgentConfig />

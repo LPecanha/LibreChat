@@ -24,7 +24,8 @@ export default function ModelPanel({
   providers,
   setActivePanel,
   models: modelsData,
-}: Pick<AgentModelPanelProps, 'models' | 'providers' | 'setActivePanel'>) {
+  modelLabels = {}, // [EXT]
+}: Pick<AgentModelPanelProps, 'models' | 'providers' | 'modelLabels' | 'setActivePanel'>) {
   const localize = useLocalize();
   const { announcePolite } = useLiveAnnouncer();
 
@@ -196,7 +197,7 @@ export default function ModelPanel({
                     searchPlaceholder={localize('com_ui_select_model')}
                     setValue={field.onChange}
                     items={models.map((model) => ({
-                      label: model,
+                      label: modelLabels[model] ?? model, // [EXT]
                       value: model,
                     }))}
                     disabled={!provider}

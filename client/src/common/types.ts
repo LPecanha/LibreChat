@@ -239,6 +239,7 @@ export type AgentModelPanelProps = {
   agent_id?: string;
   providers: Option[];
   models: Record<string, string[] | undefined>;
+  modelLabels?: Record<string, string>; // [EXT] friendly display names from modelSpecs
   setActivePanel: React.Dispatch<React.SetStateAction<Panel>>;
 };
 
