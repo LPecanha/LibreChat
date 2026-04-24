@@ -942,3 +942,39 @@ export function saveUserModelAccess(userId: string, data: { presetId?: string; b
 export function clearUserModelAccess(userId: string) {
   return request(`${extUrl()}/ext/admin/model-access/user/${encodeURIComponent(userId)}`, { method: 'DELETE' });
 }
+
+// ── Agent Categories ──────────────────────────────────────────────────────────
+
+export interface AgentCategory {
+  _id: string;
+  value: string;
+  label: string;
+  description: string;
+  order: number;
+  isActive: boolean;
+  custom: boolean;
+}
+
+export function fetchCategories() {
+  return request<AgentCategory[]>(`${extUrl()}/ext/admin/categories`);
+}
+
+export function createCategory(data: { label: string; description?: string; order?: number }) {
+  return request<AgentCategory>(`${extUrl()}/ext/admin/categories`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+}
+
+export function updateCategory(value: string, data: Partial<Pick<AgentCategory, 'label' | 'description' | 'order' | 'isActive'>>) {
+  return request<AgentCategory>(`${extUrl()}/ext/admin/categories/${encodeURIComponent(value)}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+}
+
+export function deleteCategory(value: string) {
+  return request(`${extUrl()}/ext/admin/categories/${encodeURIComponent(value)}`, { method: 'DELETE' });
+}

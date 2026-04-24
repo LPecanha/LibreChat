@@ -25,6 +25,7 @@ overlay/main   ──────────●──   (our 5 touch points + a
 |---|---|---|
 | `api/server/index.js` | 3 lines: require `modelAccessFilter` + inject on `/api/config` + mount `/api/ext-config.js` | `// [EXT]` |
 | `api/server/routes/config.js` | 1 line: include `modelSpecs` in unauthenticated `/api/config` response | `// [EXT]` |
+| `api/server/routes/extConfig.js` | set `DEFAULT_LANG` in localStorage (default pt-BR) for new users | `// [EXT]` |
 | `client/src/components/SidePanel/Agents/AgentPanel.tsx` | `startupConfig` destructure + models/labels useMemo + providers filter | `// [EXT]` |
 | `client/src/components/SidePanel/Agents/ModelPanel.tsx` | accept `modelLabels` prop + use in dropdown items | `// [EXT]` |
 | `client/src/common/types.ts` | add `modelLabels` field to `AgentModelPanelProps` | `// [EXT]` |
@@ -59,6 +60,17 @@ git add <file>
 git rebase --continue
 ```
 
+### After every rebase — sync pt-BR translations
+
+```bash
+# Translates any keys missing in pt-BR using OpenAI (gpt-4o-mini)
+OPENAI_API_KEY=<key> node scripts/sync-ptbr.mjs
+git add client/src/locales/pt-BR/translation.json
+git commit -m "i18n: sync pt-BR after rebase"
+```
+
+This script is idempotent — safe to run multiple times; it only touches keys missing from pt-BR.
+
 ### Conflict resolution cheatsheet
 
 Each `[EXT]` marker corresponds to an exact pattern. If a conflict occurs, re-apply:
@@ -78,6 +90,15 @@ app.use('/api/config', preAuthTenantMiddleware, optionalJwtAuth, modelAccessFilt
 3. After the `/api/config` route line, add:
 ```js
 app.use('/api/ext-config.js', require('./routes/extConfig')); // [EXT] runtime config injection
+```
+
+**`api/server/routes/extConfig.js`** — replace the `res.send(...)` body with:
+```js
+const lang = process.env.DEFAULT_LANG ?? 'pt-BR'; // [EXT]
+res.send(
+  `window.__EXT_URL__ = ${JSON.stringify(url)};` +
+  `\nif (!localStorage.getItem('i18nextLng')) { localStorage.setItem('i18nextLng', ${JSON.stringify(lang)}); }`, // [EXT]
+);
 ```
 
 **`client/index.html`** — before `<script defer type="module" src="/src/main.jsx">`, add:

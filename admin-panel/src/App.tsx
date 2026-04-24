@@ -9,6 +9,7 @@ import { Organizations } from '~/pages/Organizations';
 import { Credits } from '~/pages/Credits';
 import { Billing } from '~/pages/Billing';
 import { Agents } from '~/pages/Agents';
+import { Categories } from '~/pages/Agents/Categories';
 import { Plans } from '~/pages/Plans';
 import { ModelAccess } from '~/pages/ModelAccess';
 import { Access } from '~/pages/Access';
@@ -40,6 +41,7 @@ export default function App() {
         <Route path="credits" element={<Credits />} />
         <Route path="billing" element={<Billing />} />
         <Route path="agents" element={<Agents />} />
+        <Route path="categories" element={<Categories />} />
         <Route path="plans" element={<Plans />} />
         <Route path="model-access" element={<ModelAccess />} />
         <Route path="access" element={<Access />} />
