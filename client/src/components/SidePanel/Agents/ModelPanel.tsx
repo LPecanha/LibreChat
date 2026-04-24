@@ -189,6 +189,7 @@ export default function ModelPanel({
                 <>
                   <ControlCombobox
                     selectedValue={field.value || ''}
+                    displayValue={modelLabels[field.value] ?? field.value || ''} // [EXT]
                     selectPlaceholder={
                       provider
                         ? localize('com_ui_select_model')
