@@ -36,7 +36,7 @@ const { getAppConfig } = require('./services/Config');
 const staticCache = require('./utils/staticCache');
 const optionalJwtAuth = require('./middleware/optionalJwtAuth');
 const noIndex = require('./middleware/noIndex');
-const modelAccessFilter = require('./middleware/modelAccessFilter');
+const modelAccessFilter = require('./middleware/modelAccessFilter'); // [EXT]
 const routes = require('./routes');
 
 const { PORT, HOST, ALLOW_SOCIAL_LOGIN, DISABLE_COMPRESSION, TRUST_PROXY } = process.env ?? {};
@@ -173,7 +173,7 @@ const startServer = async () => {
   app.use('/api/endpoints', routes.endpoints);
   app.use('/api/balance', routes.balance);
   app.use('/api/models', routes.models);
-  app.use('/api/config', preAuthTenantMiddleware, optionalJwtAuth, modelAccessFilter, routes.config);
+  app.use('/api/config', preAuthTenantMiddleware, optionalJwtAuth, modelAccessFilter, routes.config); // [EXT]
   app.use('/api/ext-config.js', require('./routes/extConfig')); // [EXT] runtime config injection
   app.use('/api/assistants', routes.assistants);
   app.use('/api/files', await routes.files.initialize());

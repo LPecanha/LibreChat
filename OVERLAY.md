@@ -23,8 +23,9 @@ overlay/main   ──────────●──   (our 5 touch points + a
 
 | File | What changed | Marker |
 |---|---|---|
-| `api/server/index.js` | 3 lines: mount `/api/ext-config.js` route + `modelAccessFilter` middleware on `/api/config` | `// [EXT]` |
+| `api/server/index.js` | 3 lines: require `modelAccessFilter` + inject on `/api/config` + mount `/api/ext-config.js` | `// [EXT]` |
 | `api/server/routes/config.js` | 1 line: include `modelSpecs` in unauthenticated `/api/config` response | `// [EXT]` |
+| `client/src/components/SidePanel/Agents/AgentPanel.tsx` | 1 destructure + 1 useMemo: derive agent model list from `modelSpecs` | `// [EXT]` |
 | `client/index.html` | 1 line: load ext-config script | `<!-- [EXT] -->` |
 | `client/src/routes/Root.tsx` | 2 lines: import + mount `<PaymentToast />` | `// [EXT]` |
 | `client/src/components/Nav/AccountSettings.tsx` | 1 import + 1 JSX: `<ExtBalanceDisplay />` | `// [EXT]` |
@@ -102,6 +103,35 @@ And replace the balance display block with:
 ```
 
 **`client/src/locales/en/translation.json`** — add the `com_nav_buy_credits*` keys (see git log for the exact keys).
+
+**`api/server/routes/config.js`** — in the `if (!req.user)` branch, add to the payload object:
+```js
+modelSpecs: baseConfig?.modelSpecs, // [EXT] included for admin-ext server-to-server spec fetch
+```
+
+**`client/src/components/SidePanel/Agents/AgentPanel.tsx`** — add `startupConfig` to the `useAgentPanelContext()` destructure:
+```tsx
+startupConfig, // [EXT]
+```
+And replace the `const models = useMemo(...)` block with:
+```tsx
+// [EXT] derive model list from modelSpecs (already filtered by modelAccessFilter) when available
+const models = useMemo(() => {
+  const specList = startupConfig?.modelSpecs?.list;
+  if (specList?.length) {
+    const map: Record<string, string[]> = {};
+    for (const spec of specList) {
+      const endpoint = spec.preset?.endpoint as string | undefined;
+      const model = spec.preset?.model as string | undefined;
+      if (!endpoint || !model) continue;
+      if (!map[endpoint]) map[endpoint] = [];
+      if (!map[endpoint].includes(model)) map[endpoint].push(model);
+    }
+    return map;
+  }
+  return modelsQuery.data ?? {};
+}, [startupConfig?.modelSpecs?.list, modelsQuery.data]);
+```
 
 ---
 

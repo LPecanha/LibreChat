@@ -213,7 +213,7 @@ export default function AgentPanel() {
   const {
     activePanel,
     agentsConfig,
-    startupConfig,
+    startupConfig, // [EXT]
     setActivePanel,
     endpointsConfig,
     setCurrentAgentId,
@@ -238,6 +238,7 @@ export default function AgentPanel() {
 
   const agentQuery = canEdit && expandedAgentQuery.data ? expandedAgentQuery : basicAgentQuery;
 
+  // [EXT] derive model list from modelSpecs (already filtered by modelAccessFilter) when available
   const models = useMemo(() => {
     const specList = startupConfig?.modelSpecs?.list;
     if (specList?.length) {
