@@ -19,8 +19,7 @@ async function fetchAvailableSpecs(): Promise<SpecItem[]> {
   }
   const url = tenant.internalLibrechatUrl ?? tenant.librechatUrl;
   logger.info(`[modelAccess] fetching specs from ${url}/api/config`);
-  const signingSecret = tenant.librechatJwtSecret ?? tenant.jwtSecret;
-  const sysToken = jwt.sign({ id: '000000000000000000000000', role: 'ADMIN' }, signingSecret, { expiresIn: '60s' });
+  const sysToken = jwt.sign({ id: '000000000000000000000000', role: 'ADMIN' }, tenant.jwtSecret, { expiresIn: '60s' });
   try {
     const resp = await fetch(`${url}/api/config`, {
       headers: { Authorization: `Bearer ${sysToken}` },
