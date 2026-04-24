@@ -6,14 +6,28 @@ const SCHEMA = new mongoose.Schema(
   { collection: 'ext_user_model_access', strict: false },
 );
 
+let _extConn = null;
+
+function getExtConnection() {
+  if (_extConn) return _extConn;
+  const uri = process.env.EXT_MONGO_URI;
+  if (uri) {
+    _extConn = mongoose.createConnection(uri);
+  }
+  return _extConn;
+}
+
 function getModel() {
+  const conn = getExtConnection();
+  if (conn) {
+    return conn.models['ExtUserModelAccess'] ?? conn.model('ExtUserModelAccess', SCHEMA);
+  }
   return mongoose.models['ExtUserModelAccess'] ?? mongoose.model('ExtUserModelAccess', SCHEMA);
 }
 
 async function getBlockedSpecs(userId) {
   try {
     const doc = await getModel().findOne({ userId: userId.toString() }).lean();
-    logger.info(`[modelAccessFilter] userId=${userId} found=${!!doc} blocked=${JSON.stringify(doc?.effectiveBlockedSpecs ?? [])}`);
     return { blocked: doc?.effectiveBlockedSpecs ?? [], agentsDisabled: doc?.agentsDisabled ?? false };
   } catch (err) {
     logger.error('[modelAccessFilter] getBlockedSpecs error', { err });
@@ -25,7 +39,6 @@ module.exports = async function modelAccessFilter(req, res, next) {
   if (req.method !== 'GET' || !req.user?.id) return next();
 
   const { blocked, agentsDisabled } = await getBlockedSpecs(req.user.id);
-  logger.info(`[modelAccessFilter] user=${req.user.id} blocked=${blocked.length} agentsDisabled=${agentsDisabled}`);
   if (blocked.length === 0 && !agentsDisabled) return next();
 
   const originalJson = res.json.bind(res);
