@@ -199,19 +199,18 @@ router.post('/presets/:id/apply', async (req: AuthenticatedRequest, res) => {
     return;
   }
 
-  const objIds = userIds.map((uid) => new mongoose.Types.ObjectId(uid));
-  const existing = await Access.find({ userId: { $in: objIds } }).lean();
-  const overrideMap = new Map(existing.map((u) => [u.userId.toString(), u.blockedSpecsOverride ?? []]));
+  const existing = await Access.find({ userId: { $in: userIds } }).lean();
+  const overrideMap = new Map(existing.map((u) => [u.userId, u.blockedSpecsOverride ?? []]));
 
   await Promise.all(
-    objIds.map((uid) =>
+    userIds.map((uid) =>
       Access.findOneAndUpdate(
         { userId: uid },
         {
           $set: {
             userId: uid,
             presetId: preset._id,
-            effectiveBlockedSpecs: computeEffective(preset.blockedSpecs, overrideMap.get(uid.toString()) ?? []),
+            effectiveBlockedSpecs: computeEffective(preset.blockedSpecs, overrideMap.get(uid) ?? []),
             agentsDisabled: preset.agentsDisabled,
           },
           $setOnInsert: { blockedSpecsOverride: [] },
@@ -272,12 +271,12 @@ router.put('/user/:userId', async (req: AuthenticatedRequest, res) => {
 
   const effectiveBlockedSpecs = computeEffective(presetBlocked, blockedSpecsOverride);
 
-  const userObjId = new mongoose.Types.ObjectId(req.params.userId as string);
+  const userId = req.params.userId as string;
   await Access.findOneAndUpdate(
-    { userId: userObjId },
+    { userId },
     {
       $set: {
-        userId: userObjId,
+        userId,
         ...(resolvedPresetId ? { presetId: resolvedPresetId } : {}),
         blockedSpecsOverride,
         effectiveBlockedSpecs,

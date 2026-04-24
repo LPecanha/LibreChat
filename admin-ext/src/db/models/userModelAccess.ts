@@ -3,7 +3,7 @@ import { useModel } from '../../lib/model';
 
 export interface IUserModelAccess {
   _id: Types.ObjectId;
-  userId: Types.ObjectId;
+  userId: string;
   presetId?: Types.ObjectId;
   blockedSpecsOverride: string[];
   effectiveBlockedSpecs: string[];
@@ -13,7 +13,7 @@ export interface IUserModelAccess {
 
 const schema = new Schema<IUserModelAccess>(
   {
-    userId: { type: Schema.Types.ObjectId, required: true, unique: true, index: true },
+    userId: { type: String, required: true, unique: true, index: true },
     presetId: { type: Schema.Types.ObjectId },
     blockedSpecsOverride: { type: [String], default: [] },
     effectiveBlockedSpecs: { type: [String], default: [] },
