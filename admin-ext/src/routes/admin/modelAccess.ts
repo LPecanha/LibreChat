@@ -30,7 +30,7 @@ async function fetchAvailableSpecs(): Promise<SpecItem[]> {
     }
     const cfg = await resp.json() as { modelSpecs?: { list?: { name: string; label?: string }[] } };
     const list = cfg.modelSpecs?.list ?? [];
-    logger.info(`[modelAccess] got ${list.length} specs`);
+    logger.info(`[modelAccess] got ${list.length} specs — modelSpecs keys: ${JSON.stringify(cfg.modelSpecs ? Object.keys(cfg.modelSpecs) : null)}`);
     return list.map((s) => ({ name: s.name, label: s.label ?? s.name }));
   } catch (err) {
     logger.error('[modelAccess] failed to fetch specs', { err });
