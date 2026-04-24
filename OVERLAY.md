@@ -102,6 +102,18 @@ And replace the balance display block with:
 <ExtBalanceDisplay tokenCredits={balanceQuery.data.tokenCredits} />
 ```
 
+**`client/src/components/Nav/SettingsTabs/Balance/Balance.tsx`** — replace the entire file body with:
+```tsx
+import React from 'react';
+import { ExtBalancePanel } from '~/components/Nav/BuyCredits'; // [EXT]
+
+function Balance() {
+  return <ExtBalancePanel />; // [EXT]
+}
+
+export default React.memo(Balance);
+```
+
 **`client/src/locales/en/translation.json`** — add the `com_nav_buy_credits*` keys (see git log for the exact keys).
 
 **`api/server/routes/config.js`** — in the `if (!req.user)` branch, add to the payload object:
