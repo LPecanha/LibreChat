@@ -12,7 +12,8 @@ interface SpecItem { name: string; label: string; }
 async function fetchAvailableSpecs(): Promise<SpecItem[]> {
   const tenant = tenantContext.get();
   if (!tenant) return [];
-  const resp = await fetch(`${tenant.librechatUrl}/api/config`);
+  const url = tenant.internalLibrechatUrl ?? tenant.librechatUrl;
+  const resp = await fetch(`${url}/api/config`);
   if (!resp.ok) return [];
   const cfg = await resp.json() as { modelSpecs?: { list?: { name: string; label?: string }[] } };
   return (cfg.modelSpecs?.list ?? []).map((s) => ({ name: s.name, label: s.label ?? s.name }));

@@ -6,6 +6,8 @@ export interface TenantConfig {
   jwtSecret: string;
   origin: string;
   librechatUrl: string;
+  /** Internal Docker service URL for server-to-server calls (e.g. http://librechat-fibbo:3080). Falls back to librechatUrl if omitted. */
+  internalLibrechatUrl?: string;
 }
 
 let _tenants: TenantConfig[] | null = null;

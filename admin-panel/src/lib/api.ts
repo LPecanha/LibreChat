@@ -895,11 +895,8 @@ export interface UserModelAccess {
   effectiveBlockedSpecs: string[];
 }
 
-export async function fetchModelSpecs(): Promise<ModelSpec[]> {
-  const resp = await fetch(`${librechatUrl()}/api/config`);
-  if (!resp.ok) return [];
-  const data = await resp.json() as { modelSpecs?: { list?: { name: string; label?: string }[] } };
-  return (data.modelSpecs?.list ?? []).map((s) => ({ name: s.name, label: s.label ?? s.name }));
+export function fetchModelSpecs() {
+  return request<ModelSpec[]>(`${extUrl()}/ext/admin/model-access/specs`);
 }
 
 export function fetchModelPresets() {
