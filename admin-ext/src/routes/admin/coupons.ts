@@ -109,7 +109,7 @@ router.post('/', async (req: AuthenticatedRequest, res) => {
 
 router.patch('/:code', async (req: AuthenticatedRequest, res) => {
   try {
-    const code = req.params['code']?.toUpperCase();
+    const code = String(req.params['code'] ?? '').toUpperCase();
     const { isActive, description, expiresAt, maxUses } = req.body as {
       isActive?: boolean;
       description?: string;
@@ -141,7 +141,7 @@ router.patch('/:code', async (req: AuthenticatedRequest, res) => {
 
 router.delete('/:code', async (req: AuthenticatedRequest, res) => {
   try {
-    const code = req.params['code']?.toUpperCase();
+    const code = String(req.params['code'] ?? '').toUpperCase();
     const deleted = await getCouponModel().findOneAndDelete({ code }).lean();
     if (!deleted) {
       res.status(404).json({ error: 'Coupon not found' });
