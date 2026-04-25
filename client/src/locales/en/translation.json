@@ -465,7 +465,7 @@
   "com_nav_buy_credits_tab_subscription": "Monthly plan",
   "com_nav_buy_credits_tab_one_time": "Buy credits",
   "com_nav_buy_credits_already_subscribed": "You already have an active plan. You can change it by purchasing a new one.",
-  "com_nav_buy_credits_coupon_toggle": "I have a coupon",
+  "com_nav_buy_credits_coupon_toggle": "Redeem a Coupon",
   "com_nav_buy_credits_coupon_placeholder": "Coupon code",
   "com_nav_buy_credits_coupon_apply": "Apply",
   "com_nav_buy_credits_coupon_success": "Coupon applied! {{0}} added to your balance.",

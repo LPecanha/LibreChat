@@ -31,7 +31,7 @@ export function ExtBalanceDisplay({ tokenCredits }: { tokenCredits: number }) {
           <DropdownMenuSeparator />
           <button
             onClick={() => setShowModal(true)}
-            className="select-item w-full text-sm"
+            className="select-item w-full text-sm hover:bg-surface-hover hover:text-text-primary"
             aria-label={localize('com_nav_buy_credits')}
           >
             <Zap className="icon-md text-blue-500" aria-hidden="true" />
