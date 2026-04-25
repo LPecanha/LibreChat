@@ -175,6 +175,9 @@ const startServer = async () => {
   app.use('/api/models', routes.models);
   app.use('/api/config', preAuthTenantMiddleware, optionalJwtAuth, modelAccessFilter, routes.config); // [EXT]
   app.use('/api/ext-config.js', require('./routes/extConfig')); // [EXT] runtime config injection
+  if (process.env.EXT_INTERNAL_URL || process.env.EXT_PROXY_ENABLED) {
+    app.use('/ext', require('./routes/extProxy')); // [EXT] proxy to admin-ext
+  }
   app.use('/api/assistants', routes.assistants);
   app.use('/api/files', await routes.files.initialize());
   app.use('/images/', createValidateImageRequest(appConfig.secureImageLinks), routes.staticRoute);
