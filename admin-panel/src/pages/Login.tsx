@@ -1,13 +1,12 @@
 import { useState } from 'react';
+import { Sun, Moon } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { loginWithPassword } from '~/lib/api';
 import { setToken, setUser, clearAuth } from '~/lib/auth';
 import { getAvailableTenants, setActiveTenant, isMultiTenant } from '~/lib/tenant';
-import { BRAND_NAME, BRAND_COLOR } from '~/lib/brand';
+import { BRAND_NAME } from '~/lib/brand';
+import { useTheme } from '~/hooks/useTheme';
 import type { TenantInfo } from '~/lib/tenant';
-import { Button } from '~/components/ui/button';
-import { Input } from '~/components/ui/input';
-import { cn } from '~/lib/utils';
 
 function friendlyError(err: unknown): string {
   const msg = err instanceof Error ? err.message : String(err);
@@ -25,10 +24,14 @@ function friendlyError(err: unknown): string {
   return msg || 'Erro ao fazer login. Tente novamente.';
 }
 
+const floatingInput = 'peer w-full rounded-2xl border border-border bg-surface-primary px-3.5 pb-2.5 pt-3 text-text-primary duration-200 focus:border-green-500 focus:outline-none';
+const floatingLabel = 'absolute start-3 top-1.5 z-10 origin-[0] -translate-y-4 scale-75 transform bg-surface-primary px-2 text-sm text-muted-foreground duration-200 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:scale-100 peer-focus:top-1.5 peer-focus:-translate-y-4 peer-focus:scale-75 peer-focus:px-2 peer-focus:text-green-600 dark:peer-focus:text-green-500';
+
 export function Login() {
   const navigate = useNavigate();
   const tenants = getAvailableTenants();
   const multi = isMultiTenant();
+  const { theme, toggle } = useTheme();
 
   const [selectedTenant, setSelectedTenant] = useState<TenantInfo | null>(tenants[0] ?? null);
   const [email, setEmail] = useState('');
@@ -59,121 +62,115 @@ export function Login() {
   }
 
   return (
-    <div className="flex min-h-screen bg-surface-primary">
-      {/* Brand panel — desktop only */}
-      <div
-        className="hidden lg:flex lg:w-2/5 flex-col items-center justify-center gap-6 p-12 relative overflow-hidden"
-        style={{ background: `linear-gradient(150deg, ${BRAND_COLOR} 0%, ${BRAND_COLOR}99 100%)` }}
-      >
-        <div
-          className="absolute inset-0 opacity-10"
-          style={{
-            backgroundImage: `radial-gradient(circle at 20% 80%, white 0%, transparent 50%),
-              radial-gradient(circle at 80% 20%, white 0%, transparent 50%)`,
-          }}
+    <div className="relative flex min-h-screen flex-col bg-white dark:bg-gray-900">
+      <div className="mt-6 h-10 w-full bg-cover">
+        <img
+          src="/logo.svg"
+          alt={BRAND_NAME}
+          className="h-full w-full object-contain"
         />
-        <div className="relative flex flex-col items-center gap-4 text-center">
-          <img src="/logo.svg" alt={BRAND_NAME} className="h-14 w-auto brightness-0 invert" />
-          <div>
-            <h1 className="text-2xl font-bold text-white">{BRAND_NAME}</h1>
-            <p className="text-white/70 text-sm mt-1">Painel de administração</p>
-          </div>
-        </div>
-        <div className="relative mt-8 flex flex-col gap-3 text-left w-full max-w-xs">
-          {[
-            'Gestão de usuários e organizações',
-            'Controle de créditos e faturamento',
-            'Configuração de modelos e agentes',
-          ].map((item) => (
-            <div key={item} className="flex items-center gap-2.5 text-sm text-white/80">
-              <div className="h-1.5 w-1.5 rounded-full bg-white/60 shrink-0" />
-              {item}
-            </div>
-          ))}
-        </div>
       </div>
 
-      {/* Form panel */}
-      <div className="flex flex-1 items-center justify-center p-6 sm:p-10">
-        <div className="w-full max-w-sm space-y-7">
-          {/* Mobile logo */}
-          <div className="flex flex-col items-center gap-3 lg:hidden">
-            <img src="/logo.svg" alt={BRAND_NAME} className="h-9 w-auto" />
-            <p className="text-sm text-muted-foreground">Painel de administração</p>
-          </div>
+      <main className="flex flex-grow items-center justify-center">
+        <div className="w-full overflow-hidden bg-white px-6 py-4 dark:bg-gray-900 sm:max-w-md sm:rounded-lg">
+          <h1
+            className="mb-4 text-center text-3xl font-semibold text-black dark:text-white"
+            style={{ userSelect: 'none' }}
+          >
+            Painel de administração
+          </h1>
 
-          <div className="space-y-1">
-            <h2 className="text-2xl font-semibold tracking-tight text-text-primary">Entrar</h2>
-            <p className="text-sm text-muted-foreground">Use suas credenciais de administrador</p>
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {multi && (
-              <div className="space-y-1.5">
-                <label className="text-sm font-medium text-text-primary" htmlFor="tenant">
-                  Servidor
-                </label>
+          {multi && (
+            <div className="mb-4">
+              <div className="relative">
                 <select
                   id="tenant"
-                  className="w-full rounded-lg border border-border bg-card px-3 py-2.5 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-ring/50"
+                  className="peer w-full appearance-none rounded-2xl border border-border bg-surface-primary px-3.5 pb-2.5 pt-5 text-text-primary duration-200 focus:border-green-500 focus:outline-none"
                   value={selectedTenant?.id ?? ''}
-                  onChange={(e) => {
-                    setSelectedTenant(tenants.find((x) => x.id === e.target.value) ?? null);
-                  }}
+                  onChange={(e) => setSelectedTenant(tenants.find((x) => x.id === e.target.value) ?? null)}
                   required
                 >
                   {tenants.map((t) => (
-                    <option key={t.id} value={t.id}>
-                      {t.name}
-                    </option>
+                    <option key={t.id} value={t.id}>{t.name}</option>
                   ))}
                 </select>
+                <label
+                  htmlFor="tenant"
+                  className="absolute start-3 top-1.5 z-10 origin-[0] -translate-y-0 scale-75 transform bg-surface-primary px-2 text-sm text-muted-foreground"
+                >
+                  Servidor
+                </label>
               </div>
-            )}
+            </div>
+          )}
 
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium text-text-primary" htmlFor="email">
-                E-mail
-              </label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="admin@exemplo.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className={cn('h-10', error && 'border-destructive focus-visible:ring-destructive')}
-                required
-                autoComplete="email"
-              />
+          <form className="mt-6" aria-label="Login form" onSubmit={handleSubmit}>
+            <div className="mb-4">
+              <div className="relative">
+                <input
+                  type="email"
+                  id="email"
+                  autoComplete="email"
+                  aria-label="E-mail"
+                  className={floatingInput}
+                  placeholder=" "
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+                <label htmlFor="email" className={floatingLabel}>
+                  E-mail
+                </label>
+              </div>
             </div>
 
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium text-text-primary" htmlFor="password">
-                Senha
-              </label>
-              <Input
-                id="password"
-                type="password"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className={cn('h-10', error && 'border-destructive focus-visible:ring-destructive')}
-                required
-                autoComplete="current-password"
-              />
+            <div className="mb-2">
+              <div className="relative">
+                <input
+                  type="password"
+                  id="password"
+                  autoComplete="current-password"
+                  aria-label="Senha"
+                  className={floatingInput}
+                  placeholder=" "
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+                <label htmlFor="password" className={floatingLabel}>
+                  Senha
+                </label>
+              </div>
             </div>
 
             {error && (
-              <div role="alert" className="rounded-lg bg-destructive/10 px-3 py-2.5 text-sm text-destructive">
+              <div role="alert" className="mt-2 rounded-md bg-red-500/10 px-3 py-2.5 text-sm text-red-600 dark:text-red-500">
                 {error}
               </div>
             )}
 
-            <Button type="submit" className="w-full h-10" disabled={loading}>
-              {loading ? 'Entrando…' : 'Entrar'}
-            </Button>
+            <div className="mt-6">
+              <button
+                type="submit"
+                disabled={loading}
+                className="h-12 w-full rounded-2xl bg-green-600 text-sm font-medium text-white transition-colors hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-60 dark:focus:ring-offset-gray-900"
+              >
+                {loading ? 'Entrando…' : 'Continuar'}
+              </button>
+            </div>
           </form>
         </div>
+      </main>
+
+      <div className="absolute bottom-0 left-0 m-4">
+        <button
+          onClick={toggle}
+          className="rounded-md p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-gray-200 transition-colors"
+          aria-label={theme === 'dark' ? 'Modo claro' : 'Modo escuro'}
+          title={theme === 'dark' ? 'Modo claro' : 'Modo escuro'}
+        >
+          {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+        </button>
       </div>
     </div>
   );
