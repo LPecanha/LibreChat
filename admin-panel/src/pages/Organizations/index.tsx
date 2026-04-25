@@ -24,7 +24,7 @@ import { Button } from '~/components/ui/button';
 import { Input } from '~/components/ui/input';
 import { Skeleton } from '~/components/ui/skeleton';
 import { ModelIcon } from '~/components/ModelIcon';
-import { cleanModelName } from '~/lib/models';
+import { cleanModelName, resolveAvatarUrl } from '~/lib/models';
 import { formatUsd } from '~/lib/utils';
 import type { Organization } from '~/lib/api';
 
@@ -538,8 +538,8 @@ function OrgUsageSection({ groupId }: { groupId: string }) {
               {(usage?.byMember ?? []).map((m) => (
                 <div key={m.userId} className="flex items-center justify-between px-4 py-2.5 hover:bg-surface-hover">
                   <div className="flex items-center gap-2">
-                    {m.avatar ? (
-                      <img src={m.avatar} alt={m.name} className="h-6 w-6 rounded-full" />
+                    {resolveAvatarUrl(m.avatar) ? (
+                      <img src={resolveAvatarUrl(m.avatar)} alt={m.name} className="h-6 w-6 rounded-full" />
                     ) : (
                       <div className="flex h-6 w-6 items-center justify-center rounded-full bg-muted text-xs font-medium">
                         {m.name.charAt(0).toUpperCase()}

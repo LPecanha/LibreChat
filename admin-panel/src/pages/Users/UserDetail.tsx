@@ -11,7 +11,7 @@ import { Badge } from '~/components/ui/badge';
 import { Button } from '~/components/ui/button';
 import { Skeleton } from '~/components/ui/skeleton';
 import { ModelIcon, AgentIcon } from '~/components/ModelIcon';
-import { cleanModelName } from '~/lib/models';
+import { cleanModelName, resolveAvatarUrl } from '~/lib/models';
 import { formatUsd, formatDate, formatRelative } from '~/lib/utils';
 import { toast } from '~/hooks/useToast';
 import type { AdminUserItem } from '~/lib/api';
@@ -272,8 +272,8 @@ export function UserDetail({ user, onBack }: Props) {
           Voltar
         </Button>
         <div className="flex items-center gap-3">
-          {user.avatar ? (
-            <img src={user.avatar} alt={user.name} className="h-10 w-10 rounded-full object-cover" />
+          {resolveAvatarUrl(user.avatar) ? (
+            <img src={resolveAvatarUrl(user.avatar)} alt={user.name} className="h-10 w-10 rounded-full object-cover" />
           ) : (
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted text-sm font-semibold text-muted-foreground">
               {user.name.charAt(0).toUpperCase()}

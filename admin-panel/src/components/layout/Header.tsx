@@ -2,6 +2,7 @@ import { Menu, Sun, Moon } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
 import { getUser } from '~/lib/auth';
 import { useTheme } from '~/hooks/useTheme';
+import { resolveAvatarUrl } from '~/lib/models';
 
 const titles: Record<string, string> = {
   '/': 'Dashboard',
@@ -52,8 +53,8 @@ export function Header({ onMenuClick }: Props) {
         </button>
         {user && (
           <div className="flex items-center gap-2 pl-1">
-            {user.avatar ? (
-              <img src={user.avatar} alt={user.name} className="h-7 w-7 rounded-full object-cover" />
+            {resolveAvatarUrl(user.avatar) ? (
+              <img src={resolveAvatarUrl(user.avatar)} alt={user.name} className="h-7 w-7 rounded-full object-cover" />
             ) : (
               <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">
                 {user.name.charAt(0).toUpperCase()}

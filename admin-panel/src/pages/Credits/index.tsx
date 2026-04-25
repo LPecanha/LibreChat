@@ -18,6 +18,7 @@ import { Button } from '~/components/ui/button';
 import { Skeleton } from '~/components/ui/skeleton';
 import { Badge } from '~/components/ui/badge';
 import { formatUsd } from '~/lib/utils';
+import { resolveAvatarUrl } from '~/lib/models';
 import type { AdminUserItem, CreditAuditEntry, Subscription } from '~/lib/api';
 
 function AuditRow({ entry }: { entry: CreditAuditEntry }) {
@@ -296,8 +297,8 @@ function UserBalancePanel({ user }: { user: AdminUserItem }) {
       <Card>
         <CardContent className="pt-4 space-y-4">
           <div className="flex items-center gap-3">
-            {user.avatar ? (
-              <img src={user.avatar} alt={user.name} className="h-9 w-9 rounded-full" />
+            {resolveAvatarUrl(user.avatar) ? (
+              <img src={resolveAvatarUrl(user.avatar)} alt={user.name} className="h-9 w-9 rounded-full" />
             ) : (
               <div className="flex h-9 w-9 items-center justify-center rounded-full bg-muted text-sm font-medium">
                 {user.name.charAt(0)}

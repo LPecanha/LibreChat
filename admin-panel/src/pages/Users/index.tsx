@@ -14,6 +14,7 @@ import { Badge } from '~/components/ui/badge';
 import { Button } from '~/components/ui/button';
 import { Skeleton } from '~/components/ui/skeleton';
 import { formatRelative } from '~/lib/utils';
+import { resolveAvatarUrl } from '~/lib/models';
 import { toast } from '~/hooks/useToast';
 import type { AdminUserItem, AdminGroup, AdminRole } from '~/lib/api';
 
@@ -263,8 +264,8 @@ function UserDetailPanel({ user, onClose }: { user: AdminUserItem; onClose: () =
       <div className="w-full max-w-md max-h-[90vh] overflow-y-auto rounded-xl bg-card border border-border p-6 shadow-2xl">
         <div className="mb-5 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            {user.avatar ? (
-              <img src={user.avatar} alt={user.name} className="h-10 w-10 rounded-full object-cover" />
+            {resolveAvatarUrl(user.avatar) ? (
+              <img src={resolveAvatarUrl(user.avatar)} alt={user.name} className="h-10 w-10 rounded-full object-cover" />
             ) : (
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted text-sm font-semibold text-muted-foreground">
                 {user.name.charAt(0).toUpperCase()}
@@ -377,8 +378,8 @@ export function Users() {
               {users.map((u) => (
                 <div key={u.id} className="flex w-full items-center justify-between px-4 py-3">
                   <div className="flex items-center gap-3">
-                    {u.avatar ? (
-                      <img src={u.avatar} alt={u.name} className="h-8 w-8 rounded-full object-cover" />
+                    {resolveAvatarUrl(u.avatar) ? (
+                      <img src={resolveAvatarUrl(u.avatar)} alt={u.name} className="h-8 w-8 rounded-full object-cover" />
                     ) : (
                       <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted text-sm font-medium text-muted-foreground">
                         {u.name.charAt(0).toUpperCase()}
