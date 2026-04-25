@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import * as Dialog from '@radix-ui/react-dialog';
 import { X, Zap, CreditCard, QrCode, Copy, Check, RefreshCw, Tag } from 'lucide-react';
+import { QueryKeys } from 'librechat-data-provider';
 import { useLocalize } from '~/hooks';
 import { useAuthContext } from '~/hooks/AuthContext';
 import { extFetch, redeemCoupon, EXT_URL, type ExtCreditPlan } from './extApi';
@@ -35,6 +37,7 @@ function applyDiscount(pricesBRL: number, discountPct: number): number {
 
 export function BuyCreditsModal({ open, onOpenChange }: Props) {
   const localize = useLocalize();
+  const queryClient = useQueryClient();
   const { user, token } = useAuthContext() as {
     user: { id?: string; _id?: string; email?: string; name?: string } | null;
     token?: string;
@@ -116,6 +119,7 @@ export function BuyCreditsModal({ open, onOpenChange }: Props) {
       const { creditsGranted } = await redeemCoupon(couponCode.trim(), token);
       setCouponSuccess(localize('com_nav_buy_credits_coupon_success', { 0: formatUsdBalance(creditsGranted) }));
       setCouponCode('');
+      void queryClient.invalidateQueries([QueryKeys.balance]);
     } catch (err) {
       const msg = err instanceof Error ? err.message : '';
       setCouponError(msg && !msg.startsWith('HTTP') ? msg : localize('com_nav_buy_credits_coupon_error'));
