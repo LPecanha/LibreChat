@@ -118,7 +118,7 @@ export function BuyCreditsModal({ open, onOpenChange }: Props) {
       setCouponCode('');
     } catch (err) {
       const msg = err instanceof Error ? err.message : '';
-      setCouponError(msg.includes('4') ? msg.replace(/^HTTP \d+:\s*/, '') : localize('com_nav_buy_credits_coupon_error'));
+      setCouponError(msg && !msg.startsWith('HTTP') ? msg : localize('com_nav_buy_credits_coupon_error'));
     } finally {
       setCouponLoading(false);
     }

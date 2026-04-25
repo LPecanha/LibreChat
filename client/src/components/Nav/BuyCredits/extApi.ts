@@ -43,6 +43,13 @@ export async function extFetch<T>(path: string, token?: string, options: Request
       ...(options.headers as Record<string, string>),
     },
   });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  if (!res.ok) {
+    let message = `HTTP ${res.status}`;
+    try {
+      const body = await res.json() as { error?: string };
+      if (body.error) message = body.error;
+    } catch { /* ignore parse errors */ }
+    throw new Error(message);
+  }
   return res.json() as Promise<T>;
 }
