@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { loginWithPassword } from '~/lib/api';
 import { setToken, setUser, clearAuth } from '~/lib/auth';
 import { getAvailableTenants, setActiveTenant, isMultiTenant } from '~/lib/tenant';
-import { BRAND_NAME } from '~/lib/brand';
+import { BRAND_NAME, BRAND_COLOR } from '~/lib/brand';
 import type { TenantInfo } from '~/lib/tenant';
 import { Button } from '~/components/ui/button';
 import { Input } from '~/components/ui/input';
@@ -59,79 +59,121 @@ export function Login() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-surface-primary">
-      <div className="w-full max-w-sm space-y-6 rounded-xl border border-border bg-card p-8 shadow-lg">
-        <div className="flex flex-col items-center gap-3">
-          <img src="/logo.svg" alt={BRAND_NAME} className="h-8 w-auto" />
-          <p className="text-sm text-muted-foreground">Painel de administração</p>
+    <div className="flex min-h-screen bg-surface-primary">
+      {/* Brand panel — desktop only */}
+      <div
+        className="hidden lg:flex lg:w-2/5 flex-col items-center justify-center gap-6 p-12 relative overflow-hidden"
+        style={{ background: `linear-gradient(150deg, ${BRAND_COLOR} 0%, ${BRAND_COLOR}99 100%)` }}
+      >
+        <div
+          className="absolute inset-0 opacity-10"
+          style={{
+            backgroundImage: `radial-gradient(circle at 20% 80%, white 0%, transparent 50%),
+              radial-gradient(circle at 80% 20%, white 0%, transparent 50%)`,
+          }}
+        />
+        <div className="relative flex flex-col items-center gap-4 text-center">
+          <img src="/logo.svg" alt={BRAND_NAME} className="h-14 w-auto brightness-0 invert" />
+          <div>
+            <h1 className="text-2xl font-bold text-white">{BRAND_NAME}</h1>
+            <p className="text-white/70 text-sm mt-1">Painel de administração</p>
+          </div>
         </div>
+        <div className="relative mt-8 flex flex-col gap-3 text-left w-full max-w-xs">
+          {[
+            'Gestão de usuários e organizações',
+            'Controle de créditos e faturamento',
+            'Configuração de modelos e agentes',
+          ].map((item) => (
+            <div key={item} className="flex items-center gap-2.5 text-sm text-white/80">
+              <div className="h-1.5 w-1.5 rounded-full bg-white/60 shrink-0" />
+              {item}
+            </div>
+          ))}
+        </div>
+      </div>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {multi && (
+      {/* Form panel */}
+      <div className="flex flex-1 items-center justify-center p-6 sm:p-10">
+        <div className="w-full max-w-sm space-y-7">
+          {/* Mobile logo */}
+          <div className="flex flex-col items-center gap-3 lg:hidden">
+            <img src="/logo.svg" alt={BRAND_NAME} className="h-9 w-auto" />
+            <p className="text-sm text-muted-foreground">Painel de administração</p>
+          </div>
+
+          <div className="space-y-1">
+            <h2 className="text-2xl font-semibold tracking-tight text-text-primary">Entrar</h2>
+            <p className="text-sm text-muted-foreground">Use suas credenciais de administrador</p>
+          </div>
+
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {multi && (
+              <div className="space-y-1.5">
+                <label className="text-sm font-medium text-text-primary" htmlFor="tenant">
+                  Servidor
+                </label>
+                <select
+                  id="tenant"
+                  className="w-full rounded-lg border border-border bg-card px-3 py-2.5 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-ring/50"
+                  value={selectedTenant?.id ?? ''}
+                  onChange={(e) => {
+                    setSelectedTenant(tenants.find((x) => x.id === e.target.value) ?? null);
+                  }}
+                  required
+                >
+                  {tenants.map((t) => (
+                    <option key={t.id} value={t.id}>
+                      {t.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
             <div className="space-y-1.5">
-              <label className="text-sm font-medium text-text-primary" htmlFor="tenant">
-                Servidor
+              <label className="text-sm font-medium text-text-primary" htmlFor="email">
+                E-mail
               </label>
-              <select
-                id="tenant"
-                className="w-full rounded-md border border-border bg-card px-3 py-2 text-sm text-text-primary focus:outline-none focus:ring-2 focus:ring-primary"
-                value={selectedTenant?.id ?? ''}
-                onChange={(e) => {
-                  setSelectedTenant(tenants.find((x) => x.id === e.target.value) ?? null);
-                }}
+              <Input
+                id="email"
+                type="email"
+                placeholder="admin@exemplo.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className={cn('h-10', error && 'border-destructive focus-visible:ring-destructive')}
                 required
-              >
-                {tenants.map((t) => (
-                  <option key={t.id} value={t.id}>
-                    {t.name}
-                  </option>
-                ))}
-              </select>
+                autoComplete="email"
+              />
             </div>
-          )}
 
-          <div className="space-y-1.5">
-            <label className="text-sm font-medium text-text-primary" htmlFor="email">
-              E-mail
-            </label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="admin@exemplo.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className={cn(error && 'border-destructive focus-visible:ring-destructive')}
-              required
-              autoComplete="email"
-            />
-          </div>
-
-          <div className="space-y-1.5">
-            <label className="text-sm font-medium text-text-primary" htmlFor="password">
-              Senha
-            </label>
-            <Input
-              id="password"
-              type="password"
-              placeholder="••••••••"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className={cn(error && 'border-destructive focus-visible:ring-destructive')}
-              required
-              autoComplete="current-password"
-            />
-          </div>
-
-          {error && (
-            <div role="alert" className="rounded-md bg-destructive/10 px-3 py-2.5 text-sm text-destructive">
-              {error}
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-text-primary" htmlFor="password">
+                Senha
+              </label>
+              <Input
+                id="password"
+                type="password"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className={cn('h-10', error && 'border-destructive focus-visible:ring-destructive')}
+                required
+                autoComplete="current-password"
+              />
             </div>
-          )}
 
-          <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? 'Entrando…' : 'Entrar'}
-          </Button>
-        </form>
+            {error && (
+              <div role="alert" className="rounded-lg bg-destructive/10 px-3 py-2.5 text-sm text-destructive">
+                {error}
+              </div>
+            )}
+
+            <Button type="submit" className="w-full h-10" disabled={loading}>
+              {loading ? 'Entrando…' : 'Entrar'}
+            </Button>
+          </form>
+        </div>
       </div>
     </div>
   );

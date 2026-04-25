@@ -21,11 +21,18 @@ function hexToHsl(hex: string): [number, number, number] {
 }
 
 export function applyBrandTheme(): void {
+  const savedTheme = localStorage.getItem('theme');
+  if (savedTheme === 'light') {
+    document.documentElement.classList.remove('dark');
+  } else {
+    document.documentElement.classList.add('dark');
+  }
+
   const [h, s, l] = hexToHsl(BRAND_COLOR);
   const hsl = `${h} ${s}% ${l}%`;
   const root = document.documentElement;
   root.style.setProperty('--primary', hsl);
   root.style.setProperty('--ring', hsl);
   root.style.setProperty('--primary-foreground', '0 0% 100%');
-  document.title = `${BRAND_NAME} Admin`;
+  document.title = `${BRAND_NAME} Manager`;
 }

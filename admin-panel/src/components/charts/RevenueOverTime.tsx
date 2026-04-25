@@ -34,7 +34,7 @@ export function RevenueOverTime({ data }: { data: RevenuePoint[] }) {
           labelStyle={{ color: 'hsl(var(--foreground))' }}
           formatter={(v: number) => [formatBrl(v), 'Receita']}
         />
-        <Bar dataKey="amount" fill="#6366f1" radius={[3, 3, 0, 0]} name="Receita" />
+        <Bar dataKey="amount" fill="hsl(var(--primary))" radius={[3, 3, 0, 0]} name="Receita" />
       </BarChart>
     </ResponsiveContainer>
   );

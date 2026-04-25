@@ -89,16 +89,16 @@ function DateFilter({
   const today = toIso(new Date());
 
   return (
-    <div className="flex flex-wrap items-center gap-2">
+    <div className="flex flex-wrap items-center gap-1.5">
       {PRESETS.map(({ key, label }) => (
         <button
           key={key}
           onClick={() => onPreset(key)}
           className={cn(
-            'rounded-md px-3 py-1.5 text-xs font-medium transition-colors',
+            'rounded-full px-3 py-1 text-xs font-medium transition-colors',
             preset === key
-              ? 'bg-primary text-primary-foreground'
-              : 'bg-muted text-muted-foreground hover:bg-muted/80',
+              ? 'bg-primary text-primary-foreground shadow-sm'
+              : 'bg-muted text-muted-foreground hover:bg-surface-hover hover:text-text-primary',
           )}
         >
           {label}
@@ -137,19 +137,31 @@ function DateFilter({
 
 // ── Shared components ──────────────────────────────────────────────────────────
 
+type StatVariant = 'default' | 'blue' | 'green' | 'purple' | 'amber' | 'rose';
+
+const variantIcon: Record<StatVariant, string> = {
+  default: 'bg-muted text-muted-foreground',
+  blue: 'bg-blue-500/10 text-blue-500',
+  green: 'bg-green-500/10 text-green-500',
+  purple: 'bg-purple-500/10 text-purple-500',
+  amber: 'bg-amber-500/10 text-amber-500',
+  rose: 'bg-rose-500/10 text-rose-500',
+};
+
 function StatCard({
-  title, value, icon: Icon, loading, sub,
+  title, value, icon: Icon, loading, sub, variant = 'default',
 }: {
   title: string;
   value: string;
   icon: React.ElementType;
   loading: boolean;
   sub?: string;
+  variant?: StatVariant;
 }) {
   return (
     <Card>
       <CardContent className="pt-5">
-        <div className="flex items-center justify-between">
+        <div className="flex items-start justify-between gap-3">
           <div className="min-w-0 space-y-1">
             <p className="text-xs text-muted-foreground">{title}</p>
             {loading ? (
@@ -159,8 +171,8 @@ function StatCard({
             )}
             {sub && !loading && <p className="text-xs text-muted-foreground">{sub}</p>}
           </div>
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-muted">
-            <Icon className="h-4 w-4 text-muted-foreground" />
+          <div className={cn('flex h-9 w-9 shrink-0 items-center justify-center rounded-lg', variantIcon[variant])}>
+            <Icon className="h-4 w-4" />
           </div>
         </div>
       </CardContent>
@@ -169,7 +181,12 @@ function StatCard({
 }
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
-  return <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{children}</h2>;
+  return (
+    <div className="flex items-center gap-3">
+      <h2 className="text-xs font-semibold uppercase tracking-widest text-muted-foreground/70 whitespace-nowrap">{children}</h2>
+      <div className="h-px flex-1 bg-border" />
+    </div>
+  );
 }
 
 function formatBrl(cents: number) {
@@ -320,18 +337,21 @@ export function Dashboard() {
             value={formatUsd(summary?.totalTokenValue ?? 0)}
             icon={Coins}
             loading={loadingSummary}
+            variant="amber"
           />
           <StatCard
             title="Transações"
             value={new Intl.NumberFormat('pt-BR').format(summary?.totalTransactions ?? 0)}
             icon={Activity}
             loading={loadingSummary}
+            variant="blue"
           />
           <StatCard
             title="Usuários ativos"
             value={String(summary?.uniqueActiveUsers ?? 0)}
             icon={Users}
             loading={loadingSummary}
+            variant="purple"
           />
           <StatCard
             title="Saldo dos usuários"
@@ -339,6 +359,7 @@ export function Dashboard() {
             icon={Wallet}
             loading={loadingSummary}
             sub="total atual de todos os saldos"
+            variant="green"
           />
         </div>
 
@@ -490,6 +511,7 @@ export function Dashboard() {
             icon={DollarSign}
             loading={loadingRevenue}
             sub={`${revenue?.allTime.totalTransactions ?? 0} pagamentos`}
+            variant="green"
           />
           <StatCard
             title="Receita (30 dias)"
@@ -497,6 +519,7 @@ export function Dashboard() {
             icon={TrendingUp}
             loading={loadingRevenue}
             sub={`${revenue?.last30Days.totalTransactions ?? 0} pagamentos`}
+            variant="blue"
           />
           <StatCard
             title="Assinaturas ativas"
@@ -504,12 +527,14 @@ export function Dashboard() {
             icon={RefreshCw}
             loading={loadingRevenue}
             sub={revenue?.subscriptions.cancelled ? `${revenue.subscriptions.cancelled} canceladas` : undefined}
+            variant="purple"
           />
           <StatCard
             title="Créditos vendidos"
             value={formatUsd(revenue?.allTime.totalCreditsGranted ?? 0)}
             icon={Coins}
             loading={loadingRevenue}
+            variant="amber"
           />
         </div>
 
