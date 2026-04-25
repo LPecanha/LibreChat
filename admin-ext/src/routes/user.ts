@@ -177,6 +177,7 @@ router.post('/coupon/redeem', requireUserJwt, async (req: AuthenticatedRequest, 
       getCreditAuditModel().create({
         entityType: 'user',
         entityId: userObjectId,
+        adminId: userObjectId,
         amount: creditsGranted,
         reason: `coupon:${normalizedCode}`,
         balanceBefore,
