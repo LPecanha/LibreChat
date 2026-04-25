@@ -27,6 +27,13 @@ export interface ExtUserProfile {
   orgId?: string;
 }
 
+export async function redeemCoupon(code: string, token?: string): Promise<{ creditsGranted: number }> {
+  return extFetch<{ creditsGranted: number }>('/ext/user/coupon/redeem', token, {
+    method: 'POST',
+    body: JSON.stringify({ code }),
+  });
+}
+
 export async function extFetch<T>(path: string, token?: string, options: RequestInit = {}): Promise<T> {
   const res = await fetch(`${EXT_URL}${path}`, {
     ...options,

@@ -13,6 +13,7 @@ import tenantsRouter from './tenants';
 import loginRouter from './login';
 import modelAccessRouter from './modelAccess';
 import categoriesRouter from './categories';
+import couponsRouter from './coupons';
 
 const router = Router();
 
@@ -32,6 +33,7 @@ router.use('/users', usersRouter);
 router.use('/plans', plansRouter);
 router.use('/model-access', modelAccessRouter);
 router.use('/categories', categoriesRouter);
+router.use('/coupons', couponsRouter);
 
 router.get('/health', (_req, res) => {
   res.json({ status: 'ok', service: 'admin-ext', timestamp: new Date().toISOString() });

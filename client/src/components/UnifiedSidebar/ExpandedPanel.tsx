@@ -7,6 +7,7 @@ import { Skeleton, Sidebar, Button, TooltipAnchor } from '@librechat/client';
 import type { NavLink } from '~/common';
 import { CLOSE_SIDEBAR_ID } from '~/components/Chat/Menus/OpenSidebar';
 import { useActivePanel, resolveActivePanel, DEFAULT_PANEL } from '~/Providers';
+import { CreditNavButton } from '~/components/Nav/BuyCredits'; // [EXT]
 import { useLocalize, useNewConvo } from '~/hooks';
 import { clearMessagesCache, cn } from '~/utils';
 import store from '~/store';
@@ -173,6 +174,7 @@ function ExpandedPanel({
       </div>
 
       <div className="mt-auto">
+        <CreditNavButton /> {/* [EXT] */}
         <Suspense fallback={<Skeleton className="h-9 w-9 rounded-lg" />}>
           <AccountSettings collapsed />
         </Suspense>

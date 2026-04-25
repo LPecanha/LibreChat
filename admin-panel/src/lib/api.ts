@@ -978,3 +978,57 @@ export function updateCategory(value: string, data: Partial<Pick<AgentCategory, 
 export function deleteCategory(value: string) {
   return request(`${extUrl()}/ext/admin/categories/${encodeURIComponent(value)}`, { method: 'DELETE' });
 }
+
+// ── Coupons ───────────────────────────────────────────────────────────────────
+
+export interface CouponUsage {
+  userId: string;
+  userName: string;
+  userEmail: string;
+  usedAt: string;
+  creditsGranted: number;
+}
+
+export interface Coupon {
+  _id: string;
+  code: string;
+  description?: string;
+  credits: number;
+  expiresAt?: string;
+  maxUses?: number;
+  isActive: boolean;
+  usages: CouponUsage[];
+  totalUsages: number;
+  totalCreditsGranted: number;
+  createdAt: string;
+}
+
+export function fetchCoupons() {
+  return request<Coupon[]>(`${extUrl()}/ext/admin/coupons`);
+}
+
+export function createCoupon(data: {
+  code: string;
+  description?: string;
+  credits: number;
+  expiresAt?: string;
+  maxUses?: number;
+}) {
+  return request<Coupon>(`${extUrl()}/ext/admin/coupons`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+}
+
+export function updateCoupon(code: string, data: { isActive?: boolean; description?: string; expiresAt?: string | null; maxUses?: number | null }) {
+  return request<Coupon>(`${extUrl()}/ext/admin/coupons/${encodeURIComponent(code)}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+}
+
+export function deleteCoupon(code: string) {
+  return request(`${extUrl()}/ext/admin/coupons/${encodeURIComponent(code)}`, { method: 'DELETE' });
+}

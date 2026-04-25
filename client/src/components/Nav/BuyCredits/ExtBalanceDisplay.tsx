@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Zap } from 'lucide-react';
+import { DropdownMenuSeparator } from '@librechat/client';
 import { useLocalize } from '~/hooks';
 import { BuyCreditsModal } from './BuyCreditsModal';
 import { useExtProfile } from './useExtProfile';
@@ -22,21 +23,22 @@ export function ExtBalanceDisplay({ tokenCredits }: { tokenCredits: number }) {
 
   return (
     <>
-      <div className="flex items-center justify-between ml-3 mr-2 py-2" role="note">
-        <span className="text-token-text-secondary text-sm">
-          {localize('com_nav_balance')}: {formatUsdBalance(tokenCredits)}
-        </span>
-        {!isOrgMember && (
+      <div className="ml-3 mr-2 py-2 text-sm text-token-text-secondary" role="note">
+        {localize('com_nav_balance')}: {formatUsdBalance(tokenCredits)}
+      </div>
+      {!isOrgMember && (
+        <>
+          <DropdownMenuSeparator />
           <button
             onClick={() => setShowModal(true)}
-            className="mr-1 flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium text-green-500 transition-colors hover:bg-surface-hover"
+            className="select-item w-full text-sm"
             aria-label={localize('com_nav_buy_credits')}
           >
-            <Zap className="h-3 w-3" aria-hidden="true" />
+            <Zap className="icon-md text-blue-500" aria-hidden="true" />
             {localize('com_nav_buy_credits')}
           </button>
-        )}
-      </div>
+        </>
+      )}
       {showModal && <BuyCreditsModal open={showModal} onOpenChange={setShowModal} />}
     </>
   );

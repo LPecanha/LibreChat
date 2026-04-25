@@ -7,6 +7,7 @@ import {
   CreditCard,
   Bot,
   Tags,
+  Ticket,
   PackageOpen,
   ShieldCheck,
   KeyRound,
@@ -56,6 +57,7 @@ const navGroups: NavGroup[] = [
     items: [
       { to: '/agents', icon: Bot, label: 'Agentes' },
       { to: '/categories', icon: Tags, label: 'Categorias' },
+      { to: '/coupons', icon: Ticket, label: 'Cupons' },
       { to: '/plans', icon: PackageOpen, label: 'Planos' },
     ],
   },

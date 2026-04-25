@@ -3,7 +3,7 @@ import * as Dialog from '@radix-ui/react-dialog';
 import { X, Zap, CreditCard, QrCode, Copy, Check, RefreshCw, Tag } from 'lucide-react';
 import { useLocalize } from '~/hooks';
 import { useAuthContext } from '~/hooks/AuthContext';
-import { extFetch, EXT_URL, type ExtCreditPlan } from './extApi';
+import { extFetch, redeemCoupon, EXT_URL, type ExtCreditPlan } from './extApi';
 import { formatUsdBalance } from './ExtBalanceDisplay';
 import { useExtProfile } from './useExtProfile';
 
@@ -57,6 +57,11 @@ export function BuyCreditsModal({ open, onOpenChange }: Props) {
   const [pixData, setPixData] = useState<PixData | null>(null);
   const [copied, setCopied] = useState(false);
   const [pixConfirmed, setPixConfirmed] = useState(false);
+  const [couponOpen, setCouponOpen] = useState(false);
+  const [couponCode, setCouponCode] = useState('');
+  const [couponLoading, setCouponLoading] = useState(false);
+  const [couponSuccess, setCouponSuccess] = useState('');
+  const [couponError, setCouponError] = useState('');
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const userId = user?.id ?? user?._id ?? '';
@@ -100,6 +105,23 @@ export function BuyCreditsModal({ open, onOpenChange }: Props) {
     setPixCpf('');
     setError('');
     setPixConfirmed(false);
+  }
+
+  async function handleCouponRedeem() {
+    if (!couponCode.trim()) return;
+    setCouponLoading(true);
+    setCouponError('');
+    setCouponSuccess('');
+    try {
+      const { creditsGranted } = await redeemCoupon(couponCode.trim(), token);
+      setCouponSuccess(localize('com_nav_buy_credits_coupon_success', { 0: formatUsdBalance(creditsGranted) }));
+      setCouponCode('');
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : '';
+      setCouponError(msg.includes('4') ? msg.replace(/^HTTP \d+:\s*/, '') : localize('com_nav_buy_credits_coupon_error'));
+    } finally {
+      setCouponLoading(false);
+    }
   }
 
   function handleClose(v: boolean) {
@@ -280,6 +302,44 @@ export function BuyCreditsModal({ open, onOpenChange }: Props) {
               {error && (
                 <p className="mt-3 rounded-lg bg-red-500/10 px-3 py-2 text-sm text-red-500">{error}</p>
               )}
+
+              <div className="mt-3 border-t border-border-light pt-3">
+                <button
+                  onClick={() => { setCouponOpen((v) => !v); setCouponError(''); setCouponSuccess(''); }}
+                  className="flex w-full items-center gap-1.5 text-xs text-text-secondary hover:text-text-primary transition-colors"
+                >
+                  <Tag className="h-3 w-3" />
+                  {localize('com_nav_buy_credits_coupon_toggle')}
+                </button>
+                {couponOpen && (
+                  <div className="mt-2 flex flex-col gap-2">
+                    <div className="flex gap-2">
+                      <input
+                        className="flex-1 rounded-lg border border-border-medium bg-surface-secondary px-3 py-1.5 text-sm text-text-primary uppercase placeholder:normal-case placeholder:text-text-secondary focus:outline-none focus:ring-1 focus:ring-green-500"
+                        placeholder={localize('com_nav_buy_credits_coupon_placeholder')}
+                        value={couponCode}
+                        onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                        onKeyDown={(e) => e.key === 'Enter' && handleCouponRedeem()}
+                      />
+                      <button
+                        onClick={handleCouponRedeem}
+                        disabled={couponLoading || !couponCode.trim()}
+                        className="rounded-lg bg-green-700 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-green-600 disabled:opacity-60"
+                      >
+                        {couponLoading ? '…' : localize('com_nav_buy_credits_coupon_apply')}
+                      </button>
+                    </div>
+                    {couponSuccess && (
+                      <p className="flex items-center gap-1.5 rounded-lg bg-green-500/10 px-3 py-2 text-sm text-green-700 dark:text-green-400">
+                        <Check className="h-3.5 w-3.5 shrink-0" />{couponSuccess}
+                      </p>
+                    )}
+                    {couponError && (
+                      <p className="rounded-lg bg-red-500/10 px-3 py-2 text-sm text-red-500">{couponError}</p>
+                    )}
+                  </div>
+                )}
+              </div>
 
               <div className="mt-4 flex gap-2">
                 <button

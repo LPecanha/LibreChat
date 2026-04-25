@@ -16,6 +16,7 @@ const titles: Record<string, string> = {
   '/model-access': 'Modelos',
   '/access': 'Acesso',
   '/grants': 'Permissões',
+  '/coupons': 'Cupons',
   '/configuration': 'Configuração',
   '/settings': 'Sistema',
 };

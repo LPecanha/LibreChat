@@ -16,6 +16,7 @@ import { Access } from '~/pages/Access';
 import { Grants } from '~/pages/Grants';
 import { Configuration } from '~/pages/Configuration';
 import { Settings } from '~/pages/Settings';
+import { Coupons } from '~/pages/Coupons';
 
 function RequireAuth({ children }: { children: React.ReactNode }) {
   const { authenticated } = useAuth();
@@ -46,6 +47,7 @@ export default function App() {
         <Route path="model-access" element={<ModelAccess />} />
         <Route path="access" element={<Access />} />
         <Route path="grants" element={<Grants />} />
+        <Route path="coupons" element={<Coupons />} />
         <Route path="configuration" element={<Configuration />} />
         <Route path="settings" element={<Settings />} />
       </Route>
