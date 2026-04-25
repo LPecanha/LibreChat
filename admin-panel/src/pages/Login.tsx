@@ -24,8 +24,8 @@ function friendlyError(err: unknown): string {
   return msg || 'Erro ao fazer login. Tente novamente.';
 }
 
-const floatingInput = 'peer w-full rounded-2xl border border-border bg-surface-primary px-3.5 pb-2.5 pt-3 text-text-primary duration-200 focus:border-green-500 focus:outline-none';
-const floatingLabel = 'absolute start-3 top-1.5 z-10 origin-[0] -translate-y-4 scale-75 transform bg-surface-primary px-2 text-sm text-muted-foreground duration-200 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:scale-100 peer-focus:top-1.5 peer-focus:-translate-y-4 peer-focus:scale-75 peer-focus:px-2 peer-focus:text-green-600 dark:peer-focus:text-green-500';
+const floatingInput = 'peer w-full rounded-2xl border border-border bg-surface-primary px-3.5 pb-2.5 pt-3 text-text-primary duration-200 focus:border-primary focus:outline-none';
+const floatingLabel = 'absolute start-3 top-1.5 z-10 origin-[0] -translate-y-4 scale-75 transform bg-surface-primary px-2 text-sm text-muted-foreground duration-200 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:scale-100 peer-focus:top-1.5 peer-focus:-translate-y-4 peer-focus:scale-75 peer-focus:px-2 peer-focus:text-primary';
 
 export function Login() {
   const navigate = useNavigate();
@@ -77,7 +77,7 @@ export function Login() {
             className="mb-4 text-center text-3xl font-semibold text-black dark:text-white"
             style={{ userSelect: 'none' }}
           >
-            Painel de administração
+            Painel de Gerenciamento
           </h1>
 
           {multi && (
@@ -153,7 +153,7 @@ export function Login() {
               <button
                 type="submit"
                 disabled={loading}
-                className="h-12 w-full rounded-2xl bg-green-600 text-sm font-medium text-white transition-colors hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-60 dark:focus:ring-offset-gray-900"
+                className="h-12 w-full rounded-2xl bg-primary text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:opacity-60 dark:focus:ring-offset-gray-900"
               >
                 {loading ? 'Entrando…' : 'Continuar'}
               </button>
