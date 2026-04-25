@@ -17,6 +17,7 @@ build_instance() {
 
   log "=== $name: building image ==="
   docker build --no-cache -f "$REPO_ROOT/Dockerfile.overlay" \
+    --build-arg WHITELABEL_CLIENT="${name}" \
     -t "librechat-${name}" "$REPO_ROOT" \
     || die "docker build failed for $name"
 
