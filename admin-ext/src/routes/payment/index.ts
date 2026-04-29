@@ -1,21 +1,28 @@
 import { Router } from 'express';
-import express from 'express';
-import stripeRouter from './stripe';
-import pagarmeRouter from './pagarme';
+import asaasRouter from './asaas';
 import { CREDIT_PLANS } from './plans';
+import { getCreditPlanModel } from '../../db/models';
 
 const router = Router();
 
-router.use('/stripe/webhook', express.raw({ type: 'application/json' }));
+router.use('/asaas', asaasRouter);
 
-router.use('/pagarme/webhook', express.raw({ type: 'application/json' }), (req, _res, next) => {
-  (req as typeof req & { rawBody?: Buffer }).rawBody = req.body as Buffer;
-  next();
+// Legacy /plans endpoint — kept for any external consumers
+router.get('/plans', async (_req, res) => {
+  try {
+    const dbPlans = await getCreditPlanModel().find({ active: true }).sort({ type: 1, credits: 1 }).lean();
+    if (dbPlans.length > 0) {
+      res.json(dbPlans.map((p) => ({
+        id: p.planId, name: p.name, type: p.type ?? 'one_time',
+        credits: p.credits, pricesBRL: p.pricesBRL, pricesUSD: p.pricesUSD,
+        popular: p.popular, discountPct: p.discountPct ?? 0,
+      })));
+    } else {
+      res.json(CREDIT_PLANS);
+    }
+  } catch {
+    res.json(CREDIT_PLANS);
+  }
 });
-
-router.use('/stripe', stripeRouter);
-router.use('/pagarme', pagarmeRouter);
-
-router.get('/plans', (_req, res) => res.json(CREDIT_PLANS));
 
 export default router;

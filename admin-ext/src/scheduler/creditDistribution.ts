@@ -61,8 +61,10 @@ async function processSubscription(sub: ISubscription): Promise<void> {
 async function runDistributionForTenant(): Promise<void> {
   const now = new Date();
 
+  // ASAAS-managed subscriptions are refilled via webhook — skip them here
   const dueSubs = await getSubscriptionModel().find({
     status: 'active',
+    paymentProvider: { $ne: 'asaas' },
     nextRefillAt: { $lte: now },
   }).lean();
 

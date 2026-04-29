@@ -2,7 +2,7 @@ import { Schema, Types } from 'mongoose';
 import { useModel } from '../../lib/model';
 
 export type SubscriptionStatus = 'active' | 'paused' | 'cancelled' | 'past_due';
-export type PaymentProvider = 'stripe' | 'pagarme' | 'manual';
+export type PaymentProvider = 'asaas' | 'manual';
 export type EntityType = 'user' | 'group';
 
 export interface ISubscription {
@@ -31,7 +31,7 @@ const schema = new Schema<ISubscription>(
     creditsPerCycle: { type: Number, required: true },
     cycleIntervalDays: { type: Number, default: 30 },
     status: { type: String, enum: ['active', 'paused', 'cancelled', 'past_due'], default: 'active' },
-    paymentProvider: { type: String, enum: ['stripe', 'pagarme', 'manual'], default: 'manual' },
+    paymentProvider: { type: String, enum: ['asaas', 'manual'], default: 'manual' },
     externalSubId: String,
     currentPeriodStart: { type: Date, required: true },
     currentPeriodEnd: { type: Date, required: true },

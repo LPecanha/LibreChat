@@ -27,7 +27,7 @@ const schema = new Schema<IPaymentTxn>(
     entityId: { type: Schema.Types.ObjectId, required: true, index: true },
     amount: { type: Number, required: true },
     currency: { type: String, default: 'BRL' },
-    provider: { type: String, enum: ['stripe', 'pagarme', 'manual'], required: true },
+    provider: { type: String, enum: ['asaas', 'manual'], required: true },
     status: { type: String, enum: ['pending', 'completed', 'failed', 'refunded'], default: 'pending' },
     idempotencyKey: { type: String, required: true },
     creditsGranted: { type: Number, default: 0 },

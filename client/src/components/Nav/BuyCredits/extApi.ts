@@ -27,11 +27,24 @@ export interface ExtUserProfile {
   orgId?: string;
 }
 
-export async function redeemCoupon(code: string, token?: string): Promise<{ creditsGranted: number }> {
-  return extFetch<{ creditsGranted: number }>('/ext/user/coupon/redeem', token, {
-    method: 'POST',
-    body: JSON.stringify({ code }),
-  });
+export interface PixCheckoutResult {
+  paymentId: string;
+  qrCode: string;
+  qrCodeImage: string;
+  expiresAt: string;
+  subscriptionId?: string;
+}
+
+export interface CardCheckoutResult {
+  success: boolean;
+  creditsGranted: number;
+  paymentId: string;
+  subscriptionId?: string;
+}
+
+export interface PaymentStatus {
+  status: 'pending' | 'completed' | 'failed' | 'refunded';
+  creditsGranted: number;
 }
 
 export async function extFetch<T>(path: string, token?: string, options: RequestInit = {}): Promise<T> {
@@ -48,8 +61,84 @@ export async function extFetch<T>(path: string, token?: string, options: Request
     try {
       const body = await res.json() as { error?: string };
       if (body.error) message = body.error;
-    } catch { /* ignore parse errors */ }
+    } catch { /* ignore */ }
     throw new Error(message);
   }
   return res.json() as Promise<T>;
+}
+
+export async function redeemCoupon(code: string, token?: string): Promise<{ creditsGranted: number }> {
+  return extFetch<{ creditsGranted: number }>('/ext/user/coupon/redeem', token, {
+    method: 'POST',
+    body: JSON.stringify({ code }),
+  });
+}
+
+export async function checkoutPix(
+  body: {
+    planId: string;
+    customerName: string;
+    customerCpf: string;
+    entityType?: string;
+    entityId?: string;
+  },
+  token?: string,
+): Promise<PixCheckoutResult> {
+  return extFetch<PixCheckoutResult>('/ext/payment/asaas/checkout/pix', token, {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
+}
+
+export async function checkoutCard(
+  body: {
+    planId: string;
+    customerName: string;
+    customerCpf: string;
+    customerPhone: string;
+    customerPostalCode: string;
+    customerAddressNumber: string;
+    cardHolderName: string;
+    cardNumber: string;
+    cardExpiryMonth: string;
+    cardExpiryYear: string;
+    cardCvv: string;
+    entityType?: string;
+    entityId?: string;
+  },
+  token?: string,
+): Promise<CardCheckoutResult> {
+  return extFetch<CardCheckoutResult>('/ext/payment/asaas/checkout/card', token, {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
+}
+
+export async function createSubscription(
+  body: {
+    planId: string;
+    billingType: 'PIX' | 'CREDIT_CARD';
+    customerName: string;
+    customerCpf: string;
+    customerPhone?: string;
+    customerPostalCode?: string;
+    customerAddressNumber?: string;
+    cardHolderName?: string;
+    cardNumber?: string;
+    cardExpiryMonth?: string;
+    cardExpiryYear?: string;
+    cardCvv?: string;
+    entityType?: string;
+    entityId?: string;
+  },
+  token?: string,
+): Promise<PixCheckoutResult & { subscriptionId: string; success?: boolean }> {
+  return extFetch('/ext/payment/asaas/subscription', token, {
+    method: 'POST',
+    body: JSON.stringify(body),
+  });
+}
+
+export async function getPaymentStatus(paymentId: string, token?: string): Promise<PaymentStatus> {
+  return extFetch<PaymentStatus>(`/ext/payment/asaas/payment/${encodeURIComponent(paymentId)}/status`, token);
 }
