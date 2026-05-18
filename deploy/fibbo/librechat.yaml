@@ -133,7 +133,7 @@ memory:
   personalize: true
   agent:
     provider: "openAI"
-    model: "gpt-5.4-mini"
+    model: "gpt-5.5"
     instructions: |
       Store memory using only the specified validKeys.
       Prioritize retaining context from uploaded files and user instructions.
@@ -207,11 +207,6 @@ endpoints:
       default:
         - "gpt-5.5-pro"
         - "gpt-5.5"
-        - "gpt-5"
-        - "gpt-5.4-pro"
-        - "gpt-5.4"
-        - "gpt-5.4-mini"
-        - "gpt-5.4-nano"
       fetch: false
     titleConvo: true
     titleMethod: "completion"
@@ -228,9 +223,6 @@ endpoints:
       default:
         - "gemini-3.1-pro-preview"
         - "gemini-3-flash-preview"
-        - "gemini-2.5-pro"
-        - "gemini-2.5-flash"
-        - "gemini-2.5-flash-lite"
         - "gemini-2.5-flash-image"
         - "imagen-4"
       fetch: false
@@ -277,53 +269,15 @@ modelSpecs:
         temperature: 0.7
         top_p: 0.9
 
-    - name: "gpt-5"
-      label: "GPT-5"
+    - name: "gpt-55-raciocinio"
+      label: "GPT-5.5 (Raciocínio Profundo)"
       preset:
         endpoint: openAI
-        model: "gpt-5"
-        max_tokens: 32768
-        temperature: 0.7
-        top_p: 0.9
-
-    - name: "gpt-5.4-geral"
-      label: "GPT-5.4"
-      webSearch: false
-      fileSearch: false
-      preset:
-        endpoint: openAI
-        model: "gpt-5.4"
-        max_tokens: 8192
-        temperature: 0.7
-        top_p: 0.9
-
-    - name: "gpt-5.4-pro"
-      label: "GPT-5.4 (Raciocínio Profundo)"
-      preset:
-        endpoint: openAI
-        model: "gpt-5.4"
+        model: "gpt-5.5"
         dropParams: ["temperature", "top_p", "frequency_penalty", "presence_penalty", "max_tokens"]
         addParams:
           reasoning:
             effort: "high"
-
-    - name: "gpt-5.4-mini"
-      label: "GPT-5.4 Mini"
-      preset:
-        endpoint: openAI
-        model: "gpt-5.4-mini"
-        max_tokens: 4096
-        temperature: 0.7
-        top_p: 0.9
-
-    - name: "gpt-5.4-nano"
-      label: "GPT-5.4 Nano"
-      preset:
-        endpoint: openAI
-        model: "gpt-5.4-nano"
-        max_tokens: 4096
-        temperature: 0.7
-        top_p: 0.9
 
     # ── Anthropic ───────────────────────────────────────────────────────────────
     - name: "claude-opus-47"
@@ -382,30 +336,6 @@ modelSpecs:
       preset:
         endpoint: google
         model: "gemini-3-flash-preview"
-        maxContextTokens: 1048576
-        maxOutputTokens: 65536
-
-    - name: "gemini-25-pro"
-      label: "Gemini 2.5 Pro"
-      preset:
-        endpoint: google
-        model: "gemini-2.5-pro"
-        maxContextTokens: 1048576
-        maxOutputTokens: 65536
-
-    - name: "gemini-25-flash"
-      label: "Gemini 2.5 Flash"
-      preset:
-        endpoint: google
-        model: "gemini-2.5-flash"
-        maxContextTokens: 1048576
-        maxOutputTokens: 65536
-
-    - name: "gemini-25-flash-lite"
-      label: "Gemini 2.5 Flash Lite"
-      preset:
-        endpoint: google
-        model: "gemini-2.5-flash-lite"
         maxContextTokens: 1048576
         maxOutputTokens: 65536
 
