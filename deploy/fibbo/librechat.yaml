@@ -205,7 +205,10 @@ endpoints:
     baseURL: "https://api.openai.com/v1"
     models:
       default:
+        - "gpt-5.5-pro"
+        - "gpt-5.5"
         - "gpt-5"
+        - "gpt-5.4-pro"
         - "gpt-5.4"
         - "gpt-5.4-mini"
         - "gpt-5.4-nano"
@@ -238,15 +241,13 @@ endpoints:
       baseURL: "https://api.x.ai/v1"
       models:
         default:
-          - "grok-4.20-0309-reasoning"
-          - "grok-4.20-0309-non-reasoning"
-          - "grok-4.20-multi-agent-0309"
-          - "grok-4-1-fast-reasoning"
-          - "grok-4-1-fast-non-reasoning"
+          - "grok-4.3"
+          - "grok-4-0709"
+          - "grok-code-fast-1"
         fetch: false
       titleConvo: true
       titleMethod: "completion"
-      titleModel: "grok-4-1-fast-non-reasoning"
+      titleModel: "grok-code-fast-1"
       modelDisplayLabel: "Grok"
 
 # ==============================================================================
@@ -258,6 +259,24 @@ modelSpecs:
   list:
 
     # ── OpenAI ──────────────────────────────────────────────────────────────────
+    - name: "gpt-55-pro"
+      label: "GPT-5.5 Pro"
+      preset:
+        endpoint: openAI
+        model: "gpt-5.5-pro"
+        max_tokens: 8192
+        temperature: 0.7
+        top_p: 0.9
+
+    - name: "gpt-55-geral"
+      label: "GPT-5.5"
+      preset:
+        endpoint: openAI
+        model: "gpt-5.5"
+        max_tokens: 8192
+        temperature: 0.7
+        top_p: 0.9
+
     - name: "gpt-5"
       label: "GPT-5"
       preset:
@@ -391,43 +410,19 @@ modelSpecs:
         maxOutputTokens: 65536
 
     # ── xAI ─────────────────────────────────────────────────────────────────────
-    - name: "grok-4.20-res"
-      label: "Grok 4.20 (Raciocínio)"
+    - name: "grok-4.3"
+      label: "Grok 4.3"
       preset:
         endpoint: xai
-        model: "grok-4.20-0309-reasoning"
+        model: "grok-4.3"
         maxContextTokens: 2000000
         temperature: 0.7
 
-    - name: "grok-4.20-nonres"
-      label: "Grok 4.20"
+    - name: "grok-code-fast"
+      label: "Grok Code Fast"
       preset:
         endpoint: xai
-        model: "grok-4.20-0309-non-reasoning"
-        maxContextTokens: 2000000
-        temperature: 0.7
-
-    - name: "grok-4.20-multiagent"
-      label: "Grok 4.20 Multi-Agent"
-      preset:
-        endpoint: xai
-        model: "grok-4.20-multi-agent-0309"
-        maxContextTokens: 2000000
-        temperature: 0.7
-
-    - name: "grok-4-1-fast-res"
-      label: "Grok 4.1 Fast (Raciocínio)"
-      preset:
-        endpoint: xai
-        model: "grok-4-1-fast-reasoning"
-        maxContextTokens: 2000000
-        temperature: 0.7
-
-    - name: "grok-4-1-fast-nonres"
-      label: "Grok 4.1 Fast"
-      preset:
-        endpoint: xai
-        model: "grok-4-1-fast-non-reasoning"
+        model: "grok-code-fast-1"
         maxContextTokens: 2000000
         temperature: 0.7
 
