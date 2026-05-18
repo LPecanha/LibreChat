@@ -1,4 +1,5 @@
 import https from 'https';
+import crypto from 'crypto';
 import { Router } from 'express';
 import mongoose, { type Model } from 'mongoose';
 import {
@@ -71,6 +72,40 @@ async function asaasRequest<T>(
   });
 }
 
+// ---------- Normalization helpers ----------
+
+const digits = (v: string): string => (v ?? '').replace(/\D+/g, '');
+
+function normalizeTaxId(v: string): string {
+  const d = digits(v);
+  if (d.length !== 11 && d.length !== 14) {
+    throw new Error('CPF/CNPJ inválido — informe 11 (CPF) ou 14 (CNPJ) dígitos');
+  }
+  return d;
+}
+
+function normalizePhone(v: string): string {
+  const d = digits(v);
+  if (d.length >= 12 && d.startsWith('55')) return d.slice(2);
+  return d;
+}
+
+function normalizeExpiryMonth(v: string): string {
+  return digits(v).padStart(2, '0').slice(-2);
+}
+
+function normalizeExpiryYear(v: string): string {
+  const d = digits(v);
+  return d.length === 2 ? `20${d}` : d;
+}
+
+function timingSafeEqual(a: string, b: string): boolean {
+  const ab = Buffer.from(a);
+  const bb = Buffer.from(b);
+  if (ab.length !== bb.length) return false;
+  return crypto.timingSafeEqual(ab, bb);
+}
+
 // ---------- Customer ----------
 
 interface AsaasCustomer { id: string }
@@ -82,16 +117,26 @@ async function getOrCreateCustomer(
   email: string,
   cpfCnpj: string,
 ): Promise<string> {
-  const list = await asaasRequest<AsaasCustomerList>(
+  const taxId = normalizeTaxId(cpfCnpj);
+
+  // 1) Look up by CPF/CNPJ first — avoids duplicating an existing ASAAS customer
+  const byTax = await asaasRequest<AsaasCustomerList>(
+    'GET',
+    `/v3/customers?cpfCnpj=${encodeURIComponent(taxId)}&limit=1`,
+  );
+  if (byTax.data.length > 0) return byTax.data[0].id;
+
+  // 2) Fall back to our externalReference (covers customers created here without tax id sync)
+  const byRef = await asaasRequest<AsaasCustomerList>(
     'GET',
     `/v3/customers?externalReference=${encodeURIComponent(userId)}&limit=1`,
   );
-  if (list.data.length > 0) return list.data[0].id;
+  if (byRef.data.length > 0) return byRef.data[0].id;
 
   const customer = await asaasRequest<AsaasCustomer>('POST', '/v3/customers', {
     name,
     email,
-    cpfCnpj: cpfCnpj.replace(/\D/g, ''),
+    cpfCnpj: taxId,
     externalReference: userId,
   });
   return customer.id;
@@ -297,18 +342,18 @@ router.post('/checkout/card', requireUserJwt, async (req: AuthenticatedRequest, 
       remoteIp: getRemoteIp(req),
       creditCard: {
         holderName: cardHolderName,
-        number: cardNumber.replace(/\s/g, ''),
-        expiryMonth: cardExpiryMonth,
-        expiryYear: cardExpiryYear,
+        number: digits(cardNumber),
+        expiryMonth: normalizeExpiryMonth(cardExpiryMonth),
+        expiryYear: normalizeExpiryYear(cardExpiryYear),
         ccv: cardCvv,
       },
       creditCardHolderInfo: {
         name: customerName,
         email: userEmail,
-        cpfCnpj: customerCpf.replace(/\D/g, ''),
-        postalCode: customerPostalCode.replace(/\D/g, ''),
-        addressNumber: customerAddressNumber,
-        phone: customerPhone.replace(/\D/g, ''),
+        cpfCnpj: normalizeTaxId(customerCpf),
+        postalCode: digits(customerPostalCode),
+        addressNumber: customerAddressNumber?.trim() || 'S/N',
+        phone: normalizePhone(customerPhone),
       },
     });
 
@@ -397,18 +442,18 @@ router.post('/subscription', requireUserJwt, async (req: AuthenticatedRequest, r
       subBody['remoteIp'] = getRemoteIp(req);
       subBody['creditCard'] = {
         holderName: cardHolderName ?? '',
-        number: (cardNumber ?? '').replace(/\s/g, ''),
-        expiryMonth: cardExpiryMonth ?? '',
-        expiryYear: cardExpiryYear ?? '',
+        number: digits(cardNumber ?? ''),
+        expiryMonth: normalizeExpiryMonth(cardExpiryMonth ?? ''),
+        expiryYear: normalizeExpiryYear(cardExpiryYear ?? ''),
         ccv: cardCvv ?? '',
       };
       subBody['creditCardHolderInfo'] = {
         name: customerName,
         email: userEmail,
-        cpfCnpj: customerCpf.replace(/\D/g, ''),
-        postalCode: (customerPostalCode ?? '').replace(/\D/g, ''),
-        addressNumber: customerAddressNumber ?? '',
-        phone: (customerPhone ?? '').replace(/\D/g, ''),
+        cpfCnpj: normalizeTaxId(customerCpf),
+        postalCode: digits(customerPostalCode ?? ''),
+        addressNumber: customerAddressNumber?.trim() || 'S/N',
+        phone: normalizePhone(customerPhone ?? ''),
       };
     }
 
@@ -464,10 +509,10 @@ router.get('/payment/:paymentId/status', requireUserJwt, async (req: Authenticat
 // ---------- Webhook ----------
 
 router.post('/webhook', async (req, res) => {
-  // Security: validate asaas-access-token header
-  const token = req.headers['asaas-access-token'] as string | undefined;
-  const expected = process.env.ASAAS_WEBHOOK_TOKEN;
-  if (expected && token !== expected) {
+  // Security: validate asaas-access-token header (timing-safe)
+  const token = (req.headers['asaas-access-token'] as string | undefined) ?? '';
+  const expected = process.env.ASAAS_WEBHOOK_TOKEN ?? '';
+  if (expected && !timingSafeEqual(token, expected)) {
     logger.warn('[asaas/webhook] Invalid access token');
     res.status(401).json({ error: 'Unauthorized' });
     return;
@@ -487,10 +532,10 @@ router.post('/webhook', async (req, res) => {
 
   const { event, payment } = payload;
 
-  // Grant credits on PAYMENT_RECEIVED (PIX) or PAYMENT_CONFIRMED (card)
+  // Grant on: PIX → PAYMENT_RECEIVED; card → PAYMENT_CONFIRMED or PAYMENT_APPROVED_BY_RISK_ANALYSIS (3DS)
   const isCard = payment?.billingType === 'CREDIT_CARD';
   const shouldProcess =
-    (isCard && event === 'PAYMENT_CONFIRMED') ||
+    (isCard && (event === 'PAYMENT_CONFIRMED' || event === 'PAYMENT_APPROVED_BY_RISK_ANALYSIS')) ||
     (!isCard && event === 'PAYMENT_RECEIVED');
 
   if (!shouldProcess || !payment?.id) {
