@@ -1,6 +1,6 @@
 # Navvia — LibreChat runtime configuration
 # https://www.librechat.ai/docs/configuration/librechat_yaml
-version: 1.3.8
+version: 1.3.11
 cache: true
 
 # ==============================================================================
@@ -97,6 +97,13 @@ interface:
     share: true
     public: false
 
+  skills:
+    use: true
+    create: true
+    share: false
+    public: false
+    defaultActiveOnShare: false
+
   temporaryChatRetention: 720
 
 # ==============================================================================
@@ -189,6 +196,9 @@ endpoints:
       - "web_search"
       - "tools"
       - "actions"
+      - "chain"
+      - "subagents"
+      - "skills"
 
   openAI:
     apiKey: "${OPENAI_API_KEY}"
