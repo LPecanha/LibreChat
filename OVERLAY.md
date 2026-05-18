@@ -17,17 +17,19 @@ overlay/main   ──────────●──   (our 5 touch points + a
 - `admin-ext/` — Express billing service (Docker, port 3092)
 - `admin-panel/` — React admin SPA (Docker, port 3091)
 - `api/server/routes/extConfig.js` — runtime config injection endpoint
+- `api/server/routes/extProxy.js` — server-side proxy for `/ext/*` → admin-ext (eliminates browser EXT_URL dependency)
 - `Dockerfile.overlay` — local build without ghcr.io/astral-sh/uv (no auth needed); WORKDIR stays `/app` so dotenv resolves `/app/.env` from the bind mount
 
 **Core files touched (rebase surface):**
 
 | File | What changed | Marker |
 |---|---|---|
-| `api/server/index.js` | 3 lines: require `modelAccessFilter` + inject on `/api/config` + mount `/api/ext-config.js` | `// [EXT]` |
+| `api/server/index.js` | 4 additions: require `modelAccessFilter` + inject on `/api/config` + mount `/api/ext-config.js` + conditional mount `/ext` proxy | `// [EXT]` |
 | `api/server/routes/config.js` | 1 line: include `modelSpecs` in unauthenticated `/api/config` response | `// [EXT]` |
 | `api/server/routes/extConfig.js` | set `DEFAULT_LANG` in localStorage (default pt-BR) for new users | `// [EXT]` |
 | `client/src/components/SidePanel/Agents/AgentPanel.tsx` | `startupConfig` destructure + models/labels useMemo + providers filter | `// [EXT]` |
 | `client/src/components/SidePanel/Agents/ModelPanel.tsx` | accept `modelLabels` prop + use in dropdown items | `// [EXT]` |
+| `client/src/components/UnifiedSidebar/ExpandedPanel.tsx` | 1 import + 1 JSX: `<CreditNavButton />` in the bottom action stack | `// [EXT]` |
 | `client/src/common/types.ts` | add `modelLabels` field to `AgentModelPanelProps` | `// [EXT]` |
 | `client/index.html` | 1 line: load ext-config script | `<!-- [EXT] -->` |
 | `client/src/routes/Root.tsx` | 2 lines: import + mount `<PaymentToast />` | `// [EXT]` |
@@ -41,41 +43,69 @@ All core touches are marked `// [EXT]` or `<!-- [EXT] -->` so they are instantly
 
 ## Keeping in sync with upstream
 
+**Strategy: merge, not rebase.** Rebase would replay every overlay commit (often conflicting multiple times against the same file) and require `git push --force` — which breaks `./deploy.sh` on every server (it does `git pull`). Merge produces a single merge commit, conflicts get resolved once, history is preserved, and deploy pulls cleanly.
+
 ```bash
 # 1. Add upstream remote (first time only)
 git remote add upstream https://github.com/danny-avila/LibreChat.git
 
-# 2. Fetch latest upstream changes
+# 2. Always start from a clean working tree on main
+git checkout main
+git pull origin main
+
+# 3. Backup tag + working branch
+git tag pre-upstream-sync-$(date +%Y%m%d)
+git checkout -b sync/upstream-$(date +%Y%m%d)
+
+# 4. Fetch and merge upstream
 git fetch upstream
+git merge upstream/main
 
-# 3. Rebase our overlay branch on top of upstream main
-git rebase upstream/main
-
-# 4. If conflicts occur, they will only be in the 5 files above.
-#    Search for [EXT] to locate our additions and re-apply them.
+# 5. If conflicts occur, they will only be in the files listed in the
+#    "Core files touched" table above. Search for [EXT] to locate our
+#    additions and reconcile with upstream's edits.
 git status          # see conflicted files
 git diff            # inspect conflicts
-# resolve, then:
+# resolve each, then:
 git add <file>
-git rebase --continue
+git merge --continue
+
+# 6. Build + smoke test before merging back to main
+npm run build
+cd admin-ext && npx tsc --noEmit && cd ..
+# manual smoke test: login, chat, balance, buy credits, coupon redeem
+
+# 7. Fast-forward main and push
+git checkout main
+git merge --ff-only sync/upstream-$(date +%Y%m%d)
+git push origin main
 ```
 
-### After every rebase — sync pt-BR translations
+### After every upstream sync — sync pt-BR translations
 
 ```bash
 # Translates any keys missing in pt-BR using OpenAI (gpt-4o-mini)
 OPENAI_API_KEY=<key> node scripts/sync-ptbr.mjs
 git add client/src/locales/pt-BR/translation.json
-git commit -m "i18n: sync pt-BR after rebase"
+git commit -m "i18n: sync pt-BR after upstream merge"
 ```
 
 This script is idempotent — safe to run multiple times; it only touches keys missing from pt-BR.
+
+### Rollback
+
+If anything goes wrong after the merge, the backup tag from step 3 lets you reset:
+
+```bash
+git reset --hard pre-upstream-sync-YYYYMMDD
+git push --force-with-lease origin main   # only if already pushed
+```
 
 ### Conflict resolution cheatsheet
 
 Each `[EXT]` marker corresponds to an exact pattern. If a conflict occurs, re-apply:
 
-**`api/server/index.js`** — three additions:
+**`api/server/index.js`** — four additions:
 
 1. After the `optionalJwtAuth` require, add:
 ```js
@@ -87,9 +117,12 @@ const modelAccessFilter = require('./middleware/modelAccessFilter'); // [EXT]
 app.use('/api/config', preAuthTenantMiddleware, optionalJwtAuth, modelAccessFilter, routes.config); // [EXT]
 ```
 
-3. After the `/api/config` route line, add:
+3. After the `/api/config` route line, add the ext-config script + proxy mount:
 ```js
 app.use('/api/ext-config.js', require('./routes/extConfig')); // [EXT] runtime config injection
+if (process.env.EXT_INTERNAL_URL || process.env.EXT_PROXY_ENABLED) {
+  app.use('/ext', require('./routes/extProxy')); // [EXT] proxy to admin-ext
+}
 ```
 
 **`api/server/routes/extConfig.js`** — replace the `res.send(...)` body with:
@@ -113,6 +146,15 @@ import { PaymentToast } from '~/components/Nav/BuyCredits'; // [EXT]
 And before `</SetConvoProvider>`:
 ```tsx
 <PaymentToast /> {/* [EXT] */}
+```
+
+**`client/src/components/UnifiedSidebar/ExpandedPanel.tsx`** — add import at top:
+```tsx
+import { CreditNavButton } from '~/components/Nav/BuyCredits'; // [EXT]
+```
+And inside the `<div className="mt-auto">` block, before the `<Suspense>` wrapping `<AccountSettings>`:
+```tsx
+<CreditNavButton /> {/* [EXT] */}
 ```
 
 **`client/src/components/Nav/AccountSettings.tsx`** — add import:
