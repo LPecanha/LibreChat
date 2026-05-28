@@ -973,6 +973,9 @@ export const interfaceSchema = z
         }),
       ])
       .optional(),
+    // [EXT] Tela inicial do app após login: 'chat' (padrão upstream — vai pra /c/new) ou
+    // 'dashboard' (Home com banner + composer + tiles + agentes em destaque).
+    home: z.enum(['dashboard', 'chat']).optional(),
   })
   .default({
     modelSelect: true,
@@ -1026,6 +1029,8 @@ export const interfaceSchema = z
       public: false,
       defaultActiveOnShare: false,
     },
+    // [EXT] Default upstream-compatible: cai em /c/new (chat). Tenants podem opt-in com 'dashboard'.
+    home: 'chat',
   });
 
 export type TInterfaceConfig = z.infer<typeof interfaceSchema>;

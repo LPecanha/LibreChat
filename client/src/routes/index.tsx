@@ -12,14 +12,27 @@ import { MarketplaceProvider } from '~/components/Agents/MarketplaceContext';
 import AgentMarketplace from '~/components/Agents/Marketplace';
 import { OAuthSuccess, OAuthError } from '~/components/OAuth';
 import { AuthContextProvider } from '~/hooks/AuthContext';
+import { useGetStartupConfig } from '~/data-provider';
 import RouteErrorBoundary from './RouteErrorBoundary';
 import StartupLayout from './Layouts/Startup';
 import LoginLayout from './Layouts/Login';
 import dashboardRoutes from './Dashboard';
 import ShareRoute from './ShareRoute';
 import ChatRoute from './ChatRoute';
+import HomeRoute from './Home'; // [EXT] Navvia dashboard
 import Search from './Search';
 import Root from './Root';
+
+/** [EXT] Index redirect: respeita interface.home do librechat.yaml.
+ *  - 'dashboard' → /home (Home dashboard Navvia)
+ *  - 'chat' (padrão) → /c/new (comportamento upstream)
+ *  Enquanto startupConfig carrega, mantém comportamento upstream (/c/new).
+ */
+function IndexRedirect() {
+  const { data: startupConfig } = useGetStartupConfig();
+  const target = startupConfig?.interface?.home === 'dashboard' ? '/home' : '/c/new';
+  return <Navigate to={target} replace={true} />;
+}
 
 const AuthLayout = () => (
   <AuthContextProvider>
@@ -111,7 +124,11 @@ export const router = createBrowserRouter(
           children: [
             {
               index: true,
-              element: <Navigate to="/c/new" replace={true} />,
+              element: <IndexRedirect />, // [EXT] respeita interface.home
+            },
+            {
+              path: 'home', // [EXT] Navvia dashboard route
+              element: <HomeRoute />,
             },
             {
               path: 'c/:conversationId?',
