@@ -82,13 +82,14 @@ const HoverButton = memo(
     className = '',
   }: HoverButtonProps) => {
     const buttonStyle = cn(
-      'hover-button rounded-lg p-1.5 text-text-secondary-alt',
-      'hover:text-text-primary hover:bg-surface-hover',
+      'hover-button rounded-lg p-1.5 text-text-secondary-alt transition-colors duration-150',
+      'hover:text-brand hover:bg-brand-soft',
       'md:group-hover:visible md:group-focus-within:visible md:group-[.final-completion]:visible',
       !isLast && 'md:opacity-0 md:group-hover:opacity-100 md:group-focus-within:opacity-100',
       !isVisible && 'opacity-0',
-      'focus-visible:ring-2 focus-visible:ring-black dark:focus-visible:ring-white focus-visible:outline-none',
-      isActive && isVisible && 'active text-text-primary bg-surface-hover',
+      /* [EXT] Navvia: focus ring usa cor de marca em ambos os modes */
+      'focus-visible:ring-2 focus-visible:ring-brand focus-visible:outline-none',
+      isActive && isVisible && 'active text-brand bg-brand-soft',
       className,
     );
 
