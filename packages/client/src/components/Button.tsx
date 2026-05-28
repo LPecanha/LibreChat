@@ -18,12 +18,19 @@ const buttonVariants = cva(
         link: 'text-primary underline-offset-4 hover:underline',
         // hardcoded text color because of WCAG contrast issues (text-white)
         submit: 'bg-surface-submit text-white hover:bg-surface-submit-hover',
+        // [EXT] Navvia brand variants
+        brand: 'bg-brand text-brand-fg hover:opacity-90',
+        'brand-outline':
+          'border border-brand bg-brand-soft text-brand hover:bg-brand-soft/80',
       },
       size: {
         default: 'h-10 px-4 py-2',
         sm: 'h-9 rounded-lg px-3',
         lg: 'h-11 rounded-lg px-8',
         icon: 'size-10',
+        // [EXT] Navvia density (Linear-like): xs = 28px (h-7), sm-icon = h-8 w-8
+        xs: 'h-7 rounded-md px-2.5 text-xs',
+        'icon-sm': 'size-8',
       },
     },
     defaultVariants: {
