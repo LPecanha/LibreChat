@@ -40,6 +40,11 @@ async function shot(page, name, fullPage = false) {
   const page = await ctx.newPage();
 
   console.log('\n--- LIGHT ---');
+  /* Screenshot login antes de logar */
+  await page.goto(`${APP}/login`, { waitUntil: 'domcontentloaded' });
+  await page.waitForTimeout(1500);
+  await shot(page, '00-login-light');
+
   await login(page);
   await page.waitForTimeout(2000);
   /* [EXT] Força navegação para /home — Vite pode não ter HMR-reloaded Startup.tsx */
@@ -74,6 +79,33 @@ async function shot(page, name, fullPage = false) {
   await page.focus('#prompt-textarea').catch(() => {});
   await page.waitForTimeout(800);
   await shot(page, '06-composer-focused-dark');
+
+  console.log('\n--- MOBILE (iPhone 14 Pro 393x852) ---');
+  const mobileCtx = await browser.newContext({
+    viewport: { width: 393, height: 852 },
+    deviceScaleFactor: 3,
+    isMobile: true,
+    hasTouch: true,
+    userAgent:
+      'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1',
+  });
+  const mob = await mobileCtx.newPage();
+  /* re-login no mobile */
+  await mob.goto(`${APP}/login`, { waitUntil: 'domcontentloaded' });
+  await mob.waitForSelector('input[name="email"]', { timeout: 20000 });
+  await mob.fill('input[name="email"]', EMAIL);
+  await mob.fill('input[name="password"]', PASSWORD);
+  await mob.click('button[type="submit"]');
+  await mob.waitForURL(/\/(c|home|agents)\b/, { timeout: 20000 });
+  await mob.waitForTimeout(2000);
+  await mob.goto(`${APP}/home`, { waitUntil: 'domcontentloaded' });
+  await mob.waitForTimeout(2500);
+  await mob.screenshot({ path: join(OUT, '07-home-mobile.png'), fullPage: false });
+  console.log('✓ 07-home-mobile.png');
+  await mob.goto(`${APP}/c/new`, { waitUntil: 'domcontentloaded' });
+  await mob.waitForTimeout(1500);
+  await mob.screenshot({ path: join(OUT, '08-chat-mobile.png'), fullPage: false });
+  console.log('✓ 08-chat-mobile.png');
 
   console.log('\nDONE →', OUT);
   await browser.close();
