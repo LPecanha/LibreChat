@@ -34,8 +34,11 @@ export default function StartupLayout({ isAuthenticated }: { isAuthenticated?: b
       const hasPendingRedirect =
         new URLSearchParams(window.location.search).has(REDIRECT_PARAM) ||
         sessionStorage.getItem(SESSION_KEY) != null;
-      if (!hasPendingRedirect) {
-        navigate('/c/new', { replace: true });
+      /* [EXT] Navvia: aguarda startupConfig p/ decidir entre /home (dashboard) ou /c/new.
+       * Sem o data, redirecionar agora pra /c/new ignoraria interface.home. */
+      if (!hasPendingRedirect && data) {
+        const target = data?.interface?.home === 'dashboard' ? '/home' : '/c/new';
+        navigate(target, { replace: true });
       }
     }
     if (data) {

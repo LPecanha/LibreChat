@@ -61,6 +61,9 @@ interface:
   customWelcome: |-
     Olá, {{user.name}}! Bem-vindo ao Navvia.
 
+  # [EXT] Navvia: tela inicial após login (rota /home com banner + tiles + agentes).
+  home: dashboard
+
   artifacts: true
   fileSearch: true
   fileCitations: true

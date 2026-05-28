@@ -56,6 +56,8 @@ export async function loadDefaultInterface({
     marketplace: interfaceConfig?.marketplace,
     remoteAgents: interfaceConfig?.remoteAgents,
     skills: interfaceConfig?.skills,
+    /* [EXT] Navvia: passa o campo home p/ frontend (controla rota inicial /home vs /c/new). */
+    home: interfaceConfig?.home,
   });
 
   return loadedInterface;
