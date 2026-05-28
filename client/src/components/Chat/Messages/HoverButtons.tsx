@@ -81,15 +81,16 @@ const HoverButton = memo(
     isLast = false,
     className = '',
   }: HoverButtonProps) => {
+    /* [EXT] Phase E.2 Navvia: usar .msg-action do protótipo (26x26 grid,
+     * border-radius 6px, color tertiary, hover surface-hover + text-primary).
+     * Visibilidade controlada pelo .msg-toolbar pai (opacity 0/1 via hover). */
     const buttonStyle = cn(
-      'hover-button rounded-lg p-1.5 text-text-secondary-alt transition-colors duration-150',
-      'hover:text-brand hover:bg-brand-soft',
+      'msg-action',
       'md:group-hover:visible md:group-focus-within:visible md:group-[.final-completion]:visible',
       !isLast && 'md:opacity-0 md:group-hover:opacity-100 md:group-focus-within:opacity-100',
       !isVisible && 'opacity-0',
-      /* [EXT] Navvia: focus ring usa cor de marca em ambos os modes */
       'focus-visible:ring-2 focus-visible:ring-brand focus-visible:outline-none',
-      isActive && isVisible && 'active text-brand bg-brand-soft',
+      isActive && isVisible && 'active',
       className,
     );
 
@@ -186,7 +187,9 @@ const HoverButtons = ({
   const handleCopy = () => copyToClipboard(setIsCopied);
 
   return (
-    <div className="group visible flex justify-center gap-0.5 self-end focus-within:outline-none lg:justify-start">
+    /* [EXT] Phase E.2 Navvia: usar .msg-toolbar do protótipo (flex gap-3px,
+     * mt-8px, opacity 0→1 no group hover). Compatível com o group existente. */
+    <div className="msg-toolbar group visible self-end lg:justify-start focus-within:outline-none">
       {/* Text to Speech */}
       {TextToSpeech && (
         <MessageAudio
