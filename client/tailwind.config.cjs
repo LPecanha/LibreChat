@@ -13,6 +13,8 @@ module.exports = {
     fontFamily: {
       sans: ['Inter', 'sans-serif'],
       mono: ['Roboto Mono', 'monospace'],
+      // [EXT] Inter Tight para títulos/display (carregado via Google Fonts em index.html)
+      display: ['Inter Tight', 'Inter', 'sans-serif'],
     },
     // fontFamily: {
     //   sans: ['Söhne', 'sans-serif'],

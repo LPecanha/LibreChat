@@ -1,3 +1,5 @@
+// [EXT] Navvia wordmark logo (brand)
+export { default as NavviaLogo } from './NavviaLogo';
 export { default as ArchiveIcon } from './ArchiveIcon';
 export { default as Blocks } from './Blocks';
 export { default as Plugin } from './Plugin';
