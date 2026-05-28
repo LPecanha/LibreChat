@@ -205,11 +205,12 @@ export default function Settings({ open, onOpenChange }: TDialogProps) {
                     {settingsTabs.map(({ value, icon, label }) => (
                       <Tabs.Trigger
                         key={value}
+                        /* [EXT] Navvia: aba ativa ganha bg-brand-soft + text-brand, hover suave */
                         className={cn(
                           'group relative z-10 m-1 flex items-center justify-start gap-2 rounded-xl px-2 py-1.5 transition-all duration-200 ease-in-out',
                           isSmallScreen
-                            ? 'flex-1 justify-center text-nowrap p-1 px-3 text-sm text-text-secondary radix-state-active:bg-surface-hover radix-state-active:text-text-primary'
-                            : 'bg-transparent text-text-secondary radix-state-active:bg-surface-tertiary radix-state-active:text-text-primary',
+                            ? 'flex-1 justify-center text-nowrap p-1 px-3 text-sm text-text-secondary hover:bg-surface-hover radix-state-active:bg-brand-soft radix-state-active:text-brand'
+                            : 'bg-transparent text-text-secondary hover:bg-surface-hover radix-state-active:bg-brand-soft radix-state-active:text-brand',
                         )}
                         value={value}
                         ref={(el) => (tabRefs.current[value] = el)}
