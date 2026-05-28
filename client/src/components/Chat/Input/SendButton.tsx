@@ -23,7 +23,9 @@ const SubmitButton = React.memo(
             id="send-button"
             disabled={props.disabled}
             className={cn(
-              'rounded-full bg-text-primary p-1.5 text-text-primary outline-offset-4 transition-all duration-200 disabled:cursor-not-allowed disabled:text-text-secondary disabled:opacity-10',
+              /* [EXT] Navvia: send button vira azul de marca + lift sutil no hover/active.
+               * Mantém disabled muted (opacity-10) p/ não competir com glow do composer. */
+              'rounded-full bg-brand p-1.5 text-brand-fg shadow-sm outline-offset-4 transition-all duration-200 hover:-translate-y-px hover:shadow-md active:translate-y-0 disabled:cursor-not-allowed disabled:bg-text-primary disabled:text-text-secondary disabled:opacity-10 disabled:shadow-none disabled:hover:translate-y-0',
             )}
             data-testid="send-button"
             type="submit"
