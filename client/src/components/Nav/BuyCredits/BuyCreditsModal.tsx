@@ -91,6 +91,8 @@ export function BuyCreditsModal({ open, onOpenChange }: Props) {
   const [pixData, setPixData] = useState<PixCheckoutResult | null>(null);
   const [copied, setCopied] = useState(false);
   const [pixConfirmed, setPixConfirmed] = useState(false);
+  /* [EXT] Navvia: countdown até expiração do PIX (ASAAS retorna expiresAt) */
+  const [pixSecondsLeft, setPixSecondsLeft] = useState<number | null>(null);
 
   // Card state
   const [cardName, setCardName] = useState('');
@@ -147,6 +149,22 @@ export function BuyCreditsModal({ open, onOpenChange }: Props) {
     return () => { if (pollRef.current) clearInterval(pollRef.current); };
   }, [pixData?.paymentId, token, queryClient]);
 
+  /* [EXT] Navvia: countdown tick (1s) baseado em pixData.expiresAt */
+  useEffect(() => {
+    if (!pixData?.expiresAt) {
+      setPixSecondsLeft(null);
+      return;
+    }
+    const expiresMs = new Date(pixData.expiresAt).getTime();
+    const tick = () => {
+      const remaining = Math.max(0, Math.round((expiresMs - Date.now()) / 1000));
+      setPixSecondsLeft(remaining);
+    };
+    tick();
+    const id = setInterval(tick, 1000);
+    return () => clearInterval(id);
+  }, [pixData?.expiresAt]);
+
   function reset() {
     if (pollRef.current) clearInterval(pollRef.current);
     setView('plans');
@@ -154,6 +172,7 @@ export function BuyCreditsModal({ open, onOpenChange }: Props) {
     setPixCpf('');
     setCopied(false);
     setPixConfirmed(false);
+    setPixSecondsLeft(null);
     setCardName('');
     setCardNumber('');
     setCardExpiry('');
@@ -249,7 +268,7 @@ export function BuyCreditsModal({ open, onOpenChange }: Props) {
     });
   }
 
-  const inputCls = 'w-full rounded-lg border border-border-medium bg-surface-secondary px-3 py-2 text-sm text-text-primary placeholder:text-text-secondary focus:outline-none focus:ring-1 focus:ring-green-500';
+  const inputCls = 'w-full rounded-lg border border-border-medium bg-surface-secondary px-3 py-2 text-sm text-text-primary placeholder:text-text-secondary focus:outline-none focus:ring-1 focus:ring-brand';
 
   // -------- Render --------
 
@@ -329,7 +348,7 @@ export function BuyCreditsModal({ open, onOpenChange }: Props) {
                     <button
                       key={plan.id}
                       onClick={() => setSelected(plan.id)}
-                      className={`relative rounded-xl border p-3 text-left transition-colors ${selected === plan.id ? 'border-green-500 bg-green-500/10' : 'border-border-light bg-surface-secondary hover:border-border-medium hover:bg-surface-tertiary'}`}
+                      className={`relative rounded-xl border p-3 text-left transition-colors ${selected === plan.id ? 'border-brand bg-brand-soft' : 'border-border-light bg-surface-secondary hover:border-border-medium hover:bg-surface-tertiary'}`}
                     >
                       {plan.popular && (
                         <span className="absolute right-2 top-2 rounded-full bg-green-600 px-1.5 py-0.5 text-[10px] font-semibold text-white">
@@ -338,8 +357,8 @@ export function BuyCreditsModal({ open, onOpenChange }: Props) {
                       )}
                       <div className="flex items-center gap-1.5">
                         {tab === 'subscription'
-                          ? <RefreshCw className={`h-3.5 w-3.5 ${selected === plan.id ? 'text-green-500' : 'text-text-secondary'}`} />
-                          : <Zap className={`h-3.5 w-3.5 ${selected === plan.id ? 'text-green-500' : 'text-text-secondary'}`} />}
+                          ? <RefreshCw className={`h-3.5 w-3.5 ${selected === plan.id ? 'text-brand' : 'text-text-secondary'}`} />
+                          : <Zap className={`h-3.5 w-3.5 ${selected === plan.id ? 'text-brand' : 'text-text-secondary'}`} />}
                         <span className="text-sm font-medium text-text-primary">{plan.name}</span>
                       </div>
                       <p className="mt-1 text-xs font-semibold text-text-primary">
@@ -378,7 +397,7 @@ export function BuyCreditsModal({ open, onOpenChange }: Props) {
                   <div className="mt-2 flex flex-col gap-2">
                     <div className="flex gap-2">
                       <input
-                        className="flex-1 rounded-lg border border-border-medium bg-surface-secondary px-3 py-1.5 text-sm uppercase text-text-primary placeholder:normal-case placeholder:text-text-secondary focus:outline-none focus:ring-1 focus:ring-green-500"
+                        className="flex-1 rounded-lg border border-border-medium bg-surface-secondary px-3 py-1.5 text-sm uppercase text-text-primary placeholder:normal-case placeholder:text-text-secondary focus:outline-none focus:ring-1 focus:ring-brand"
                         placeholder={localize('com_nav_buy_credits_coupon_placeholder')}
                         value={couponCode}
                         onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
@@ -387,7 +406,7 @@ export function BuyCreditsModal({ open, onOpenChange }: Props) {
                       <button
                         onClick={handleCouponRedeem}
                         disabled={couponLoading || !couponCode.trim()}
-                        className="rounded-lg bg-green-700 px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-green-600 disabled:opacity-60"
+                        className="rounded-lg bg-brand px-3 py-1.5 text-sm font-medium text-white transition-colors hover:opacity-90 disabled:opacity-60"
                       >
                         {couponLoading ? '…' : localize('com_nav_buy_credits_coupon_apply')}
                       </button>
@@ -407,7 +426,7 @@ export function BuyCreditsModal({ open, onOpenChange }: Props) {
                 <button
                   onClick={() => { setError(''); setView('card-form'); }}
                   disabled={!selected}
-                  className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-green-700 py-2.5 text-sm font-medium text-white transition-colors hover:bg-green-600 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-brand py-2.5 text-sm font-medium text-white transition-colors hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   <CreditCard className="h-4 w-4" />
                   {localize('com_nav_buy_credits_pay_card')}
@@ -446,7 +465,7 @@ export function BuyCreditsModal({ open, onOpenChange }: Props) {
               <button
                 onClick={handlePixSubmit}
                 disabled={loading || pixCpf.replace(/\D/g, '').length < 11}
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-green-700 py-2.5 text-sm font-medium text-white transition-colors hover:bg-green-600 disabled:cursor-not-allowed disabled:opacity-60"
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-brand py-2.5 text-sm font-medium text-white transition-colors hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {loading ? '…' : 'Gerar QR Code PIX'}
               </button>
@@ -456,10 +475,35 @@ export function BuyCreditsModal({ open, onOpenChange }: Props) {
           {/* PIX QR code */}
           {view === 'pix-qr' && pixData && (
             <div className="mt-4 space-y-4">
+              {/* [EXT] Navvia: header com valor + countdown sempre visível */}
+              {selectedPlan && (
+                <div className="flex items-center justify-between rounded-lg bg-surface-secondary px-3 py-2 text-xs">
+                  <div className="text-text-secondary">
+                    {selectedPlan.name} ·{' '}
+                    <span className="font-medium text-text-primary">{fmtBRL(selectedPlan.pricesBRL)}</span>
+                  </div>
+                  {pixSecondsLeft !== null && pixSecondsLeft > 0 && (
+                    <div
+                      className={`font-mono tabular-nums ${pixSecondsLeft < 60 ? 'text-red-500' : 'text-text-secondary'}`}
+                      aria-live="polite"
+                    >
+                      {String(Math.floor(pixSecondsLeft / 60)).padStart(2, '0')}:
+                      {String(pixSecondsLeft % 60).padStart(2, '0')}
+                    </div>
+                  )}
+                </div>
+              )}
               {pixConfirmed && (
                 <div className="flex items-center gap-2 rounded-lg border border-green-500/30 bg-green-500/10 px-4 py-3">
                   <Check className="h-4 w-4 shrink-0 text-green-500" />
                   <p className="text-sm text-green-700 dark:text-green-400">{localize('com_nav_buy_credits_success')}</p>
+                </div>
+              )}
+              {/* [EXT] Navvia: status sutil enquanto aguarda pagamento (polling automático) */}
+              {!pixConfirmed && (
+                <div className="flex items-center gap-2 rounded-lg border border-brand/20 bg-brand-soft px-3 py-2">
+                  <div className="h-2 w-2 animate-pulse rounded-full bg-brand" aria-hidden="true" />
+                  <p className="text-xs text-brand">Aguardando pagamento — confirmação automática.</p>
                 </div>
               )}
               <div className="flex justify-center">
@@ -526,7 +570,7 @@ export function BuyCreditsModal({ open, onOpenChange }: Props) {
               <button
                 onClick={handleCardSubmit}
                 disabled={loading || !cardName || cardNumber.replace(/\s/g, '').length < 16 || !cardExpiry || !cardCvv || cpf.replace(/\D/g, '').length < 11}
-                className="flex w-full items-center justify-center gap-2 rounded-xl bg-green-700 py-2.5 text-sm font-medium text-white transition-colors hover:bg-green-600 disabled:cursor-not-allowed disabled:opacity-60"
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-brand py-2.5 text-sm font-medium text-white transition-colors hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {loading ? '…' : `Pagar ${selectedPlan ? fmtBRL(selectedPlan.pricesBRL) : ''}`}
               </button>
@@ -547,7 +591,7 @@ export function BuyCreditsModal({ open, onOpenChange }: Props) {
               )}
               <button
                 onClick={() => handleClose(false)}
-                className="mt-2 rounded-xl bg-green-700 px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-green-600"
+                className="mt-2 rounded-xl bg-brand px-6 py-2.5 text-sm font-medium text-white transition-colors hover:opacity-90"
               >
                 Fechar
               </button>
