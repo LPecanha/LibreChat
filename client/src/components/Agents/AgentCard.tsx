@@ -46,10 +46,13 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, onSelect, className = '' }
     <OGDialog open={isOpen} onOpenChange={handleOpenChange}>
       <OGDialogTrigger asChild>
         <div
+          /* [EXT] Phase F Navvia: usar .agent-card do protótipo
+           * (border-radius var(--radius)+4, border light, bg surface-secondary,
+           * hover border-medium + translateY(-3px) + shadow-overlay). Mantém
+           * altura+padding+gap atual p/ não quebrar layout do grid. */
           className={cn(
-            'group relative flex h-32 gap-5 overflow-hidden rounded-xl',
-            'cursor-pointer select-none px-6 py-4',
-            'bg-surface-tertiary transition-colors duration-150 hover:bg-surface-hover',
+            'agent-card group relative h-32 gap-5 overflow-hidden',
+            'cursor-pointer select-none px-6 py-4 !flex-row',
             'md:h-36 lg:h-40',
             '[&_*]:cursor-pointer',
             className,
