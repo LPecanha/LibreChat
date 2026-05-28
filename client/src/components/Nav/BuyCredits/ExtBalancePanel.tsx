@@ -64,7 +64,7 @@ export function ExtBalancePanel() {
           )}
           <button
             onClick={() => setShowModal(true)}
-            className="flex items-center justify-center gap-2 rounded-xl bg-green-700 py-2.5 text-sm font-medium text-white transition-colors hover:bg-green-600"
+            className="flex items-center justify-center gap-2 rounded-xl bg-brand py-2.5 text-sm font-medium text-white transition-colors hover:bg-brand"
           >
             <Zap className="h-4 w-4" />
             {localize('com_nav_buy_credits')}

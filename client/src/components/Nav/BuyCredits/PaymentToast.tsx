@@ -28,12 +28,12 @@ export function PaymentToast() {
     <div
       className={`fixed bottom-6 right-6 z-[300] flex max-w-sm items-start gap-3 rounded-xl border px-4 py-3 shadow-lg transition-all ${
         isSuccess
-          ? 'border-green-500/30 bg-green-500/10 text-green-700 dark:text-green-400'
+          ? 'border-green-500/30 bg-green-500/10 text-brand dark:text-brand'
           : 'border-border bg-surface-dialog text-text-primary'
       }`}
     >
       {isSuccess ? (
-        <CheckCircle className="mt-0.5 h-4 w-4 shrink-0 text-green-500" />
+        <CheckCircle className="mt-0.5 h-4 w-4 shrink-0 text-brand" />
       ) : (
         <XCircle className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
       )}

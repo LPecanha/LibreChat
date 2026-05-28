@@ -326,7 +326,7 @@ export function BuyCreditsModal({ open, onOpenChange }: Props) {
                   <Zap className="h-3 w-3" />
                   {localize('com_nav_buy_credits_tab_one_time')}
                   {activeSub && subDiscountPct > 0 && (
-                    <span className="rounded-full bg-green-600 px-1.5 py-0.5 text-[9px] font-bold text-white">
+                    <span className="rounded-full bg-brand px-1.5 py-0.5 text-[9px] font-bold text-white">
                       -{subDiscountPct}%
                     </span>
                   )}
@@ -334,7 +334,7 @@ export function BuyCreditsModal({ open, onOpenChange }: Props) {
               </div>
 
               {tab === 'subscription' && activeSub && (
-                <p className="mt-2 rounded-lg border border-green-500/20 bg-green-500/10 px-3 py-2 text-xs text-green-700 dark:text-green-400">
+                <p className="mt-2 rounded-lg border border-green-500/20 bg-green-500/10 px-3 py-2 text-xs text-brand dark:text-brand">
                   {localize('com_nav_buy_credits_already_subscribed')}
                 </p>
               )}
@@ -351,7 +351,7 @@ export function BuyCreditsModal({ open, onOpenChange }: Props) {
                       className={`relative rounded-xl border p-3 text-left transition-colors ${selected === plan.id ? 'border-brand bg-brand-soft' : 'border-border-light bg-surface-secondary hover:border-border-medium hover:bg-surface-tertiary'}`}
                     >
                       {plan.popular && (
-                        <span className="absolute right-2 top-2 rounded-full bg-green-600 px-1.5 py-0.5 text-[10px] font-semibold text-white">
+                        <span className="absolute right-2 top-2 rounded-full bg-brand px-1.5 py-0.5 text-[10px] font-semibold text-white">
                           {localize('com_nav_buy_credits_popular')}
                         </span>
                       )}
@@ -369,10 +369,10 @@ export function BuyCreditsModal({ open, onOpenChange }: Props) {
                         <p className={`text-xs ${hasDiscount ? 'text-muted-foreground line-through' : 'text-text-secondary'}`}>
                           {fmtBRL(plan.pricesBRL)}
                         </p>
-                        {hasDiscount && <p className="text-xs font-medium text-green-600">{fmtBRL(discountedBRL)}</p>}
+                        {hasDiscount && <p className="text-xs font-medium text-brand">{fmtBRL(discountedBRL)}</p>}
                       </div>
                       {tab === 'subscription' && plan.discountPct > 0 && (
-                        <div className="mt-1 flex items-center gap-1 text-[10px] text-green-600">
+                        <div className="mt-1 flex items-center gap-1 text-[10px] text-brand">
                           <Tag className="h-2.5 w-2.5" />
                           {plan.discountPct}% desc. em créditos avulsos
                         </div>
@@ -412,7 +412,7 @@ export function BuyCreditsModal({ open, onOpenChange }: Props) {
                       </button>
                     </div>
                     {couponSuccess && (
-                      <p className="flex items-center gap-1.5 rounded-lg bg-green-500/10 px-3 py-2 text-sm text-green-700 dark:text-green-400">
+                      <p className="flex items-center gap-1.5 rounded-lg bg-green-500/10 px-3 py-2 text-sm text-brand dark:text-brand">
                         <Check className="h-3.5 w-3.5 shrink-0" />{couponSuccess}
                       </p>
                     )}
@@ -495,8 +495,8 @@ export function BuyCreditsModal({ open, onOpenChange }: Props) {
               )}
               {pixConfirmed && (
                 <div className="flex items-center gap-2 rounded-lg border border-green-500/30 bg-green-500/10 px-4 py-3">
-                  <Check className="h-4 w-4 shrink-0 text-green-500" />
-                  <p className="text-sm text-green-700 dark:text-green-400">{localize('com_nav_buy_credits_success')}</p>
+                  <Check className="h-4 w-4 shrink-0 text-brand" />
+                  <p className="text-sm text-brand dark:text-brand">{localize('com_nav_buy_credits_success')}</p>
                 </div>
               )}
               {/* [EXT] Navvia: status sutil enquanto aguarda pagamento (polling automático) */}
@@ -520,7 +520,7 @@ export function BuyCreditsModal({ open, onOpenChange }: Props) {
                 onClick={handleCopyPix}
                 className="flex w-full items-center justify-center gap-2 rounded-xl border border-border-medium py-2.5 text-sm font-medium text-text-primary transition-colors hover:bg-surface-hover"
               >
-                {copied ? <Check className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
+                {copied ? <Check className="h-4 w-4 text-brand" /> : <Copy className="h-4 w-4" />}
                 {copied ? localize('com_nav_buy_credits_pix_copied') : localize('com_nav_buy_credits_pix_copy')}
               </button>
               <p className="text-center text-xs text-text-secondary">{localize('com_nav_buy_credits_pix_expires')}</p>
@@ -581,7 +581,7 @@ export function BuyCreditsModal({ open, onOpenChange }: Props) {
           {view === 'success' && (
             <div className="mt-6 flex flex-col items-center gap-4 text-center">
               <div className="flex h-14 w-14 items-center justify-center rounded-full bg-green-500/10">
-                <Check className="h-7 w-7 text-green-500" />
+                <Check className="h-7 w-7 text-brand" />
               </div>
               <p className="text-base font-semibold text-text-primary">{localize('com_nav_buy_credits_success')}</p>
               {cardSuccess > 0 && (

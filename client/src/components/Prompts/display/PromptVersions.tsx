@@ -26,7 +26,7 @@ const VersionBadge = ({
           className={cn(
             'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium',
             isProduction
-              ? 'bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-400'
+              ? 'bg-green-100 text-brand dark:bg-green-900/40 dark:text-brand'
               : 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400',
           )}
         >
@@ -52,7 +52,7 @@ const getTimelineConnectorClasses = (isSelected: boolean, isProduction: boolean)
     return 'border-green-500 bg-green-500 text-white';
   }
   if (isProduction) {
-    return 'border-green-400 bg-transparent text-green-500';
+    return 'border-green-400 bg-transparent text-brand';
   }
   return 'border-border-medium bg-transparent text-text-secondary';
 };
@@ -116,7 +116,7 @@ const VersionCard = ({
           <span
             className={cn(
               'text-sm font-semibold',
-              isSelected ? 'text-green-700 dark:text-green-400' : 'text-text-primary',
+              isSelected ? 'text-brand dark:text-brand' : 'text-text-primary',
             )}
           >
             {localize('com_ui_version_var', { 0: versionNumber })}

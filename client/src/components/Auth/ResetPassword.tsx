@@ -36,7 +36,7 @@ function ResetPassword() {
     return (
       <>
         <div
-          className="relative mt-6 rounded-xl border border-green-500/20 bg-green-50/50 px-6 py-4 text-green-700 shadow-sm transition-all dark:bg-green-950/30 dark:text-green-100"
+          className="relative mt-6 rounded-xl border border-green-500/20 bg-green-50/50 px-6 py-4 text-brand shadow-sm transition-all dark:bg-green-950/30 dark:text-green-100"
           role="alert"
         >
           <div className="flex flex-col space-y-4">

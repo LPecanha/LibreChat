@@ -122,7 +122,7 @@ export default function MCPStatusBadge({
         role="status"
         className={cn(
           badgeBaseClass,
-          'bg-green-50 text-green-600 dark:bg-green-950 dark:text-green-400',
+          'bg-green-50 text-brand dark:bg-green-950 dark:text-brand',
         )}
       >
         <Check className="size-3" aria-hidden="true" />
