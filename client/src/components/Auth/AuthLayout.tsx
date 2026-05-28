@@ -1,4 +1,4 @@
-import { ThemeSelector } from '@librechat/client';
+import { ThemeSelector, NavviaLogo } from '@librechat/client';
 import { TStartupConfig } from 'librechat-data-provider';
 import { ErrorMessage } from '~/components/Auth/ErrorMessage';
 import { TranslationKeys, useLocalize } from '~/hooks';
@@ -56,41 +56,59 @@ function AuthLayout({
     return null;
   };
 
+  /* [EXT] Phase G Navvia — port do authScreen do protótipo (linha 1578+).
+   * Layout split: hero gradient à esquerda (Navvia identity), form à
+   * direita. Em mobile, hero some e form ocupa viewport. */
   return (
-    <div className="relative flex min-h-screen flex-col bg-white dark:bg-gray-900">
+    <div className="relative flex min-h-screen bg-surface-primary">
       <Banner />
-      <BlinkAnimation active={isFetching}>
-        <div className="mt-6 h-10 w-full bg-cover">
-          <img
-            src="assets/logo.svg"
-            className="h-full w-full object-contain"
-            alt={localize('com_ui_logo', { 0: startupConfig?.appTitle ?? 'LibreChat' })}
-          />
-        </div>
-      </BlinkAnimation>
-      <DisplayError />
-      <div className="absolute bottom-0 left-0 md:m-4">
+      <div className="absolute bottom-0 left-0 z-20 m-4">
         <ThemeSelector />
       </div>
 
-      <main className="flex flex-grow items-center justify-center">
-        <div className="w-authPageWidth overflow-hidden bg-white px-6 py-4 dark:bg-gray-900 sm:max-w-md sm:rounded-lg">
-          {!hasStartupConfigError && !isFetching && header && (
-            <h1
-              className="mb-4 text-center text-3xl font-semibold text-black dark:text-white"
-              style={{ userSelect: 'none' }}
-            >
-              {header}
-            </h1>
-          )}
-          {children}
-          {!pathname.includes('2fa') &&
-            (pathname.includes('login') || pathname.includes('register')) && (
-              <SocialLoginRender startupConfig={startupConfig} />
-            )}
+      {/* Hero gradient esquerda — visível em md+, escondido em mobile */}
+      <aside
+        className="hero relative hidden w-1/2 flex-col items-center justify-center overflow-hidden p-12 md:flex"
+      >
+        <span className="blob blob-1" aria-hidden="true" />
+        <span className="blob blob-2" aria-hidden="true" />
+        <span className="blob blob-3" aria-hidden="true" />
+        <div className="relative z-10 flex flex-col items-center text-center">
+          <NavviaLogo size="xl" />
+          <p className="mt-6 max-w-sm text-[15px] text-text-secondary">
+            Sua plataforma multi-IA com agentes, prompts, skills e memória —
+            tudo em um workspace.
+          </p>
         </div>
+      </aside>
+
+      {/* Form direita */}
+      <main className="flex w-full flex-col md:w-1/2">
+        <BlinkAnimation active={isFetching}>
+          <div className="mt-6 flex h-10 w-full items-center justify-center md:hidden">
+            <NavviaLogo size="md" />
+          </div>
+        </BlinkAnimation>
+        <DisplayError />
+        <div className="flex flex-1 items-center justify-center px-6 py-8">
+          <div className="w-full max-w-md">
+            {!hasStartupConfigError && !isFetching && header && (
+              <h1
+                className="mb-6 text-center font-display text-[28px] font-bold tracking-tight text-text-primary"
+                style={{ userSelect: 'none' }}
+              >
+                {header}
+              </h1>
+            )}
+            {children}
+            {!pathname.includes('2fa') &&
+              (pathname.includes('login') || pathname.includes('register')) && (
+                <SocialLoginRender startupConfig={startupConfig} />
+              )}
+          </div>
+        </div>
+        <Footer startupConfig={startupConfig} />
       </main>
-      <Footer startupConfig={startupConfig} />
     </div>
   );
 }
