@@ -52,6 +52,8 @@ const TOKEN_WHITELIST = new Set([
   'border-light', 'border-medium', 'border-medium-alt', 'border-heavy', 'border-xheavy',
   'border-destructive',
   'brand-purple', 'presentation',
+  // [EXT] Navvia brand
+  'brand',
 ]);
 
 /** Tokens shadcn utilitários: em CSS são HSL, em themes/*.ts são RGB.
@@ -89,16 +91,10 @@ const STYLE_ONLY_WHITELIST = new Set([
   'siri-a', 'siri-b', 'siri-c',
 ]);
 
-/** Drifts pré-existentes do upstream que serão resolvidos na Fase 1.
+/** Drifts pré-existentes do upstream que serão resolvidos em alguma fase.
  * Cada entrada: `${token}:${scope}` (scope ∈ html|dark). Quando resolvermos,
- * remover daqui. */
-const KNOWN_BASELINE_DRIFT = new Set([
-  'text-destructive:html',
-  'border-destructive:html',
-  'text-destructive:dark',
-  'border-destructive:dark',
-  'ring-primary:dark',
-]);
+ * remover daqui. Fase 1 já resolveu os 5 que existiam no baseline. */
+const KNOWN_BASELINE_DRIFT = new Set([]);
 
 function extractCssVars(css, selector) {
   // Captura o bloco { ... } depois do seletor exato (ex.: ':root', 'html', '.dark', '.gizmo')
@@ -177,7 +173,8 @@ if (!existsSync(STYLE_CSS)) {
 
   function checkScope(scope, cssScope, themeScope) {
     for (const tok of TOKEN_WHITELIST) {
-      const cssVal = cssScope[tok];
+      // CSS scope: html/.dark vence; se ausente, cai para :root (tokens base universais).
+      const cssVal = cssScope[tok] != null ? cssScope[tok] : rootVars[tok];
       const themeVal = themeScope[tok];
       const known = KNOWN_BASELINE_DRIFT.has(`${tok}:${scope}`);
 

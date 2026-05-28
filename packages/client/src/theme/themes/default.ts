@@ -11,6 +11,8 @@ export const defaultTheme: IThemeRGB = {
   'rgb-text-secondary-alt': '89 89 89', // #595959 (gray-500)
   'rgb-text-tertiary': '89 89 89', // #595959 (gray-500)
   'rgb-text-warning': '245 158 11', // #f59e0b (amber-500)
+  // [EXT] text-destructive (previously missing — synced with style.css var(--red-600))
+  'rgb-text-destructive': '220 38 38', // #dc2626 (red-600)
 
   // Ring colors
   'rgb-ring-primary': '89 89 89', // #595959 (gray-500)
@@ -45,9 +47,13 @@ export const defaultTheme: IThemeRGB = {
   'rgb-border-medium-alt': '205 205 205', // #cdcdcd (gray-300)
   'rgb-border-heavy': '153 150 150', // #999696 (gray-400)
   'rgb-border-xheavy': '89 89 89', // #595959 (gray-500)
+  // [EXT] border-destructive (previously missing — synced with style.css var(--red-600))
+  'rgb-border-destructive': '220 38 38', // #dc2626 (red-600)
 
   // Brand colors
   'rgb-brand-purple': '171 104 255', // #ab68ff
+  // [EXT] Navvia brand (azul)
+  'rgb-brand': '36 105 226', // #2469e2
 
   // Presentation
   'rgb-presentation': '255 255 255', // #fff (white)

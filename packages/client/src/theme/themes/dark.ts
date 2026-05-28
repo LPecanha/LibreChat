@@ -11,8 +11,10 @@ export const darkTheme: IThemeRGB = {
   'rgb-text-secondary-alt': '153 150 150', // #999696 (gray-400)
   'rgb-text-tertiary': '89 89 89', // #595959 (gray-500)
   'rgb-text-warning': '245 158 11', // #f59e0b (amber-500)
+  // [EXT] text-destructive (previously missing — synced with style.css var(--red-600))
+  'rgb-text-destructive': '220 38 38', // #dc2626 (red-600)
 
-  // Ring colors (not defined in dark mode, using default)
+  // Ring colors
   'rgb-ring-primary': '89 89 89', // #595959 (gray-500)
 
   // Header colors
@@ -45,9 +47,13 @@ export const darkTheme: IThemeRGB = {
   'rgb-border-medium-alt': '66 66 66', // #424242 (gray-600)
   'rgb-border-heavy': '89 89 89', // #595959 (gray-500)
   'rgb-border-xheavy': '153 150 150', // #999696 (gray-400)
+  // [EXT] border-destructive (previously missing — synced with style.css var(--red-500))
+  'rgb-border-destructive': '239 68 68', // #ef4444 (red-500)
 
   // Brand colors
   'rgb-brand-purple': '171 104 255', // #ab68ff
+  // [EXT] Navvia brand (azul — mesmo valor light/dark, ajuste de matiz feito por brand-soft)
+  'rgb-brand': '36 105 226', // #2469e2
 
   // Presentation
   'rgb-presentation': '33 33 33', // #212121 (gray-800)

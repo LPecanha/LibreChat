@@ -86,6 +86,16 @@ module.exports = {
           900: '#031f29',
         },
         'brand-purple': 'var(--brand-purple)',
+        // [EXT] Navvia brand tokens
+        brand: 'var(--brand)',
+        'brand-fg': 'var(--brand-fg)',
+        'brand-soft': 'var(--brand-soft)',
+        'brand-grad-start': 'var(--brand-grad-start)',
+        'brand-grad-end': 'var(--brand-grad-end)',
+        'siri-a': 'var(--siri-a)',
+        'siri-b': 'var(--siri-b)',
+        'siri-c': 'var(--siri-c)',
+        // [EXT] end Navvia
         presentation: 'var(--presentation)',
         'text-primary': 'var(--text-primary)',
         'text-secondary': 'var(--text-secondary)',
