@@ -26,10 +26,10 @@ export function CreditNavButton() {
             size="icon"
             variant="ghost"
             aria-label="Comprar Créditos"
-            className="h-9 w-9 rounded-lg"
+            className="h-9 w-9 rounded-lg hover:bg-brand-soft"
             onClick={() => setShowModal(true)}
           >
-            <Zap className="h-5 w-5 text-blue-500" aria-hidden="true" />
+            <Zap className="h-5 w-5 text-brand" aria-hidden="true" />
           </Button>
         }
       />
