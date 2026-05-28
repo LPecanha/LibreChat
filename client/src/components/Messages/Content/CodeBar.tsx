@@ -12,16 +12,18 @@ const CodeBar: React.FC<CodeBarProps> = React.memo(
     const localize = useLocalize();
     const { isCopied, handleCopy } = useCopyCode(codeRef);
 
+    // [EXT] Phase E Navvia: usar .codeblock-bar do protótipo
+    // (bg surface-tertiary, padding 6px 12px, font 11px, lang monospace)
     return (
-      <div className="flex items-center justify-between bg-surface-primary-alt px-1.5 py-1.5 font-sans text-xs text-text-secondary dark:bg-transparent">
-        <span className="flex items-center gap-1.5 text-xs font-medium">
-          <LangIcon lang={lang} className="size-3.5" />
+      <div className="codeblock-bar">
+        <span className="lang flex items-center gap-1.5">
+          <LangIcon lang={lang} className="size-3" />
           {lang}
         </span>
         {plugin === true ? (
           <InfoIcon className="ml-auto flex h-4 w-4 gap-2 text-text-secondary" />
         ) : (
-          <div className="flex items-center justify-center gap-2">
+          <div className="acts">
             {allowExecution === true && (
               <RunCode lang={lang} codeRef={codeRef} blockIndex={blockIndex} />
             )}

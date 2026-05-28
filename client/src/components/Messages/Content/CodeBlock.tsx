@@ -101,7 +101,9 @@ const CodeBlock: React.FC<CodeBlockProps> = ({
   return (
     <div
       ref={containerRef}
-      className="relative w-full overflow-hidden rounded-xl border border-border-light text-xs"
+      /* [EXT] Phase E Navvia: usar .codeblock-card do protótipo
+       * (border-radius var(--radius), border light, overflow hidden) */
+      className="codeblock-card relative w-full text-xs"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onFocus={handleFocus}
@@ -117,9 +119,7 @@ const CodeBlock: React.FC<CodeBlockProps> = ({
           allowExecution={allowExecution}
         />
       </div>
-      <div
-        className={cn(classProp, 'overflow-y-auto bg-surface-chat p-4 dark:bg-surface-primary-alt')}
-      >
+      <div className={cn(classProp, 'codeblock-body overflow-y-auto')}>
         <code
           ref={codeRef}
           className={cn(
@@ -140,11 +140,13 @@ const CodeBlock: React.FC<CodeBlockProps> = ({
       />
       {allowExecution === true && toolCalls && toolCalls.length > 0 && (
         <>
-          <div className="border-t border-border-light bg-surface-primary-alt p-4 text-xs dark:bg-transparent">
-            <div className="mb-1 text-[10px] font-medium uppercase tracking-wide text-text-secondary">
+          {/* [EXT] Phase E Navvia: .codeblock-out — sempre dark, monospace,
+               border-top discreto, output style enterprise. */}
+          <div className="codeblock-out">
+            <div className="mb-1 text-[10px] font-medium uppercase tracking-wide opacity-70">
               {localize('com_ui_output')}
             </div>
-            <div className="flex flex-col-reverse text-text-primary">
+            <div className="flex flex-col-reverse">
               <pre className="shrink-0">
                 <LogContent
                   output={(currentToolCall?.result as string | undefined) ?? ''}
