@@ -67,6 +67,7 @@
   --siri-a: #2469e2;
   --siri-b: #11b38d;
   --siri-c: #00d4ff;
+  --siri-angle: 0deg;
   /* [EXT] end Navvia */
   --font-size-xs: 0.75rem;
   --font-size-sm: 0.875rem;
@@ -2951,4 +2952,106 @@ html {
 
 .sharepoint-picker-bg {
   background-color: #f5f5f5;
+}
+
+/* [EXT] Navvia — Siri-style animated glow border for composer.
+ *
+ * Aplica num wrapper que envolve o composer (.siri-border). Borda
+ * com gradient cônico animado que intensifica no foco. Glow blob
+ * difuso atrás (::after) só aparece no focus-within.
+ *
+ * Em mode .generating (aplicado por JS enquanto resposta streama):
+ * borda fica sempre acesa, animação acelerada (2s spin), com pulso
+ * (breathing) no glow.
+ */
+@property --siri-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+.siri-border {
+  position: relative;
+  isolation: isolate;
+}
+.siri-border::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1.5px;
+  background: conic-gradient(
+    from var(--siri-angle),
+    var(--siri-a),
+    var(--siri-b),
+    var(--siri-c),
+    var(--siri-a)
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0.12;
+  transition: opacity 0.4s;
+  animation: siri-spin 7s linear infinite;
+  pointer-events: none;
+}
+.siri-border::after {
+  content: '';
+  position: absolute;
+  inset: -10px;
+  border-radius: inherit;
+  z-index: -1;
+  background: conic-gradient(
+    from var(--siri-angle),
+    var(--siri-a),
+    var(--siri-b),
+    var(--siri-c),
+    var(--siri-a)
+  );
+  filter: blur(22px);
+  opacity: 0;
+  transition: opacity 0.5s;
+  animation: siri-spin 7s linear infinite;
+  pointer-events: none;
+}
+.siri-border:focus-within::before {
+  opacity: 0.55;
+}
+.siri-border:focus-within::after {
+  opacity: 0.2;
+}
+.siri-border.generating::before {
+  opacity: 1;
+  animation-duration: 2s;
+}
+.siri-border.generating::after {
+  opacity: 0.45;
+  animation:
+    siri-spin 2s linear infinite,
+    siri-breathe 2.4s ease-in-out infinite;
+}
+@keyframes siri-spin {
+  to {
+    --siri-angle: 360deg;
+  }
+}
+@keyframes siri-breathe {
+  0%,
+  100% {
+    opacity: 0.2;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+/* Hero variant — base glow sempre presente (mais forte que padrão) */
+.siri-border.siri-hero::before {
+  opacity: 0.4;
+}
+.siri-border.siri-hero::after {
+  opacity: 0.15;
+  animation:
+    siri-spin 7s linear infinite,
+    siri-breathe 4.5s ease-in-out infinite;
 }

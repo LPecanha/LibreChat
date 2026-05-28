@@ -277,6 +277,17 @@ const ChatForm = memo(function ChatForm({
               isTemporary
                 ? 'border-violet-800/60 bg-violet-950/10'
                 : 'border-border-light bg-surface-chat',
+              /* [EXT] Navvia Siri glow:
+               * - siri-border: borda animada (mais forte em :focus-within e .generating)
+               * - siri-hero: variante para landing (glow mais presente em estado idle)
+               * - .generating: classe pulsante enquanto isSubmitting (resposta streama) */
+              'siri-border',
+              centerFormOnLanding &&
+                (conversationId == null || conversationId === Constants.NEW_CONVO) &&
+                conversation?.messages?.length === 0 &&
+                !isSubmitting &&
+                'siri-hero',
+              isSubmitting && 'generating',
             )}
           >
             <TextareaHeader addedConvo={addedConvo} setAddedConvo={setAddedConvo} />
