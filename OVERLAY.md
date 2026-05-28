@@ -279,3 +279,78 @@ Without `WHITELABEL_CLIENT`, the image builds as vanilla LibreChat (no brand app
 2. If a client-side hook point is needed, add **one import + one JSX line** in an existing core file, marked `// [EXT]`.
 3. Never modify existing logic in core files — only add isolated extension points.
 4. Add the new touch point to the table above.
+
+---
+
+## UI Refactor (Navvia) — files to touch by phase
+
+This refactor expands the upstream-touch surface beyond the baseline ~12 files. The detailed plan lives in `IMPLEMENTATION-PLAN.md`. Branch `dev` accumulates changes; merge `dev → main` per phase batch.
+
+**Inventory of upstream files to be modified (all to receive `[EXT]` marker):**
+
+### Phase 1 — Tokens
+- `client/src/style.css` — rewrite `:root` palette, `html` (light), `.dark`, `.gizmo` blocks; add Navvia brand vars (`--brand`, `--brand-grad-*`, `--siri-*`)
+- `packages/client/src/theme/themes/default.ts` — sync RGB strings with style.css
+- `packages/client/src/theme/themes/dark.ts` — idem
+- `client/tailwind.config.cjs` — add brand-grad colors, refine shadow scale, set `--radius` to 7px
+
+### Phase 2 — Typography + icons
+- `client/src/style.css` — `--font-size-*` scale + Inter Tight @font-face
+- `client/tailwind.config.cjs` — `fontFamily.display`
+- `client/public/fonts/` — add InterTight woff2 files (assets, not upstream)
+- **New (overlay-only):** `packages/client/src/svgs/NavviaLogo.tsx`, `client/src/components/svg/Icon.tsx`
+
+### Phase 3 — Primitives restyle (CVA)
+- `packages/client/src/components/Button.tsx`, `Input.tsx`, `Textarea.tsx`, `Select.tsx`, `DropdownMenu.tsx`, `Dialog.tsx`, `Tabs.tsx`, `Switch.tsx`, `Checkbox.tsx`, `Badge.tsx`, `Tooltip.tsx`, `Combobox.tsx`, `MultiSelect.tsx` (+ ~60 others)
+
+### Phase 4 — Home/Sidebar/Agents
+- **New:** `client/src/routes/Home.tsx`, `client/src/components/Home/*`
+- **New:** `client/src/routes/Agents.tsx`, `client/src/components/Agents/AgentCard.tsx`, `AgentGrid.tsx`
+- `client/src/routes/Root.tsx` (already `[EXT]`) — add Home/Agents routes conditional on `interface.home`
+- `client/src/components/UnifiedSidebar/UnifiedSidebar.tsx`, `Sidebar.tsx`, `ConversationsSection.tsx`
+- `client/src/components/UnifiedSidebar/ExpandedPanel.tsx` (already `[EXT]`)
+- `client/src/components/Chat/Landing.tsx` — agent landing variant
+
+### Phase 5 — Composer
+- `client/src/components/Chat/Input/ChatForm.tsx`, `BadgeRow.tsx`, `Files/FilePreview.tsx`, `Files/FileRow.tsx`, `AudioRecorder.tsx`, `EditBadges.tsx`, `PendingManualSkillsChips.tsx`, `StopButton.tsx`
+- **New:** `client/src/components/Chat/Input/SiriBorder.tsx`
+
+### Phase 6 — Messages
+- `client/src/components/Chat/Messages/HoverButtons.tsx`, `Fork.tsx`, `Feedback.tsx`, `SiblingSwitch.tsx`, `MessageNav.tsx`, `EditMessage.tsx`
+- `client/src/components/Chat/Messages/Content/Reasoning.tsx`, `Summary.tsx`
+- `client/src/components/Chat/Messages/Content/Parts/WebSearch.tsx`, `OpenAIImageGen/*`, `CodeAnalyze.tsx`, `ExecuteCode.tsx`, `ToolCall.tsx`, `RetrievalCall.tsx`, `SkillCall.tsx`, `SubagentCall.tsx`, `AgentHandoff.tsx`
+- `client/src/components/Messages/Content/CodeBar.tsx`, `Mermaid/MermaidDialog.tsx`
+- `client/src/components/Chat/AddedConvo.tsx`, `Presentation.tsx`
+
+### Phase 7 — Settings & dialogs
+- `client/src/components/Nav/SettingsTabs/General/*`, `Chat/*`, `Speech/*`, `Data/*`, `Account/*`
+- **New:** `client/src/components/Nav/SettingsTabs/Commands/*`
+- `client/src/components/Nav/SettingsTabs/Personalization.tsx`
+- `client/src/components/Nav/SettingsTabs/Balance/Balance.tsx` (already `[EXT]`)
+- `client/src/components/SidePanel/Agents/AgentPanel.tsx` (already `[EXT]`), `AgentConfig.tsx`, `ModelPanel.tsx` (already `[EXT]`), `Advanced/*`
+- `client/src/components/Artifacts/*`
+- `client/src/components/Nav/BuyCredits/BuyCreditsModal.tsx` (overlay-only, no conflict) — fix PIX flow per ASAAS
+- `admin-ext/src/routes/payment/asaas.ts` (overlay-only) — review PIX flow if needed
+- `client/src/components/Input/SetKeyDialog/SetKeyDialog.tsx`, `Bookmarks/BookmarkEditDialog.tsx`, `SidePanel/Memories/MemoryCreateDialog.tsx`, `MemoryEditDialog.tsx`, `MCP/MCPConfigDialog.tsx`, `Tools/ToolSelectDialog.tsx`, `Tools/MCPToolSelectDialog.tsx`, `Skills/dialogs/SkillSelectDialog.tsx`, `Nav/SettingsTabs/Account/Avatar.tsx`, `Auth/TwoFactorPhases/*`, `Prompts/dialogs/VariableDialog.tsx`
+
+### Phase 8 — Mobile/webapp
+- `client/src/mobile.css` — drawer, sheets, bottom tabs, grids
+- `client/src/routes/Root.tsx` (already `[EXT]`) — mount MobileTopBar/Tabs
+- **New:** `client/src/components/Layout/MobileTopBar.tsx`, `MobileTabs.tsx`
+- **New:** `client/src/hooks/useDrawer.ts`
+- `client/src/components/UnifiedSidebar/UnifiedSidebar.tsx` — off-canvas behavior
+
+### Phase 9 — Dynamic white-label
+- **New (overlay-only):** `packages/client/src/svgs/TenantLogo.tsx`, `scripts/apply-tenant.mjs`, `whitelabel/README.md`
+- `whitelabel/clients/navvia/` — already exists; integrate runtime
+
+### Phase 10 — QA
+- No new file touches. Audits + `OVERLAY.md` final inventory update.
+
+**Mandatory practices per phase:**
+- Mark each touched upstream block with `// [EXT]` (or `<!-- [EXT] -->` for HTML/JSX)
+- Update this section if new files added to the touch list
+- Run `node scripts/check-token-drift.mjs` after any token edit
+- Run `node scripts/sync-ptbr.mjs` after any locale string addition
+- Capture screenshots in `design/screenshots/<phase>/` for regression diff at Phase 10
+- `npm run build` must pass before committing
