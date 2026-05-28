@@ -42,45 +42,34 @@ function Header() {
   const isSmallScreen = useMediaQuery('(max-width: 768px)');
 
   return (
-    <div className="via-presentation/70 md:from-presentation/80 md:via-presentation/50 2xl:from-presentation/0 absolute top-0 z-10 flex h-[52px] w-full items-center justify-between bg-gradient-to-b from-presentation to-transparent p-2 font-semibold text-text-primary 2xl:via-transparent">
-      <div className="hide-scrollbar flex w-full items-center justify-between gap-2 overflow-x-auto">
-        <div className="mx-1 flex items-center">
-          <OpenSidebar className="md:hidden" />
-          {!(navVisible && isSmallScreen) && (
-            <div
-              className={cn(
-                'flex items-center gap-2 pl-2',
-                !isSmallScreen ? 'transition-all duration-200 ease-in-out' : '',
-              )}
-            >
-              <ModelSelector startupConfig={startupConfig} />
-              {interfaceConfig.presets === true && interfaceConfig.modelSelect && <PresetsMenu />}
-              {hasAccessToBookmarks === true && <BookmarkMenu />}
-              {hasAccessToMultiConvo === true && <AddMultiConvo />}
-              {isSmallScreen && (
-                <>
-                  <ExportAndShareMenu
-                    isSharedButtonEnabled={startupConfig?.sharedLinksEnabled ?? false}
-                  />
-                  {hasAccessToTemporaryChat === true && <TemporaryChat />}
-                </>
-              )}
-            </div>
-          )}
-        </div>
-
-        {!isSmallScreen && (
-          <div className="flex items-center gap-2">
-            <ExportAndShareMenu
-              isSharedButtonEnabled={startupConfig?.sharedLinksEnabled ?? false}
-            />
-            {hasAccessToTemporaryChat === true && <TemporaryChat />}
+    /* [EXT] Phase D.2 Navvia — port do header do protótipo (linha 779-805):
+     * relative + border-b (sem gradient overlay), altura h-12, font-medium
+     * (não font-semibold), padding px-3, layout: model picker à esquerda,
+     * ações à direita via ml-auto. Wrapper bg-surface-chat pra não vazar
+     * gradient antigo sobre o body. */
+    <header className="relative z-10 flex h-12 w-full shrink-0 items-center gap-1.5 border-b border-border-light bg-surface-chat px-3 text-text-primary">
+      <div className="mx-1 flex items-center gap-1.5">
+        <OpenSidebar className="md:hidden" />
+        {!(navVisible && isSmallScreen) && (
+          <div
+            className={cn(
+              'flex items-center gap-1.5',
+              !isSmallScreen ? 'transition-all duration-200 ease-in-out' : '',
+            )}
+          >
+            <ModelSelector startupConfig={startupConfig} />
+            {interfaceConfig.presets === true && interfaceConfig.modelSelect && <PresetsMenu />}
+            {hasAccessToBookmarks === true && <BookmarkMenu />}
           </div>
         )}
       </div>
-      {/* Empty div for spacing */}
-      <div />
-    </div>
+
+      <div className="ml-auto flex items-center gap-1">
+        {hasAccessToMultiConvo === true && <AddMultiConvo />}
+        {hasAccessToTemporaryChat === true && <TemporaryChat />}
+        <ExportAndShareMenu isSharedButtonEnabled={startupConfig?.sharedLinksEnabled ?? false} />
+      </div>
+    </header>
   );
 }
 
