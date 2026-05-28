@@ -283,18 +283,31 @@ const ChatForm = memo(function ChatForm({
             conversationId={conversationId}
             agentId={conversation?.agent_id}
           />
+          {/* [EXT] Navvia composer — port da estrutura do protótipo
+           * (design/ui-preview.html linhas 826-840):
+           *
+           *   <div class="siri rounded-xl border bg-surface-secondary">
+           *     <div class="composer-prelude"> file chips </div>
+           *     <TextareaAutosize px-3.5 pt-3 text-[14px] />
+           *     <div bottom-row flex items-center gap-1.5 px-2.5 pb-2.5 pt-1>
+           *       AttachFileChat | BadgeRow inline | spacer | AudioRecorder | SendButton/StopButton
+           *     </div>
+           *   </div>
+           *
+           * Hooks/lógica preservados: Mention(+), Mention(@), PromptsCommand(/),
+           * SkillsCommand, paste handler, keyboard handler, collapse, edit badges
+           * modal, manual skills pending chips, auto-save, multi-conv header. */}
           <div
             onClick={handleContainerClick}
             className={cn(
-              'relative flex w-full flex-grow flex-col overflow-hidden rounded-t-3xl border pb-4 text-text-primary transition-all duration-200 sm:rounded-3xl sm:pb-0',
-              isTextAreaFocused ? 'shadow-lg' : 'shadow-md',
+              'relative flex w-full flex-grow flex-col overflow-hidden border text-text-primary transition-all duration-200',
+              /* radius do protótipo (não rounded-3xl) — usa --radius do CSS Phase A */
+              'rounded-t-[14px] sm:rounded-[14px]',
+              isTextAreaFocused ? 'shadow-lg' : 'shadow-sm',
               isTemporary
                 ? 'border-violet-800/60 bg-violet-950/10'
-                : 'border-border-light bg-surface-chat',
-              /* [EXT] Navvia Siri glow:
-               * - siri-border: borda animada (mais forte em :focus-within e .generating)
-               * - siri-hero: variante para landing (glow mais presente em estado idle)
-               * - .generating: classe pulsante enquanto isSubmitting (resposta streama) */
+                : 'border-border-light bg-surface-secondary',
+              /* siri-border do protótipo: idle 0.12 / focus 0.55 / generating 1.0 */
               'siri-border',
               centerFormOnLanding &&
                 (conversationId == null || conversationId === Constants.NEW_CONVO) &&
@@ -304,21 +317,21 @@ const ChatForm = memo(function ChatForm({
               isSubmitting && 'generating',
             )}
           >
+            {/* Multi-conv header (pill superior — quando 2 modelos lado a lado) */}
             <TextareaHeader addedConvo={addedConvo} setAddedConvo={setAddedConvo} />
+
+            {/* Composer prelude — pending skills chips (estilo do protótipo) */}
             <PendingManualSkillsChips conversationId={conversationId} />
-            {/* WIP */}
-            <EditBadges
-              isEditingChatBadges={isEditingBadges}
-              handleCancelBadges={handleCancelBadges}
-              handleSaveBadges={handleSaveBadges}
-              setBadges={setBadges}
-            />
+
+            {/* File preview area (estilo composer-prelude — fica acima do textarea) */}
             <FileFormChat
               conversation={conversation}
               files={files}
               setFiles={setFiles}
               setFilesLoading={setFilesLoading}
             />
+
+            {/* Textarea */}
             {endpoint && (
               <div className={cn('flex', isRTL ? 'flex-row-reverse' : 'flex-row')}>
                 <div
@@ -354,8 +367,10 @@ const ChatForm = memo(function ChatForm({
                     aria-label={localize('com_ui_message_input')}
                     onClick={handleFocusOrClick}
                     style={{ height: 44, overflowY: 'auto' }}
+                    /* [EXT] Phase D.3 padding 14px / 14px (protótipo: px-3.5 pt-3) */
                     className={cn(
-                      baseClasses,
+                      'w-full resize-none bg-transparent px-3.5 pt-3 text-[14px] text-text-primary placeholder:text-text-tertiary focus:outline-none',
+                      isCollapsed ? 'max-h-[52px]' : 'max-h-[45vh] md:max-h-[55vh]',
                       removeFocusRings,
                       'scrollbar-hover transition-[max-height] duration-200 disabled:cursor-not-allowed',
                     )}
@@ -370,21 +385,27 @@ const ChatForm = memo(function ChatForm({
                 </div>
               </div>
             )}
+
+            {/* [EXT] Bottom row do protótipo:
+             *   gap-1.5 px-2.5 pb-2.5 pt-1 — compacto, alinhado, items-center.
+             *   AttachFileChat = anexar popover (já é um popover Radix upstream)
+             *   BadgeRow = badges inline (Busca web ativa, Interpretador, etc.)
+             *   EditBadges (botão de configurar quais badges aparecem) inline
+             *   AudioRecorder = mic button
+             *   SendButton/StopButton no fim */}
             <div
               className={cn(
-                '@container items-between flex gap-2 pb-2',
+                'flex items-center gap-1.5 px-2.5 pb-2.5 pt-1',
                 isRTL ? 'flex-row-reverse' : 'flex-row',
               )}
             >
-              <div className={`${isRTL ? 'mr-2' : 'ml-2'}`}>
-                <AttachFileChat
-                  conversation={conversation}
-                  disableInputs={disableInputs}
-                  files={files}
-                  setFiles={setFiles}
-                  setFilesLoading={setFilesLoading}
-                />
-              </div>
+              <AttachFileChat
+                conversation={conversation}
+                disableInputs={disableInputs}
+                files={files}
+                setFiles={setFiles}
+                setFilesLoading={setFilesLoading}
+              />
               <BadgeRow
                 showEphemeralBadges={
                   !!endpoint &&
@@ -400,17 +421,24 @@ const ChatForm = memo(function ChatForm({
                   Array.isArray(conversation?.messages) && conversation.messages.length >= 1
                 }
               />
-              <div className="mx-auto flex" />
-              {SpeechToText && (
-                <AudioRecorder
-                  methods={methods}
-                  ask={submitMessage}
-                  textAreaRef={textAreaRef}
-                  disabled={disableInputs || isNotAppendable}
-                  isSubmitting={isSubmitting}
+              {/* Spacer empurra mic + send pra direita */}
+              <div className="ml-auto flex items-center gap-1.5">
+                {/* EditBadges no protótipo é um botão pencil inline (não topo) */}
+                <EditBadges
+                  isEditingChatBadges={isEditingBadges}
+                  handleCancelBadges={handleCancelBadges}
+                  handleSaveBadges={handleSaveBadges}
+                  setBadges={setBadges}
                 />
-              )}
-              <div className={`${isRTL ? 'ml-2' : 'mr-2'}`}>
+                {SpeechToText && (
+                  <AudioRecorder
+                    methods={methods}
+                    ask={submitMessage}
+                    textAreaRef={textAreaRef}
+                    disabled={disableInputs || isNotAppendable}
+                    isSubmitting={isSubmitting}
+                  />
+                )}
                 {isSubmitting && showStopButton ? (
                   <StopButton stop={handleStopGenerating} setShowStopButton={setShowStopButton} />
                 ) : (
