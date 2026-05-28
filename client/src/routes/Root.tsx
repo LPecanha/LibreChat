@@ -20,6 +20,7 @@ import {
 import { useUserTermsQuery, useGetStartupConfig } from '~/data-provider';
 import { UnifiedSidebar } from '~/components/UnifiedSidebar';
 import { NavviaSidebar } from '~/components/NavviaSidebar'; // [EXT] Phase B
+import { MobileTopBar, MobileTabs } from '~/components/Layout'; // [EXT] Phase H
 import { TermsAndConditionsModal } from '~/components/ui';
 import { useHealthCheck } from '~/data-provider';
 import { Banner } from '~/components/Banners';
@@ -72,6 +73,8 @@ export default function Root() {
           <AgentsMapContext.Provider value={agentsMap}>
             <PromptGroupsProvider>
               <Banner onHeightChange={setBannerHeight} />
+              {/* [EXT] Phase H: MobileTopBar fixed top (mobile-only, sai do flow) */}
+              <MobileTopBar />
               <div className="flex" style={{ height: `calc(100dvh - ${bannerHeight}px)` }}>
                 <div className="relative z-0 flex h-full w-full overflow-hidden">
                   {/* [EXT] Phase B: troca UnifiedSidebar (dual-strip) por NavviaSidebar
@@ -92,6 +95,8 @@ export default function Root() {
                   </div>
                 </div>
               </div>
+              {/* [EXT] Phase H: MobileTabs fixed bottom (mobile-only) */}
+              <MobileTabs />
             </PromptGroupsProvider>
           </AgentsMapContext.Provider>
           {config?.interface?.termsOfService?.modalAcceptance === true && (

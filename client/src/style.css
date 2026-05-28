@@ -4739,6 +4739,8 @@ aside:hover .sidebar-collapse {
   stroke: var(--brand);
 }
 @media (max-width: 768px) {
+  /* Componentes próprios usam Tailwind md:hidden ao invés de .mobile-only;
+   * essa utility fica para casos genéricos onde queremos só display:flex em mobile. */
   .mobile-only {
     display: flex;
   }
