@@ -137,73 +137,80 @@ export default function Landing({ centerFormOnLanding }: { centerFormOnLanding: 
       ? getGreeting()
       : getGreeting() + (user?.name ? ', ' + user.name : '');
 
+  /* [EXT] Phase D Navvia — visual port do protótipo (design/ui-preview.html
+   * linha 808-813): avatar 64x64 brand rounded-2xl, h2 font-display 22px,
+   * subtitle text-secondary. Mantém ConvoIcon dentro do square brand quando
+   * for agente/assistant (preserva avatar customizado). Para landing genérica
+   * sem agente, mostra emoji 💬. */
+  const isGeneric = !(isAgent || isAssistant) && !name;
+  const title = name || (isGeneric ? 'Nova conversa' : greetingText);
+  const subtitle = description
+    ? null
+    : 'Escolha um modelo e comece a digitar, ou explore os agentes especializados.';
+
   return (
     <div
-      /* [EXT] Navvia: fade-in suave ao entrar na rota /c/new (alinha c/ HomeView). */
       className={`fade-in flex h-full transform-gpu flex-col items-center justify-center pb-16 transition-all duration-200 ${centerFormOnLanding ? 'max-h-full sm:max-h-0' : 'max-h-full'} ${getDynamicMargin}`}
     >
-      <div ref={contentRef} className="flex flex-col items-center gap-0 p-2">
-        <div
-          className={`flex ${textHasMultipleLines ? 'flex-col' : 'flex-col md:flex-row'} items-center justify-center gap-2`}
-        >
-          <div className={`relative size-10 justify-center ${textHasMultipleLines ? 'mb-2' : ''}`}>
+      <div ref={contentRef} className="flex flex-col items-center gap-0 px-4 text-center">
+        {/* [EXT] Avatar 64x64 — agentes/assistants mostram ConvoIcon, landing genérica mostra emoji */}
+        <div className="mb-4 grid h-16 w-16 place-items-center rounded-2xl bg-brand text-brand-fg shadow-lg">
+          {isGeneric ? (
+            <span className="text-[28px]" aria-hidden="true">
+              💬
+            </span>
+          ) : (
             <ConvoIcon
               agentsMap={agentsMap}
               assistantMap={assistantMap}
               conversation={conversation}
               endpointsConfig={endpointsConfig}
-              containerClassName={containerClassName}
+              containerClassName="h-full w-full flex items-center justify-center"
               context="landing"
-              className="h-2/3 w-2/3 text-black dark:text-white"
+              className="h-2/3 w-2/3 text-brand-fg"
               size={41}
             />
-            {startupConfig?.showBirthdayIcon && (
-              <TooltipAnchor
-                className="absolute bottom-[27px] right-2"
-                description={localize('com_ui_happy_birthday')}
-                aria-label={localize('com_ui_happy_birthday')}
-              >
-                <BirthdayIcon />
-              </TooltipAnchor>
-            )}
-          </div>
-          {((isAgent || isAssistant) && name) || name ? (
-            <div className="flex flex-col items-center gap-0 p-2">
-              <SplitText
-                key={`split-text-${name}`}
-                text={name}
-                className={`${getTextSizeClass(name)} font-medium text-text-primary`}
-                delay={50}
-                textAlign="center"
-                animationFrom={{ opacity: 0, transform: 'translate3d(0,50px,0)' }}
-                animationTo={{ opacity: 1, transform: 'translate3d(0,0,0)' }}
-                easing={easings.easeOutCubic}
-                threshold={0}
-                rootMargin="0px"
-                onLineCountChange={handleLineCountChange}
-              />
-            </div>
-          ) : (
+          )}
+          {startupConfig?.showBirthdayIcon && (
+            <TooltipAnchor
+              className="absolute bottom-[27px] right-2"
+              description={localize('com_ui_happy_birthday')}
+              aria-label={localize('com_ui_happy_birthday')}
+            >
+              <BirthdayIcon />
+            </TooltipAnchor>
+          )}
+        </div>
+
+        {/* Title — font-display 22px (protótipo) */}
+        <h2 className={`font-display text-[22px] font-bold tracking-tight ${getTextSizeClass(title)}`}>
+          {(isAgent || isAssistant) && name ? (
             <SplitText
-              key={`split-text-${greetingText}${user?.name ? '-user' : ''}`}
-              text={greetingText}
-              className={`${getTextSizeClass(greetingText)} font-medium text-text-primary`}
-              delay={50}
+              key={`split-text-${name}`}
+              text={name}
+              className=""
+              delay={40}
               textAlign="center"
-              animationFrom={{ opacity: 0, transform: 'translate3d(0,50px,0)' }}
+              animationFrom={{ opacity: 0, transform: 'translate3d(0,30px,0)' }}
               animationTo={{ opacity: 1, transform: 'translate3d(0,0,0)' }}
               easing={easings.easeOutCubic}
               threshold={0}
               rootMargin="0px"
               onLineCountChange={handleLineCountChange}
             />
+          ) : (
+            title
           )}
-        </div>
-        {description && (
-          <div className="animate-fadeIn mt-4 max-w-md text-center text-sm font-normal text-text-primary">
+        </h2>
+
+        {/* Subtitle/description */}
+        {description ? (
+          <p className="animate-fadeIn mt-1.5 max-w-md text-[14px] text-text-secondary">
             {description}
-          </div>
-        )}
+          </p>
+        ) : subtitle ? (
+          <p className="mt-1.5 max-w-md text-[14px] text-text-secondary">{subtitle}</p>
+        ) : null}
       </div>
     </div>
   );

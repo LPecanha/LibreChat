@@ -162,6 +162,20 @@ const ChatForm = memo(function ChatForm({
 
   const { submitMessage, submitPrompt } = useSubmitMessage();
 
+  /* [EXT] Phase D Navvia: auto-submit do composer da Home.
+   * HomeView.tsx grava sessionStorage['navvia:pendingMessage'] antes de
+   * navegar p/ /c/new. Aqui lemos uma única vez e disparamos o submit
+   * automaticamente — o usuário escreve na Home e cai já na conversa
+   * com a mensagem enviada. */
+  useEffect(() => {
+    if (conversationId !== Constants.NEW_CONVO) return;
+    const pending = sessionStorage.getItem('navvia:pendingMessage');
+    if (!pending) return;
+    sessionStorage.removeItem('navvia:pendingMessage');
+    const id = window.setTimeout(() => submitMessage({ text: pending }), 100);
+    return () => window.clearTimeout(id);
+  }, [conversationId, submitMessage]);
+
   const handleKeyUp = useHandleKeyUp({
     index,
     textAreaRef,
