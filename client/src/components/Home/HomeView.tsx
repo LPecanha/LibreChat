@@ -98,7 +98,8 @@ function HomeView() {
   const handleStartChat = () => navigate('/c/new');
 
   return (
-    <div className="flex h-full w-full flex-col overflow-y-auto bg-surface-primary">
+    /* [EXT] Navvia: fade-in suave ao montar (transição entre rotas /home ↔ /c/new). */
+    <div className="fade-in flex h-full w-full flex-col overflow-y-auto bg-surface-primary">
       {/* Banner full-bleed com gradient Navvia */}
       <section
         className="relative flex-shrink-0 overflow-hidden border-b border-border-light"
