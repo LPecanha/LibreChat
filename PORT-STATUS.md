@@ -64,6 +64,18 @@ Branch `dev` agora contém **34 commits** que portam o protótipo HTML `design/u
 | G.4 + E.9 | `40880d5ff` | **OGDialog overlay + Settings backdrop** — `bg-black/80` → `bg-black/50 backdrop-blur-sm` (estilo `.modal-backdrop` do protótipo). Propaga p/ Share/Export/SetKey/EditBadges/Fork/Feedback/Variable/MemoryCreate/Edit/MCPConfig/ToolSelect/SkillSelect/BuyCredits/Settings — TODOS os modais ganham backdrop unified. **Citation chips** com hover brand-soft + border-brand + text-brand (estilo `.citation`) |
 | I.3 | `e2b6f9486` | **Banner global** (`<Banner />`) refeito com bg-brand-soft + text-brand + border-b border-light + ícone close opacity hover (estilo `#appBanner` do protótipo). Antes era bg-presentation + gradient dark + link azul cru |
 
+**Atualização após décima primeira rodada de port** (5 commits novos):
+
+| Fase | Commit | Entrega |
+|---|---|---|
+| sweep | `70298c101` | **submit→brand em 17 arquivos** — zero `variant="submit"` restantes em client/components. Atinge: AdminSettings, GenericGrantAccess, EditBadges, AgentPanel, AgentDetail+Content, MCP CustomUserVars/ServerInit, SharedLink, PromptForm/Variable/Actions, ExportModal, Avatar, SetKeyDialog, MemoryEdit/Create |
+| theme | `9800a1cc6` | **rgb-surface-submit** em ambos themes → 36 105 226 (brand) — garante consistência se algum componente futuro usar submit |
+| G.8 | `9d3094368` | DeleteAccount warning usa `.error-card.rate` |
+| E.11 | `88e3d8d0d` | Mermaid streaming + error states unified com `.codeblock-card` + `.codeblock-body` |
+| sweep | `1b629cce6` | **blue-* upstream → brand em 20 arquivos** — text-blue-{400..700}, hover/dark variants, decoration-blue. Atinge Sharing/*, MCPConfig, SourceIcon, Auth links, PluginPagination, MCPStatusBadge, AdminSettings + outros |
+
+**Estado real do trabalho 1:1 (revisado após rodada 11):** ~92% completo. Zero variant="submit" e zero text-blue-* upstream restantes. Theme token aponta para brand. Mermaid 100% unified. DeleteAccount warning consistente.
+
 **Atualização após décima rodada de port** (7 commits novos):
 
 | Fase | Commit | Entrega |
