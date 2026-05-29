@@ -219,3 +219,15 @@ export const img: React.ElementType = memo(function MarkdownImage({
   return <img src={fixedSrc} alt={alt} title={title} className={className} style={style} />;
 });
 img.displayName = 'MarkdownImage';
+
+/* [EXT] Phase E.5 Navvia: tables markdown usam .tbl do protótipo
+ * (design/ui-preview.html linhas 227-230) — bordas unified, thead muted,
+ * padding 7px 10px, rounded corners externos via overflow hidden. */
+export const table: React.ElementType = memo(function MarkdownTable({
+  children,
+}: {
+  children?: React.ReactNode;
+}) {
+  return <table className="tbl">{children}</table>;
+});
+table.displayName = 'MarkdownTable';
