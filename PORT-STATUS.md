@@ -64,7 +64,20 @@ Branch `dev` agora contém **34 commits** que portam o protótipo HTML `design/u
 | G.4 + E.9 | `40880d5ff` | **OGDialog overlay + Settings backdrop** — `bg-black/80` → `bg-black/50 backdrop-blur-sm` (estilo `.modal-backdrop` do protótipo). Propaga p/ Share/Export/SetKey/EditBadges/Fork/Feedback/Variable/MemoryCreate/Edit/MCPConfig/ToolSelect/SkillSelect/BuyCredits/Settings — TODOS os modais ganham backdrop unified. **Citation chips** com hover brand-soft + border-brand + text-brand (estilo `.citation`) |
 | I.3 | `e2b6f9486` | **Banner global** (`<Banner />`) refeito com bg-brand-soft + text-brand + border-b border-light + ícone close opacity hover (estilo `#appBanner` do protótipo). Antes era bg-presentation + gradient dark + link azul cru |
 
-**Estado real do trabalho 1:1 (revisado após rodada 9):** ~86% completo. Modais com backdrop unified (impacto em 14+ dialogs). Banner global brand-aware. Citation chips brand no hover.
+**Atualização após décima rodada de port** (7 commits novos):
+
+| Fase | Commit | Entrega |
+|---|---|---|
+| J.4 | `490ff90d5` | **HomeView 100% i18n** — 20 chaves novas (tiles, chips, popovers, kbd, send button, attach label). SUGGESTION_CHIPS/TOOLS_TILES refatorados p/ labelKey/descKey como const. Stats labels (Credits/Conversations/Agents available/Default model) via localize() |
+| I.4 | `09bf1bccb` | SelectedPrincipalsList empty state usa `.empty` |
+| I.5 | `4be440124` | AgentGrid loading state — 4 cards `.skeleton` shimmer em vez de spinner |
+| G.5 | `13745ec3a` | Settings header — title em font-display + close em `.msg-action` |
+| G.6 | `b4495aa1c` | **DialogTitle global** (OriginalDialog.tsx) — font-display + size 18px propaga p/ TODOS modais. BookmarkEdit submit → brand |
+| E.10 | `61a28af92` | SiblingSwitch usa `.sibling-nav` do protótipo (22x22 btns, count tabular-nums) |
+| I.6 | `3676614b3` | MemoryEmptyState usa `.empty` |
+| fix | `c2d29f4f8` | Submit variant → brand em Registration, ResetPassword, RequestPasswordReset, Feedback |
+
+**Estado real do trabalho 1:1 (revisado após rodada 10):** ~89% completo. HomeView 100% i18n. Modais com title font-display + backdrop blur. Sibling navigation unified. Empty states aplicados em 3 lugares. Submit buttons em brand em todos os flows críticos.
 
 Falta principal:
 - Settings 6 abas restantes (Speech, Chat, Beta, Personalization, Memory, Data, Account, Balance) — conteúdo upstream
