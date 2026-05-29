@@ -127,10 +127,13 @@ const AgentGrid: React.FC<AgentGridProps> = ({
     return categoryValue.charAt(0).toUpperCase() + categoryValue.slice(1);
   };
 
-  // Simple loading spinner
+  /* [EXT] Phase I.5 Navvia: loading state usa .skeleton em vez de spinner.
+   * Reduz CLS quando agentes carregam (cards já têm placeholder do tamanho). */
   const loadingSpinner = (
-    <div className="flex justify-center py-12">
-      <Spinner className="h-8 w-8 text-primary" />
+    <div className="grid grid-cols-1 gap-4 py-4 sm:grid-cols-2">
+      {Array.from({ length: 4 }).map((_, i) => (
+        <div key={i} className="skeleton h-32 md:h-36 lg:h-40 rounded-xl" />
+      ))}
     </div>
   );
 
