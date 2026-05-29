@@ -201,7 +201,7 @@ function NavviaSidebar() {
       {/* Scroll: Conversas + Biblioteca */}
       <div className="flex-1 overflow-y-auto px-3 pb-2">
         {/* Conversas — agrupadas por data */}
-        <div className="sec-label mt-5">Conversas</div>
+        <div className="sec-label mt-5">{localize('com_nav_my_conversations')}</div>
         {grouped.length === 0 ? (
           <div className="px-2 py-3 text-[11.5px] text-text-tertiary">
             {search ? 'Nada encontrado' : 'Nenhuma conversa ainda'}
@@ -240,7 +240,7 @@ function NavviaSidebar() {
         )}
 
         {/* Biblioteca — 6 ícones coloridos */}
-        <div className="sec-label mt-6">Biblioteca</div>
+        <div className="sec-label mt-6">{localize('com_nav_library')}</div>
         <button onClick={() => navigate('/agents')} className="lib-item">
           <span className="lib-ic" style={{ background: 'rgba(36,105,226,0.13)', color: '#2469e2' }}>
             <Bot className="h-[13px] w-[13px]" strokeWidth={1.9} />
@@ -275,7 +275,7 @@ function NavviaSidebar() {
           <span className="lib-ic" style={{ background: 'rgba(168,85,247,0.15)', color: '#a855f7' }}>
             <Server className="h-[13px] w-[13px]" strokeWidth={1.9} />
           </span>
-          Servidores MCP
+          {localize('com_nav_servers_mcp')}
         </button>
       </div>
 

@@ -99,14 +99,14 @@ export const DensitySelector = ({
   const localize = useLocalize();
   const labelId = 'density-selector-label';
   const options = [
-    { value: 'compact', label: localize('com_nav_density_compact') || 'Compacta' },
-    { value: 'cozy', label: localize('com_nav_density_cozy') || 'Padrão' },
-    { value: 'comfortable', label: localize('com_nav_density_comfortable') || 'Confortável' },
+    { value: 'compact', label: localize('com_nav_density_compact') },
+    { value: 'cozy', label: localize('com_nav_density_cozy') },
+    { value: 'comfortable', label: localize('com_nav_density_comfortable') },
   ];
 
   return (
     <div className="flex items-center justify-between">
-      <div id={labelId}>{localize('com_nav_density') || 'Densidade da interface'}</div>
+      <div id={labelId}>{localize('com_nav_density')}</div>
       <Dropdown
         value={density}
         onChange={onChange}
