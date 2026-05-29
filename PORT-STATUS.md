@@ -42,7 +42,15 @@ Branch `dev` agora contém **34 commits** que portam o protótipo HTML `design/u
 | E.5 | `dde8f3ab0` | Markdown tables com `.tbl` do protótipo — renderer customizado em ReactMarkdown registrado em components |
 | I.1 | `81d09a711` | Empty state em AgentGrid usa `.empty` do protótipo (ícone Bot circular + heading + message) |
 
-**Estado real do trabalho 1:1 (revisado após rodada 6):** ~80% completo. i18n praticamente completo no UI critical path. Tables markdown unified. Empty states começando a receber `.empty` (1 de N).
+**Atualização após sétima rodada de port** (3 commits novos):
+
+| Fase | Commit | Entrega |
+|---|---|---|
+| I.2 | `6fd4a67b8` | **Toast global** refeito — usa `.toast` + variants (success/error/warn/info) do protótipo. Substitui cores hardcoded fortes (#E02F1F text-white) por bg-surface-overlay + border-left brand colored + ícones lucide. **Aplica em todas as ações** (cópia, save, erro de API, etc.) — feedback consistente em toda a plataforma |
+| E.6 | `469869139` | Mermaid diagrams com `.mermaid-box` do protótipo (hover border-medium, cursor zoom-in, .exp button absoluto top-right) |
+| E.7 | `c4598438b` | KaTeX equações display (\$\$...\$\$) recebem styling `.latex-block` via override CSS (sem mexer em markup nem plugin) |
+
+**Estado real do trabalho 1:1 (revisado após rodada 7):** ~82% completo. Toast global agora é Navvia em toda a plataforma. Mermaid e LaTeX unified com .tool-card/.codeblock-card.
 
 Falta principal:
 - Settings 6 abas restantes (Speech, Chat, Beta, Personalization, Memory, Data, Account, Balance) — conteúdo upstream
