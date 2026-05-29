@@ -231,8 +231,9 @@ export default function ToolCall({
       </div>
       <div style={expandStyle}>
         <div className="overflow-hidden" ref={expandRef}>
+          {/* [EXT] Phase E.4 Navvia: usar .tool-card do protótipo */}
           {hasInfo && (
-            <div className="my-2 overflow-hidden rounded-lg border border-border-light bg-surface-secondary">
+            <div className="tool-card my-2 overflow-hidden">
               <ToolCallInfo input={args ?? ''} output={output} attachments={attachments} />
             </div>
           )}

@@ -231,7 +231,8 @@ export default function WebSearch({
         {hasSourceData && (
           <div style={sourceExpandStyle}>
             <div className="overflow-hidden" ref={sourceExpandRef}>
-              <div className="my-2 max-h-[280px] overflow-y-auto rounded-lg border border-border-light">
+              {/* [EXT] Phase E.4 Navvia: usar .tool-card do protótipo */}
+              <div className="tool-card my-2 max-h-[280px] overflow-y-auto !p-0">
                 {allSources.map((source, i) => {
                   const domain = getCleanDomain(source.link);
                   return (

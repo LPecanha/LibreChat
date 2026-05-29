@@ -101,27 +101,24 @@ export default function ExecuteCode({
       </div>
       <div style={expandStyle}>
         <div className="overflow-hidden" ref={expandRef}>
-          <div className="my-2 overflow-hidden rounded-lg border border-border-light bg-surface-secondary">
+          {/* [EXT] Phase E.4 Navvia: usar .codeblock-card + .codeblock-body
+           * + .codeblock-out do protótipo. Dark sempre no body, JetBrains Mono. */}
+          <div className="codeblock-card my-2">
             {code && <CodeWindowHeader language={lang} code={code} />}
             {code && (
-              <pre className="max-h-[300px] overflow-auto bg-surface-chat p-4 font-mono text-xs dark:bg-surface-primary-alt">
+              <pre className="codeblock-body max-h-[300px] overflow-auto">
                 <code className={`hljs language-${lang} !whitespace-pre`}>{highlighted}</code>
               </pre>
             )}
             {hasOutput && (
-              <div
-                className={cn(
-                  'bg-surface-primary-alt p-4 text-xs dark:bg-transparent',
-                  code && 'border-t border-border-light',
-                )}
-              >
-                <div className="mb-1.5 text-[10px] font-medium uppercase tracking-wide text-text-secondary">
+              <div className="codeblock-out">
+                <div className="mb-1.5 text-[10px] font-medium uppercase tracking-wide opacity-70">
                   {localize('com_ui_output')}
                 </div>
                 <div
                   className={cn(
                     'max-h-[200px] overflow-auto',
-                    outputHasError ? 'text-red-600 dark:text-red-400' : 'text-text-primary',
+                    outputHasError && 'text-red-400',
                   )}
                 >
                   <Stdout output={output} />

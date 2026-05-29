@@ -55,18 +55,17 @@ export default function CodeAnalyze({
           }
         />
       </div>
+      {/* [EXT] Phase E.4 Navvia: usar codeblock-card + codeblock-out
+       * (consistente com ExecuteCode + CodeBlock) */}
       {showCode && (
-        <div className="code-analyze-block mb-3 mt-0.5 overflow-hidden rounded-xl bg-black">
+        <div className="codeblock-card code-analyze-block mb-3 mt-0.5">
           <MarkdownLite content={code ? `\`\`\`python\n${code}\n\`\`\`` : ''} />
           {logs && (
-            <div className="bg-gray-700 p-4 text-xs">
-              <div className="mb-1 text-gray-400">{localize('com_ui_result')}</div>
-              <div
-                className="prose flex flex-col-reverse text-white"
-                style={{
-                  color: 'white',
-                }}
-              >
+            <div className="codeblock-out">
+              <div className="mb-1 opacity-70 text-[10px] uppercase tracking-wide">
+                {localize('com_ui_result')}
+              </div>
+              <div className="prose flex flex-col-reverse">
                 <pre className="shrink-0">{logs}</pre>
               </div>
             </div>

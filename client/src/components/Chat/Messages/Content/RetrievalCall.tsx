@@ -436,9 +436,8 @@ export default function RetrievalCall({
                 return (
                   <div
                     key={`${item.fileId ?? item.fileName}-${i}`}
-                    className={cn(
-                      'overflow-hidden rounded-lg border border-border-light bg-surface-secondary',
-                    )}
+                    /* [EXT] Phase E.4 Navvia: usar .tool-card do protótipo */
+                    className="tool-card overflow-hidden"
                   >
                     <FileHeader
                       fileName={item.fileName}
