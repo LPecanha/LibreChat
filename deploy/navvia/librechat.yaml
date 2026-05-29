@@ -64,6 +64,9 @@ interface:
   # [EXT] Navvia: tela inicial após login (rota /home com banner + tiles + agentes).
   home: dashboard
 
+  # [EXT] Navvia: footer custom (substitui "LibreChat vX.X - Every AI for Everyone.")
+  customFooter: 'Navvia · 2026'
+
   artifacts: true
   fileSearch: true
   fileCitations: true

@@ -155,14 +155,16 @@ function Speech() {
       orientation="horizontal"
       value={advancedMode ? 'advanced' : 'simple'}
     >
-      <div className="sticky -top-1 z-50 mb-4 bg-white dark:bg-gray-700">
+      {/* [EXT] Phase G.3 Navvia: header dos sub-tabs usa surface tokens */}
+      <div className="sticky -top-1 z-50 mb-4 bg-background">
         <Tabs.List className="flex justify-center bg-background">
           <Tabs.Trigger
             onClick={() => setAdvancedMode(false)}
+            /* [EXT] Phase G.3 Navvia: tab simple/advanced ativa usa brand-soft + text-brand */
             className={cn(
-              'group m-1 flex items-center justify-center gap-2 bg-transparent px-4 py-2 text-sm text-text-secondary transition-all duration-200 ease-in-out radix-state-active:bg-secondary radix-state-active:text-foreground radix-state-active:shadow-lg',
+              'group m-1 flex w-full items-center justify-center gap-2 bg-transparent px-4 py-2 text-sm text-text-secondary transition-all duration-200 ease-in-out hover:bg-surface-hover',
+              'radix-state-active:bg-brand-soft radix-state-active:text-brand radix-state-active:shadow-sm',
               isSmallScreen ? 'flex-row rounded-lg' : 'rounded-xl',
-              'w-full',
             )}
             value="simple"
             style={{ userSelect: 'none' }}
@@ -172,10 +174,11 @@ function Speech() {
           </Tabs.Trigger>
           <Tabs.Trigger
             onClick={() => setAdvancedMode(true)}
+            /* [EXT] Phase G.3 Navvia: tab simple/advanced ativa usa brand-soft + text-brand */
             className={cn(
-              'group m-1 flex items-center justify-center gap-2 bg-transparent px-4 py-2 text-sm text-text-secondary transition-all duration-200 ease-in-out radix-state-active:bg-secondary radix-state-active:text-foreground radix-state-active:shadow-lg',
+              'group m-1 flex w-full items-center justify-center gap-2 bg-transparent px-4 py-2 text-sm text-text-secondary transition-all duration-200 ease-in-out hover:bg-surface-hover',
+              'radix-state-active:bg-brand-soft radix-state-active:text-brand radix-state-active:shadow-sm',
               isSmallScreen ? 'flex-row rounded-lg' : 'rounded-xl',
-              'w-full',
             )}
             value="advanced"
             style={{ userSelect: 'none' }}
