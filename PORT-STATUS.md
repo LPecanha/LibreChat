@@ -27,7 +27,14 @@ Branch `dev` agora contém **34 commits** que portam o protótipo HTML `design/u
 | G.2 | `47a0d00c7` | **DensitySelector novo** em Settings/General — usuário escolhe compacta/cozy/confortável. Persiste em localStorage. Root.tsx aplica `body[data-density]` ao montar. Tokens (--row-h, --ui-font, --msg-font, --radius) já em CSS Phase A respondem automaticamente |
 | D.4 | `5fdebaf8c` | ConversationStarters agora usa `.starter` do protótipo (consistência com .tile, .agent-card, .stat) |
 
-**Estado real do trabalho 1:1 (revisado após rodada 4):** ~73% completo. Density picker era uma funcionalidade ausente que protótipo definia — implementada de verdade. ConversationStarters agora consistente com resto do design system.
+**Atualização após quinta rodada de port** (2 commits novos):
+
+| Fase | Commit | Entrega |
+|---|---|---|
+| G.3 | `d56dce92f` | Speech sub-tabs (Simple/Advanced) com active brand-soft + text-brand · `customFooter` Navvia no librechat.yaml (precisa também `.env CUSTOM_FOOTER`) — substitui "LibreChat v0.8.6-rc1 - Every AI for Everyone." por "Navvia · 2026" |
+| J.1 | `a6d58325a` | i18n proper — adiciona 7 chaves em en + pt-BR (com_nav_my_conversations, com_nav_library, com_nav_density*, com_nav_servers_mcp) + NavviaSidebar e DensitySelector usando localize() |
+
+**Estado real do trabalho 1:1 (revisado após rodada 5):** ~76% completo. Última identidade visível upstream (footer) removida. Density picker funcional. i18n proper para 7 strings novas em ambos os idiomas.
 
 Falta principal:
 - Settings 6 abas restantes (Speech, Chat, Beta, Personalization, Memory, Data, Account, Balance) — conteúdo upstream
