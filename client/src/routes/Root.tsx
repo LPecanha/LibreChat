@@ -36,6 +36,14 @@ export default function Root() {
 
   useHealthCheck(isAuthenticated);
 
+  /* [EXT] Phase G.2 Navvia: aplica densidade salva no <body> ao montar.
+   * Settings/General/DensitySelector é fonte de verdade — aqui apenas
+   * restaura ao recarregar a página. Default = "cozy". */
+  useEffect(() => {
+    const density = localStorage.getItem('navvia:density') || 'cozy';
+    document.body.setAttribute('data-density', density);
+  }, []);
+
   const assistantsMap = useAssistantsMap({ isAuthenticated });
   const agentsMap = useAgentsMap({ isAuthenticated });
   const fileMap = useFileMap({ isAuthenticated });

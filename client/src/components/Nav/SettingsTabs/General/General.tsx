@@ -1,4 +1,4 @@
-import React, { useContext, useCallback } from 'react';
+import React, { useContext, useCallback, useEffect, useState } from 'react';
 import Cookies from 'js-cookie';
 import { useRecoilState } from 'recoil';
 import { Dropdown, ThemeContext } from '@librechat/client';
@@ -6,6 +6,10 @@ import ArchivedChats from './ArchivedChats';
 import ToggleSwitch from '../ToggleSwitch';
 import { useLocalize } from '~/hooks';
 import store from '~/store';
+
+/* [EXT] Phase G.2 Navvia: chave localStorage para densidade. */
+const DENSITY_KEY = 'navvia:density';
+const DEFAULT_DENSITY = 'cozy';
 
 const toggleSwitchConfigs = [
   {
@@ -67,6 +71,48 @@ export const ThemeSelector = ({
         options={themeOptions}
         sizeClasses="w-[180px]"
         testId="theme-selector"
+        className="z-50"
+        aria-labelledby={labelId}
+        portal={portal}
+      />
+    </div>
+  );
+};
+
+/* [EXT] Phase G.2 Navvia — Density selector
+ * Aplica data-density no <body> via useEffect. Os tokens (--row-h, --ui-font,
+ * --msg-font, --radius) estão definidos em style.css Phase A:
+ *   compact:     row 28 / ui 12.5 / msg 14 / radius 6
+ *   cozy:        row 32 / ui 13   / msg 15 / radius 7 (default)
+ *   comfortable: row 38 / ui 14   / msg 16 / radius 8
+ *
+ * Persiste em localStorage. Lê no mount para restaurar preferência. */
+export const DensitySelector = ({
+  density,
+  onChange,
+  portal = true,
+}: {
+  density: string;
+  onChange: (value: string) => void;
+  portal?: boolean;
+}) => {
+  const localize = useLocalize();
+  const labelId = 'density-selector-label';
+  const options = [
+    { value: 'compact', label: localize('com_nav_density_compact') || 'Compacta' },
+    { value: 'cozy', label: localize('com_nav_density_cozy') || 'Padrão' },
+    { value: 'comfortable', label: localize('com_nav_density_comfortable') || 'Confortável' },
+  ];
+
+  return (
+    <div className="flex items-center justify-between">
+      <div id={labelId}>{localize('com_nav_density') || 'Densidade da interface'}</div>
+      <Dropdown
+        value={density}
+        onChange={onChange}
+        options={options}
+        sizeClasses="w-[180px]"
+        testId="density-selector"
         className="z-50"
         aria-labelledby={labelId}
         portal={portal}
@@ -155,6 +201,20 @@ function General() {
 
   const [langcode, setLangcode] = useRecoilState(store.lang);
 
+  /* [EXT] Phase G.2 Navvia: state da densidade lê localStorage no mount
+   * e aplica data-density no <body>. Persiste em mudanças. */
+  const [density, setDensity] = useState<string>(() => {
+    if (typeof window === 'undefined') return DEFAULT_DENSITY;
+    return localStorage.getItem(DENSITY_KEY) ?? DEFAULT_DENSITY;
+  });
+
+  useEffect(() => {
+    document.body.setAttribute('data-density', density);
+    localStorage.setItem(DENSITY_KEY, density);
+  }, [density]);
+
+  const changeDensity = useCallback((value: string) => setDensity(value), []);
+
   const changeTheme = useCallback(
     (value: string) => {
       setTheme(value);
@@ -185,6 +245,10 @@ function General() {
       </div>
       <div className="pb-3">
         <LangSelector langcode={langcode} onChange={changeLang} />
+      </div>
+      {/* [EXT] Phase G.2 Navvia: densidade da UI (compacta/padrão/confortável) */}
+      <div className="pb-3">
+        <DensitySelector density={density} onChange={changeDensity} />
       </div>
       {toggleSwitchConfigs.map((config) => (
         <div key={config.key} className="pb-3">
