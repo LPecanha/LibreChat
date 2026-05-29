@@ -208,7 +208,7 @@ const AgentMarketplace: React.FC<AgentMarketplaceProps> = ({ className = '' }) =
             {!isSmallScreen && (
               <div className="container mx-auto max-w-4xl">
                 <div className={cn('mb-8 text-center', 'mt-12')}>
-                  <h1 className="mb-3 text-3xl font-bold tracking-tight text-text-primary md:text-5xl">
+                  <h1 className="mb-3 text-3xl font-bold font-display tracking-tight text-text-primary md:text-5xl">
                     {localize('com_agents_marketplace')}
                   </h1>
                   <p className="mx-auto mb-6 max-w-2xl text-lg text-text-secondary">
@@ -302,7 +302,7 @@ const AgentMarketplace: React.FC<AgentMarketplaceProps> = ({ className = '' }) =
 
                         return (
                           <div className="text-left">
-                            <h2 className="text-2xl font-bold text-text-primary">{name}</h2>
+                            <h2 className="text-2xl font-bold font-display text-text-primary">{name}</h2>
                             {description && (
                               <p className="mt-2 text-text-secondary">{description}</p>
                             )}
@@ -382,7 +382,7 @@ const AgentMarketplace: React.FC<AgentMarketplaceProps> = ({ className = '' }) =
 
                           return (
                             <div className="text-left">
-                              <h2 className="text-2xl font-bold text-text-primary">{name}</h2>
+                              <h2 className="text-2xl font-bold font-display text-text-primary">{name}</h2>
                               {description && (
                                 <p className="mt-2 text-text-secondary">{description}</p>
                               )}

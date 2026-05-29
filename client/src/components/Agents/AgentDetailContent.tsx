@@ -144,7 +144,7 @@ const AgentDetailContent: React.FC<AgentDetailContentProps> = ({ agent }) => {
 
       {/* Agent name */}
       <div className="mt-3 text-center">
-        <h2 className="text-2xl font-bold text-text-primary">
+        <h2 className="text-2xl font-bold font-display text-text-primary">
           {agent?.name || localize('com_agents_loading')}
         </h2>
       </div>

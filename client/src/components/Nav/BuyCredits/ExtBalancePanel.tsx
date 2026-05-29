@@ -26,7 +26,7 @@ export function ExtBalancePanel() {
     <div className="flex flex-col gap-4 p-4 text-sm text-text-primary">
       <div className="rounded-xl bg-surface-secondary px-4 py-3">
         <p className="text-xs text-text-secondary">{localize('com_nav_balance')}</p>
-        <p className="mt-0.5 text-3xl font-bold text-text-primary">
+        <p className="mt-0.5 text-3xl font-bold font-display text-text-primary">
           {balanceQuery.isLoading ? '…' : formatUsdBalance(tokenCredits)}
         </p>
         <p className="text-xs text-text-secondary">{localize('com_nav_buy_credits_api_credits')}</p>
