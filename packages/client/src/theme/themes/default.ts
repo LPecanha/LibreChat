@@ -35,8 +35,12 @@ export const defaultTheme: IThemeRGB = {
   'rgb-surface-tertiary': '236 236 236', // #ececec (gray-100)
   'rgb-surface-tertiary-alt': '255 255 255', // #fff (white)
   'rgb-surface-dialog': '255 255 255', // #fff (white)
-  'rgb-surface-submit': '4 120 87', // #047857 (green-700)
-  'rgb-surface-submit-hover': '6 95 70', // #065f46 (green-800)
+  /* [EXT] Phase 3 Navvia: surface-submit aponta para brand (azul #2469E2)
+   * em vez de verde upstream — fallback consistente caso alguém ainda use
+   * variant="submit" futuramente (todo client/ já foi migrado para
+   * variant="brand"). */
+  'rgb-surface-submit': '36 105 226', // #2469e2 (brand)
+  'rgb-surface-submit-hover': '24 90 200', // brand escurecido
   'rgb-surface-destructive': '185 28 28', // #b91c1c (red-700)
   'rgb-surface-destructive-hover': '153 27 27', // #991b1b (red-800)
   'rgb-surface-chat': '255 255 255', // #fff (white)
