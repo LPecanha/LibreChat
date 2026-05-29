@@ -10,7 +10,7 @@ export default function FilesListView() {
   const navigate = useNavigate();
   const localize = useLocalize();
   return (
-    /* [EXT] Phase G.12 Navvia: bg-[#f9f9f9] (hardcoded) → bg-surface-primary (semantic token) */
+    /* [EXT] Phase G.12 Navvia: bg-surface-secondary (hardcoded) → bg-surface-primary (semantic token) */
     <div className="bg-surface-primary p-0 lg:p-7">
       <div className="m-4 flex w-full flex-row justify-between md:m-2">
         <FilesSectionSelector />

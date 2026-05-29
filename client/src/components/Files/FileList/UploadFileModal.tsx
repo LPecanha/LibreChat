@@ -33,7 +33,7 @@ const UploadFileModal = ({ open, onOpenChange }) => {
             </div>
             <div className="flex w-full flex-col text-center sm:w-4/5 sm:text-left">
               <div className="italic">Please upload square file, size less than 100KB</div>
-              <div className="mt-4 flex w-full flex-row items-center bg-[#f9f9f9] p-2">
+              <div className="mt-4 flex w-full flex-row items-center bg-surface-secondary p-2">
                 <div className="w-1/2 sm:w-1/3">
                   <Button>Choose File</Button>
                 </div>
@@ -43,13 +43,13 @@ const UploadFileModal = ({ open, onOpenChange }) => {
           </div>
           <div className="mt-3 flex w-full flex-col">
             <label htmlFor="name">Name</label>
-            <label className="hidden text-[#808080] sm:block">The name of the uploaded file</label>
+            <label className="hidden text-text-secondary sm:block">The name of the uploaded file</label>
             <Input type="text" id="name" name="name" placeholder="Name" />
           </div>
 
           <div className="mt-3 flex w-full flex-col">
             <label htmlFor="purpose">Purpose</label>
-            <label className="hidden text-[#808080] sm:block">
+            <label className="hidden text-text-secondary sm:block">
               The purpose of the uploaded file
             </label>
             <Input type="text" id="purpose" name="purpose" placeholder="Purpose" />

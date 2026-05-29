@@ -35,7 +35,7 @@ export default function VectorStoreListItem({
           <DotsIcon className="text-grey-100 m-0 p-0" />
         </Button>
         <Button
-          className="m-0 w-full bg-transparent p-0 text-[#666666] hover:bg-slate-200 sm:w-fit"
+          className="m-0 w-full bg-transparent p-0 text-text-secondary hover:bg-slate-200 sm:w-fit"
           onClick={() => deleteVectorStore(vectorStore._id)}
         >
           <TrashIcon className="m-0 p-0" />

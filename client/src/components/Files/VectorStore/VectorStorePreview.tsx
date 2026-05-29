@@ -139,7 +139,7 @@ export default function VectorStorePreview() {
           </span>
           <div className="w-1/2 md:w-3/5">
             <p className="text-gray-500">
-              <span className="text-[#91c561]">0 KB hours</span>
+              <span className="text-green-700">0 KB hours</span>
               &nbsp; Free until end of 2024
             </p>
           </div>
@@ -200,7 +200,7 @@ export default function VectorStorePreview() {
                 <div className="flex w-1/2 flex-row lg:w-1/3">
                   <div className="content-center text-nowrap">{file.createdAt?.toString()}</div>
                   <Button
-                    className="my-0 ml-3 h-min bg-transparent p-0 text-[#666666] hover:bg-slate-200"
+                    className="my-0 ml-3 h-min bg-transparent p-0 text-text-secondary hover:bg-slate-200"
                     onClick={() => console.log('click')}
                   >
                     <TrashIcon className="m-0 p-0" />

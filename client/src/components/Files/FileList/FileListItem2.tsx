@@ -51,7 +51,7 @@ export default function FileListItem2({
             return (
               <span
                 key={index}
-                className="ml-2 mt-1 content-center rounded-full bg-[#f2f8ec] px-2 text-xs text-[#91c561]"
+                className="ml-2 mt-1 content-center rounded-full bg-green-500/15 px-2 text-xs text-green-700"
               >
                 {vectorStore.name}
               </span>

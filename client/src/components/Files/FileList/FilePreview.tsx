@@ -84,7 +84,7 @@ export default function FilePreview() {
             &nbsp; Status
           </span>
           <div className="w-1/2 sm:w-3/4 md:w-3/5">
-            <span className="flex w-20 flex-row items-center justify-evenly rounded-full bg-[#f2f8ec] p-1 text-[#91c561]">
+            <span className="flex w-20 flex-row items-center justify-evenly rounded-full bg-green-500/15 p-1 text-green-700">
               <CheckMark className="m-0 p-0" />
               <div>{file.object}</div>
             </span>
