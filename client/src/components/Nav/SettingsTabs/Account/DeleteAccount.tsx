@@ -167,7 +167,7 @@ const renderInput = (
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void,
 ) => (
   <div className="mb-4">
-    <label className="mb-1 block text-sm font-medium text-black dark:text-white" htmlFor={id}>
+    <label className="mb-1 block text-sm font-medium text-text-primary" htmlFor={id}>
       {label}
     </label>
     <Input id={id} onChange={onChange} placeholder={value} />
