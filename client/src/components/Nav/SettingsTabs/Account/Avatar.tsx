@@ -320,7 +320,8 @@ function Avatar() {
             </>
           ) : (
             <div
-              className="flex h-72 w-full flex-col items-center justify-center rounded-lg border-2 border-dashed border-gray-300 bg-transparent transition-colors hover:border-gray-400 dark:border-gray-600 dark:hover:border-gray-500"
+              /* [EXT] Phase G.10 Navvia: drop zone Avatar usa tokens semânticos + hover brand */
+              className="flex h-72 w-full flex-col items-center justify-center rounded-lg border-2 border-dashed border-border-medium bg-transparent transition-colors hover:border-brand hover:bg-brand-soft/30"
               onDrop={handleDrop}
               onDragOver={handleDragOver}
               role="button"
