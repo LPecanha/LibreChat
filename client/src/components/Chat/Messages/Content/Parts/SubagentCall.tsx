@@ -451,7 +451,8 @@ export default function SubagentCall({
         type="button"
         onClick={() => setOpen(true)}
         className={cn(
-          'group my-1.5 flex w-full flex-col gap-1 rounded-lg border border-border-light bg-surface-secondary px-3 py-2 text-left transition hover:bg-surface-tertiary',
+          /* [EXT] Phase E.4 Navvia: .tool-card hover faz border-medium */
+          'tool-card group flex w-full flex-col gap-1 text-left transition hover:!border-border-medium',
           running && 'animate-pulse-slow',
         )}
         aria-label={headerText}
@@ -622,7 +623,8 @@ function SubagentPrompt({
   return (
     <section
       aria-labelledby={headingId}
-      className="mb-3 shrink-0 overflow-hidden rounded-lg border border-border-light bg-surface-secondary text-text-primary"
+      /* [EXT] Phase E.4 Navvia: tool-card outer p/ painel completo (drawer) */
+      className="tool-card mb-3 shrink-0 overflow-hidden text-text-primary !p-0"
     >
       <div className="flex min-h-[2.75rem] items-center justify-between gap-3 border-b border-border-light px-3 py-2">
         <h3 id={headingId} className="text-sm font-medium text-text-primary">
