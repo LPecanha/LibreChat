@@ -144,7 +144,7 @@ export default function MemoryCreateDialog({
         buttons={
           <Button
             type="button"
-            variant="submit"
+            variant="brand"
             onClick={handleSave}
             disabled={isLoading || !key.trim() || !value.trim()}
             className="text-white"

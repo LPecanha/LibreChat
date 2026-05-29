@@ -62,7 +62,7 @@ export default function ServerInitializationSection({
             {localize('com_ui_cancel')}
           </Button>
           <Button
-            variant="submit"
+            variant="brand"
             onClick={() => window.open(serverOAuthUrl, '_blank', 'noopener,noreferrer')}
             className="flex-1"
           >

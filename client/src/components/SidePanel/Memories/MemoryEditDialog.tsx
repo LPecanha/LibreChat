@@ -216,7 +216,7 @@ export default function MemoryEditDialog({
           hasUpdateAccess ? (
             <Button
               type="button"
-              variant="submit"
+              variant="brand"
               onClick={handleSave}
               aria-label={localize('com_ui_save')}
               disabled={isLoading || !key.trim() || !value.trim()}

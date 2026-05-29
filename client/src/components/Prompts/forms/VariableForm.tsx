@@ -216,7 +216,7 @@ export default function VariableForm({
           ))}
         </div>
         <div className="flex justify-end">
-          <Button type="submit" variant="submit" aria-label={localize('com_ui_submit')}>
+          <Button type="submit" variant="brand" aria-label={localize('com_ui_submit')}>
             {localize('com_ui_submit')}
           </Button>
         </div>

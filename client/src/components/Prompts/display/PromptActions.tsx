@@ -48,7 +48,7 @@ const PromptActions = ({ group, mainText, onUsePrompt }: PromptActionsProps) => 
         <SharePrompt group={group} disabled={false} />
 
         <Button
-          variant="submit"
+          variant="brand"
           onClick={handleUsePrompt}
           className="flex-1 gap-2 sm:min-w-40 sm:flex-none"
           aria-label={localize('com_ui_use_prompt')}

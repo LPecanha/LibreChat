@@ -241,7 +241,7 @@ const AdminSettingsDialog: React.FC<AdminSettingsDialogProps> = ({
             <div className="flex justify-end">
               <Button
                 type="submit"
-                variant="submit"
+                variant="brand"
                 disabled={
                   isSubmitting ||
                   isLoading ||

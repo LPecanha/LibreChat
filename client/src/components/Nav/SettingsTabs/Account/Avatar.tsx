@@ -303,7 +303,7 @@ function Avatar() {
                   {localize('com_ui_cancel')}
                 </Button>
                 <Button
-                  variant="submit"
+                  variant="brand"
                   type="button"
                   className={cn('w-full', isUploading ? 'cursor-not-allowed opacity-90' : '')}
                   onClick={handleUpload}

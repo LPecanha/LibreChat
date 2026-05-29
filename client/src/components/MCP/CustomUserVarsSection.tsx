@@ -190,7 +190,7 @@ export default function CustomUserVarsSection({
         </Button>
         <Button
           type="button"
-          variant="submit"
+          variant="brand"
           disabled={isSubmitting}
           onClick={handleSubmit(onFormSubmit)}
         >

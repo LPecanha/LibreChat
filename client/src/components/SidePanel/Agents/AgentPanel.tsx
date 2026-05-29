@@ -535,7 +535,7 @@ export default function AgentPanel() {
                   {localize('com_ui_create_new_agent')}
                 </Button>
                 <Button
-                  variant="submit"
+                  variant="brand"
                   disabled={isEphemeralAgent(agent_id) || agentQuery.isInitialLoading}
                   onClick={(e) => {
                     e.preventDefault();

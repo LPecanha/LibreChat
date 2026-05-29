@@ -56,7 +56,7 @@ const EditBadgesComponent = ({
           </Button>
           <Button
             size="sm"
-            variant="submit"
+            variant="brand"
             aria-label="Save changes"
             onClick={handleSaveBadges}
             className="h-8 rounded-b-lg rounded-tr-xl"

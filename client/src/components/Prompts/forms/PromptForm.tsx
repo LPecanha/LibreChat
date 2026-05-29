@@ -70,7 +70,7 @@ const VersionsPanel = React.memo(
         {canEdit && (
           <div className="shrink-0 px-4 py-2">
             <Button
-              variant="submit"
+              variant="brand"
               size="sm"
               aria-label={localize('com_ui_make_production')}
               className={cn(

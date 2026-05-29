@@ -315,7 +315,8 @@ const SetKeyDialog = ({
             disabled={!(expiryTime ?? '')}
             setDialogOpen={onOpenChange}
           />
-          <Button variant="submit" onClick={submit}>
+          {/* [EXT] Phase G.7 Navvia: brand submit */}
+          <Button variant="brand" onClick={submit}>
             {localize('com_ui_submit')}
           </Button>
         </OGDialogFooter>
