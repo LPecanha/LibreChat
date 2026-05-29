@@ -56,27 +56,30 @@ export const Banner = ({ onHeightChange }: { onHeightChange?: (height: number) =
   };
 
   return (
+    /* [EXT] Phase I.3 Navvia — Banner global usa estilo #appBanner do
+     * protótipo (linhas 275-279): bg brand-soft + text-brand + border-b
+     * border-light, ícone close à direita com opacity hover. Persiste no
+     * tema light/dark via tokens semânticos. */
     <div
       ref={bannerRef}
-      className="sticky top-0 z-20 flex items-center bg-presentation px-2 py-1 text-text-primary dark:bg-gradient-to-r md:relative"
+      className="sticky top-0 z-20 flex items-center gap-2 border-b border-border-light bg-brand-soft px-3.5 py-2 text-[13px] text-brand md:relative"
     >
       <div
         className={cn(
-          'text-md w-full truncate text-center [&_a]:text-blue-700 [&_a]:underline dark:[&_a]:text-blue-400',
-          !banner.persistable && 'px-4',
+          'flex-1 truncate [&_a]:underline [&_a]:font-medium',
+          !banner.persistable && 'pr-2',
         )}
         dangerouslySetInnerHTML={{ __html: sanitizedMessage }}
-      ></div>
+      />
       {!banner.persistable && (
-        <Button
-          size="icon"
-          variant="ghost"
+        <button
+          type="button"
           aria-label="Dismiss banner"
-          className="size-8"
           onClick={onClick}
+          className="grid h-6 w-6 place-items-center rounded text-brand opacity-70 transition-opacity hover:opacity-100"
         >
-          <XIcon className="mx-auto h-4 w-4 text-text-primary" aria-hidden="true" />
-        </Button>
+          <XIcon className="h-4 w-4" aria-hidden="true" />
+        </button>
       )}
     </div>
   );
