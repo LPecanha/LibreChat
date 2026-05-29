@@ -8,19 +8,18 @@ interface MemoryEmptyStateProps {
 export default function MemoryEmptyState({ isFiltered = false }: MemoryEmptyStateProps) {
   const localize = useLocalize();
 
+  /* [EXT] Phase I.6 Navvia: usar .empty do protótipo */
   return (
-    <div className="flex flex-col items-center justify-center rounded-lg border border-border-light bg-transparent p-6 text-center">
-      <div className="mb-2 flex size-10 items-center justify-center rounded-full bg-surface-tertiary">
-        <Brain className="size-5 text-text-secondary" aria-hidden="true" />
-      </div>
+    <div className="empty">
+      <span className="ic" aria-hidden="true">
+        <Brain className="h-6 w-6" strokeWidth={1.7} />
+      </span>
       {isFiltered ? (
-        <p className="text-sm text-text-secondary">{localize('com_ui_no_memories_match')}</p>
+        <p>{localize('com_ui_no_memories_match')}</p>
       ) : (
         <>
-          <p className="text-sm font-medium text-text-primary">
-            {localize('com_ui_no_memories_title')}
-          </p>
-          <p className="mt-0.5 text-xs text-text-secondary">{localize('com_ui_no_memories')}</p>
+          <h3>{localize('com_ui_no_memories_title')}</h3>
+          <p>{localize('com_ui_no_memories')}</p>
         </>
       )}
     </div>
