@@ -83,8 +83,9 @@ const DeleteAccount = ({ disabled = false }: { title?: string; disabled?: boolea
               {localize('com_nav_delete_account_confirm')}
             </OGDialogTitle>
           </OGDialogHeader>
-          <div className="mb-8 text-sm text-black dark:text-white">
-            <ul className="font-semibold text-amber-600">
+          {/* [EXT] Phase G.8 Navvia: warning box estilo .error-card.rate */}
+          <div className="error-card rate mb-6 flex-col items-start">
+            <ul className="ml-4 list-disc space-y-1 font-medium">
               <li>{localize('com_nav_delete_warning')}</li>
               <li>{localize('com_nav_delete_data_info')}</li>
             </ul>
