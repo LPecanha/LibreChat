@@ -2,7 +2,18 @@
 
 ## Sumário
 
-Branch `dev` agora contém **29 commits** que portam o protótipo HTML `design/ui-preview.html` (2176 linhas, 13 views) para React/TypeScript dentro do LibreChat, preservando integrações funcionais (auth, websocket, agents, billing).
+Branch `dev` agora contém **34 commits** que portam o protótipo HTML `design/ui-preview.html` (2176 linhas, 13 views) para React/TypeScript dentro do LibreChat, preservando integrações funcionais (auth, websocket, agents, billing).
+
+**Atualização após segunda rodada de port** (5 commits novos):
+
+| Fase | Commit | Entrega |
+|---|---|---|
+| D.3 | `8ea431d22` | ChatForm JSX reorganizado p/ estrutura do protótipo (siri-border + bottom-row novo) |
+| Auth+ | `b459bc158` | Verdes restantes em LoginForm/Footer/Registration/Reset/2FA/VerifyEmail → brand |
+| Sweep | `c0115f783` | 36 arquivos não-auth com verdes upstream → brand (dialogs, SidePanel, Prompts, Skills) |
+| E.3 | `0af83636a` | ThinkingContent + .thinking/.think-content do protótipo |
+
+**Estado real do trabalho 1:1:** ~60-65% completo. Falta principal: tool cards, side panels (Builder/Artifacts), conteúdo das 8 tabs de Settings, modais dispersos. Detalhes abaixo.
 
 ## Fases executadas
 
