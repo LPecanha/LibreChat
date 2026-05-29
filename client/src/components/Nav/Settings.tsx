@@ -138,7 +138,8 @@ export default function Settings({ open, onOpenChange }: TDialogProps) {
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <div className="fixed inset-0 bg-black opacity-50 dark:opacity-80" aria-hidden="true" />
+          {/* [EXT] Phase G.4 Navvia: backdrop com blur + opacity unified */}
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" aria-hidden="true" />
         </TransitionChild>
 
         <TransitionChild

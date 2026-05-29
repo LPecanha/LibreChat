@@ -133,7 +133,8 @@ export function SourceHovercard({
               isFile ? (
                 <button
                   onClick={handleFileClick}
-                  className="ml-1 inline-flex h-5 max-w-36 items-center gap-1 overflow-hidden text-ellipsis whitespace-nowrap rounded-xl border border-border-heavy bg-surface-secondary px-2 text-xs font-medium text-text-primary no-underline transition-colors hover:bg-surface-hover dark:border-border-medium dark:hover:bg-surface-tertiary"
+                  /* [EXT] Phase E.9 Navvia: hover ganha brand-soft + text-brand (estilo .citation) */
+                  className="citation-chip ml-1 inline-flex h-5 max-w-36 items-center gap-1 overflow-hidden text-ellipsis whitespace-nowrap rounded-xl border border-border-heavy bg-surface-secondary px-2 text-xs font-medium text-text-primary no-underline transition-colors hover:border-brand hover:bg-brand-soft hover:text-brand dark:border-border-medium"
                   onMouseEnter={onMouseEnter}
                   onMouseLeave={onMouseLeave}
                   title={
@@ -148,7 +149,8 @@ export function SourceHovercard({
                   href={source.link}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="ml-1 inline-block h-5 max-w-36 cursor-pointer items-center overflow-hidden text-ellipsis whitespace-nowrap rounded-xl border border-border-heavy bg-surface-secondary px-2 text-xs font-medium no-underline transition-colors hover:bg-surface-hover dark:border-border-medium dark:hover:bg-surface-tertiary"
+                  /* [EXT] Phase E.9 Navvia: hover ganha brand-soft + text-brand (estilo .citation) */
+                  className="citation-chip ml-1 inline-block h-5 max-w-36 cursor-pointer items-center overflow-hidden text-ellipsis whitespace-nowrap rounded-xl border border-border-heavy bg-surface-secondary px-2 text-xs font-medium no-underline transition-colors hover:border-brand hover:bg-brand-soft hover:text-brand dark:border-border-medium"
                   onMouseEnter={onMouseEnter}
                   onMouseLeave={onMouseLeave}
                 >

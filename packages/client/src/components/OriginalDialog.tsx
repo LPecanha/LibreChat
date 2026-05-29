@@ -61,8 +61,10 @@ export const DialogOverlay = React.forwardRef<
     <DialogPrimitive.Overlay
       ref={ref}
       style={{ ...style, zIndex: overlayZIndex }}
+      /* [EXT] Phase G.4 Navvia: overlay usa bg-black/50 + blur (modal-backdrop
+       * do protótipo, linhas 131-132). Era bg-black/80 sem blur. */
       className={cn(
-        'fixed inset-0 bg-black/80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
+        'fixed inset-0 bg-black/50 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
         className,
       )}
       {...props}
