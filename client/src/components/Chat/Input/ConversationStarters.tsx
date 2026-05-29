@@ -62,13 +62,15 @@ const ConversationStarters = () => {
       {conversation_starters
         .slice(0, Constants.MAX_CONVO_STARTERS)
         .map((text: string, index: number) => (
+          /* [EXT] Phase D.4 Navvia: usar .starter do protótipo
+           * (design/ui-preview.html linha 401-402): border-light + bg secondary,
+           * hover border-medium + bg-hover + lift -1px. Mantém w-40 + line-clamp. */
           <button
             key={index}
             onClick={() => sendConversationStarter(text)}
-            /* [EXT] Navvia polish: hover ganha brand-soft + border-brand. Transition mais suave. */
-            className="relative flex w-40 cursor-pointer flex-col gap-2 rounded-2xl border border-border-medium px-3 pb-4 pt-3 text-start align-top text-[15px] shadow-[0_0_2px_0_rgba(0,0,0,0.05),0_4px_6px_0_rgba(0,0,0,0.02)] transition-all duration-200 ease-out fade-in hover:-translate-y-0.5 hover:border-brand hover:bg-brand-soft hover:shadow-md"
+            className="starter fade-in flex w-40 flex-col gap-2"
           >
-            <p className="break-word line-clamp-3 overflow-hidden text-balance break-all text-text-secondary">
+            <p className="line-clamp-3 overflow-hidden text-balance break-words text-text-secondary">
               {text}
             </p>
           </button>
