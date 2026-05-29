@@ -133,7 +133,7 @@ export default function FilePreview() {
                 <div className="flex w-3/5 flex-row md:w-1/2 xl:w-1/3">
                   <div className="content-center text-nowrap">{vectors.created_at.toString()}</div>
                   <Button
-                    className="m-0 ml-3 h-full bg-transparent p-0 text-[#666666] hover:bg-slate-200"
+                    className="m-0 ml-3 h-full bg-transparent p-0 text-text-secondary hover:bg-surface-hover"
                     onClick={() => {
                       console.log('Remove from vector store');
                     }}
@@ -161,7 +161,7 @@ export default function FilePreview() {
                 <div className="flex w-3/5 flex-row md:w-1/2 xl:w-1/3">
                   <div className="content-center text-nowrap">{thread.createdAt}</div>
                   <Button
-                    className="m-0 ml-3 h-full bg-transparent p-0 text-[#666666] hover:bg-slate-200"
+                    className="m-0 ml-3 h-full bg-transparent p-0 text-text-secondary hover:bg-surface-hover"
                     onClick={() => {
                       console.log('Remove from thread');
                     }}

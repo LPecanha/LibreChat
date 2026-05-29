@@ -76,7 +76,7 @@ export const fileTableColumns: ColumnDef<TFile>[] = [
               return (
                 <span
                   key={index}
-                  className="ml-2 mt-2 flex w-fit flex-row items-center rounded-full bg-[#f5f5f5] px-2 text-gray-500"
+                  className="ml-2 mt-2 flex w-fit flex-row items-center rounded-full bg-surface-secondary px-2 text-gray-500"
                 >
                   <PlusIcon className="h-3 w-3" />
                   &nbsp;
@@ -113,7 +113,7 @@ export const fileTableColumns: ColumnDef<TFile>[] = [
     cell: ({ row }) => {
       return (
         <>
-          <Button className="w-min content-center bg-transparent text-gray-500 hover:bg-slate-200">
+          <Button className="w-min content-center bg-transparent text-gray-500 hover:bg-surface-hover">
             <DotsIcon className="text-grey-100 m-0 size-5 p-0" />
           </Button>
         </>
