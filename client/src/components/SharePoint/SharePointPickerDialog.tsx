@@ -98,7 +98,7 @@ export default function SharePointPickerDialog({
                         )}
                         <div className="h-2 w-full rounded-full bg-surface-tertiary">
                           <div
-                            className="h-2 rounded-full bg-blue-600 transition-all duration-300"
+                            className="h-2 rounded-full bg-brand transition-all duration-300"
                             style={{
                               width: `${Math.round((downloadProgress.completed / downloadProgress.total) * 100)}%`,
                             }}
