@@ -73,14 +73,14 @@ export default function FilePreview() {
       <div className="mt-3 flex flex-col">
         <div className="flex flex-row">
           <span className="flex w-1/2 flex-row items-center sm:w-1/4 md:w-2/5">
-            <InfoIcon className="size-4 text-gray-500" />
+            <InfoIcon className="size-4 text-text-tertiary" />
             &nbsp; File ID
           </span>
-          <span className="w-1/2 text-gray-500 sm:w-3/4 md:w-3/5">{file._id}</span>
+          <span className="w-1/2 text-text-tertiary sm:w-3/4 md:w-3/5">{file._id}</span>
         </div>
         <div className="mt-3 flex flex-row">
           <span className="flex w-1/2 flex-row items-center sm:w-1/4 md:w-2/5">
-            <CircleIcon className="m-0 size-4 p-0 text-gray-500" />
+            <CircleIcon className="m-0 size-4 p-0 text-text-tertiary" />
             &nbsp; Status
           </span>
           <div className="w-1/2 sm:w-3/4 md:w-3/5">
@@ -92,24 +92,24 @@ export default function FilePreview() {
         </div>
         <div className="mt-3 flex flex-row">
           <span className="flex w-1/2 flex-row items-center sm:w-1/4 md:w-2/5">
-            <Clock3Icon className="m-0 size-4 p-0 text-gray-500" />
+            <Clock3Icon className="m-0 size-4 p-0 text-text-tertiary" />
             &nbsp; Purpose
           </span>
-          <span className="w-1/2 text-gray-500 sm:w-3/4 md:w-3/5">{file.message}</span>
+          <span className="w-1/2 text-text-tertiary sm:w-3/4 md:w-3/5">{file.message}</span>
         </div>
         <div className="mt-3 flex flex-row">
           <span className="flex w-1/2 flex-row items-center sm:w-1/4 md:w-2/5">
-            <Clock3Icon className="m-0 size-4 p-0 text-gray-500" />
+            <Clock3Icon className="m-0 size-4 p-0 text-text-tertiary" />
             &nbsp; Size
           </span>
-          <span className="w-1/2 text-gray-500 sm:w-3/4 md:w-3/5">{file.bytes}</span>
+          <span className="w-1/2 text-text-tertiary sm:w-3/4 md:w-3/5">{file.bytes}</span>
         </div>
         <div className="mt-3 flex flex-row">
           <span className="flex w-1/2 flex-row items-center sm:w-1/4 md:w-2/5">
-            <Clock3Icon className="m-0 size-4 p-0 text-gray-500" />
+            <Clock3Icon className="m-0 size-4 p-0 text-text-tertiary" />
             &nbsp; Created At
           </span>
-          <span className="w-1/2 text-gray-500 sm:w-3/4 md:w-3/5">
+          <span className="w-1/2 text-text-tertiary sm:w-3/4 md:w-3/5">
             {file.createdAt?.toString()}
           </span>
         </div>

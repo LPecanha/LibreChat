@@ -111,7 +111,7 @@ export default function MCPConfigDialog({
       }
       // Simply disconnected: gray (neutral)
       return (
-        <div className="flex items-center gap-2 rounded-full bg-surface-secondary px-2 py-0.5 text-xs font-medium text-gray-600 dark:bg-surface-secondary dark:text-gray-400">
+        <div className="flex items-center gap-2 rounded-full bg-surface-secondary px-2 py-0.5 text-xs font-medium text-text-secondary dark:bg-surface-secondary dark:text-text-tertiary">
           <PlugZap className="size-3" aria-hidden="true" />
           <span>{localize('com_nav_mcp_status_disconnected')}</span>
         </div>

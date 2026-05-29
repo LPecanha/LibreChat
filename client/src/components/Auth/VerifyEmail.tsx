@@ -82,12 +82,12 @@ function RequestPasswordReset() {
         {headerText}
       </h1>
       {countdown > 0 && (
-        <p className="text-center text-lg text-gray-600 dark:text-gray-400">
+        <p className="text-center text-lg text-text-secondary dark:text-text-tertiary">
           {localize('com_auth_email_verification_redirecting', { 0: countdown.toString() })}
         </p>
       )}
       {showResendLink && countdown === 0 && (
-        <p className="text-center text-lg text-gray-600 dark:text-gray-400">
+        <p className="text-center text-lg text-text-secondary dark:text-text-tertiary">
           {localize('com_auth_email_verification_resend_prompt')}
           <button
             className="ml-2 text-brand hover:underline"

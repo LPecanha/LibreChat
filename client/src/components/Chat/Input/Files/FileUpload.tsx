@@ -24,7 +24,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
   text = null,
   id = '1',
 }) => {
-  const [statusColor, setStatusColor] = useState<string>('text-gray-600');
+  const [statusColor, setStatusColor] = useState<string>('text-text-secondary');
   const [status, setStatus] = useState<null | string>(null);
   const localize = useLocalize();
 
@@ -75,7 +75,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
         type="button"
         onClick={handleClick}
         className={cn(
-          'mr-1 flex h-auto cursor-pointer items-center rounded bg-transparent px-2 py-1 text-xs font-normal transition-colors hover:bg-surface-hover hover:text-brand focus:ring-ring dark:bg-transparent dark:text-gray-300 dark:hover:bg-surface-hover dark:hover:text-brand',
+          'mr-1 flex h-auto cursor-pointer items-center rounded bg-transparent px-2 py-1 text-xs font-normal transition-colors hover:bg-surface-hover hover:text-brand focus:ring-ring dark:bg-transparent dark:text-text-secondary dark:hover:bg-surface-hover dark:hover:text-brand',
           statusColor,
           containerClassName,
         )}

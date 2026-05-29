@@ -286,8 +286,8 @@ export default function AssistantSelect({
       optionsClass="hover:bg-gray-20/50 dark:border-gray-700"
       optionsListClass="rounded-lg shadow-lg dark:bg-gray-850 dark:border-gray-700 dark:last:border"
       currentValueClass={cn(
-        'text-md font-semibold text-gray-900 dark:text-white',
-        value === '' ? 'text-gray-500' : '',
+        'text-md font-semibold text-text-primary dark:text-white',
+        value === '' ? 'text-text-tertiary' : '',
       )}
       className={cn(
         'mt-1 rounded-md dark:border-gray-700 dark:bg-gray-850',
@@ -295,10 +295,10 @@ export default function AssistantSelect({
       )}
       renderOption={() => (
         <span className="flex items-center gap-1.5 truncate">
-          <span className="absolute inset-y-0 left-0 flex items-center pl-2 text-gray-800 dark:text-gray-100">
+          <span className="absolute inset-y-0 left-0 flex items-center pl-2 text-text-primary dark:text-text-primary">
             <Plus className="w-[16px]" />
           </span>
-          <span className={cn('ml-4 flex h-6 items-center gap-1 text-gray-800 dark:text-gray-100')}>
+          <span className={cn('ml-4 flex h-6 items-center gap-1 text-text-primary dark:text-text-primary')}>
             {createAssistant}
           </span>
         </span>

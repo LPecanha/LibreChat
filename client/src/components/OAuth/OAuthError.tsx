@@ -55,10 +55,10 @@ export default function OAuthError() {
             </svg>
           </div>
         </div>
-        <h1 className="mb-4 text-3xl font-bold font-display text-gray-900">
+        <h1 className="mb-4 text-3xl font-bold font-display text-text-primary">
           {localize('com_ui_oauth_error_title') || 'Authentication Failed'}
         </h1>
-        <p className="mb-6 text-sm text-gray-600">{getErrorMessage(error)}</p>
+        <p className="mb-6 text-sm text-text-secondary">{getErrorMessage(error)}</p>
         <button
           onClick={() => window.close()}
           className="rounded-md bg-surface-primary px-4 py-2 text-sm font-medium text-white hover:bg-surface-secondary focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2"

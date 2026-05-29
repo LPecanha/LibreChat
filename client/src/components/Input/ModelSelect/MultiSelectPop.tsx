@@ -59,17 +59,17 @@ function MultiSelectPop({
             >
               {' '}
               {showLabel && (
-                <label className="block text-xs text-gray-700 dark:text-gray-500">{title}</label>
+                <label className="block text-xs text-text-secondary dark:text-text-tertiary">{title}</label>
               )}
               <span className="inline-flex" id={excludeIds[2]}>
                 <span
                   className={cn(
-                    'flex h-6 items-center gap-1 text-sm text-gray-800 dark:text-white',
+                    'flex h-6 items-center gap-1 text-sm text-text-primary dark:text-white',
                     !showLabel ? 'text-xs' : '',
                   )}
                 >
                   {/* {!showLabel && title.length > 0 && (
-                    <span className="text-xs text-gray-700 dark:text-gray-500">{title}:</span>
+                    <span className="text-xs text-text-secondary dark:text-text-tertiary">{title}:</span>
                   )} */}
                   <span className="flex items-center gap-1">
                     <div className="flex gap-1">
@@ -96,7 +96,7 @@ function MultiSelectPop({
                   viewBox="0 0 24 24"
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  className="h-4 w-4 text-gray-400"
+                  className="h-4 w-4 text-text-tertiary"
                   height="1em"
                   width="1em"
                   xmlns="http://www.w3.org/2000/svg"

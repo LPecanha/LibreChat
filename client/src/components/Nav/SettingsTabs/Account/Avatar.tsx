@@ -286,7 +286,7 @@ function Avatar() {
                 </div>
 
                 {/* Helper Text */}
-                <p className="text-center text-xs text-gray-500 dark:text-gray-400">
+                <p className="text-center text-xs text-text-tertiary dark:text-text-tertiary">
                   {localize('com_ui_editor_instructions')}
                 </p>
               </div>
@@ -335,7 +335,7 @@ function Avatar() {
               }}
               aria-label={localize('com_ui_upload_avatar_label')}
             >
-              <FileImage className="mb-4 size-16 text-gray-400" />
+              <FileImage className="mb-4 size-16 text-text-tertiary" />
               <p className="mb-2 text-center text-sm font-medium text-text-primary">
                 {localize('com_ui_drag_drop')}
               </p>

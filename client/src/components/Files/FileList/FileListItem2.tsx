@@ -31,7 +31,7 @@ export default function FileListItem2({
           </div>
           <div className="w-3/4 content-center">{file.filename}</div>
         </div>
-        <div className="flex w-fit flex-row flex-wrap text-gray-500 md:w-3/5">
+        <div className="flex w-fit flex-row flex-wrap text-text-tertiary md:w-3/5">
           {attachedVectorStores.map((vectorStore, index) => {
             if (index === 4) {
               return (
@@ -60,7 +60,7 @@ export default function FileListItem2({
         </div>
       </div>
       <div className="mr-0 flex w-2/12 flex-col items-center justify-evenly sm:mr-4 md:flex-row">
-        <Button className="w-min content-center bg-transparent text-gray-500 hover:bg-surface-hover">
+        <Button className="w-min content-center bg-transparent text-text-tertiary hover:bg-surface-hover">
           <DotsIcon className="text-grey-100" />
         </Button>
         <Button

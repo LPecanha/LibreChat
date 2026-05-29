@@ -95,7 +95,7 @@ export default function MCPStatusBadge({
         role="status"
         className={cn(
           badgeBaseClass,
-          'bg-surface-secondary text-gray-600 dark:bg-surface-secondary dark:text-gray-400',
+          'bg-surface-secondary text-text-secondary dark:bg-surface-secondary dark:text-text-tertiary',
         )}
       >
         <span>{localize('com_nav_mcp_status_disconnected')}</span>
