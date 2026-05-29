@@ -4175,6 +4175,19 @@ aside:hover .sidebar-collapse {
   font-style: italic;
   text-align: center;
 }
+
+/* [EXT] Phase E.7 Navvia: aplica .latex-block automaticamente em equações
+ * display geradas pelo KaTeX (.katex-display). Sem precisar mexer em
+ * markup — só override CSS. KaTeX já trata math inline com .katex span. */
+.katex-display {
+  display: block;
+  padding: 12px 14px;
+  margin: 10px 0;
+  border-radius: var(--radius);
+  background: var(--surface-secondary);
+  border: 1px solid var(--border-light);
+  overflow-x: auto;
+}
 .latex-inline {
   font-family: 'Cambria Math', Georgia, serif;
   font-style: italic;
