@@ -229,16 +229,15 @@ function HomeView() {
           {startupConfig?.balance?.enabled && balanceFormatted && (
             <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-border-light bg-surface-primary/70 px-2.5 py-1 text-[11.5px] text-text-secondary backdrop-blur">
               <span className="h-1.5 w-1.5 rounded-full bg-brand" />
-              Plano Pro · {balanceFormatted} em créditos
+              {localize('com_nav_home_plan_pill', { 0: balanceFormatted })}
             </div>
           )}
 
           <h1 className="font-display text-[38px] font-extrabold leading-[1.04] tracking-tight text-text-primary">
-            Por onde começamos{firstName ? `, ${firstName}` : ''}?
+            {localize('com_nav_home_greeting_question', { 0: firstName ? `, ${firstName}` : '' })}
           </h1>
           <p className="mt-2.5 max-w-xl text-[15px] text-text-secondary">
-            Comece digitando abaixo — converse, gere imagens, analise documentos ou chame um agente com{' '}
-            <span className="font-mono">@</span>.
+            {localize('com_nav_home_composer_hint')}
           </p>
 
           {/* COMPOSER siri-hero */}
@@ -248,7 +247,7 @@ function HomeView() {
               onChange={(e) => setComposer(e.target.value)}
               onKeyDown={handleKey}
               rows={3}
-              placeholder="Pergunte qualquer coisa…"
+              placeholder={localize('com_nav_home_composer_placeholder')}
               className="w-full resize-none bg-transparent px-5 pt-4 text-[16px] text-text-primary placeholder:text-text-tertiary focus:outline-none"
               style={{ lineHeight: 1.55 }}
             />
@@ -452,7 +451,7 @@ function HomeView() {
         </div>
 
         {/* ===== FERRAMENTAS ===== */}
-        <h2 className="rise d2 mt-9 font-display text-[16px] font-semibold">Ferramentas</h2>
+        <h2 className="rise d2 mt-9 font-display text-[16px] font-semibold">{localize('com_nav_home_section_tools')}</h2>
         <div className="mt-3 grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
           {TOOLS_TILES.map((t, i) => (
             <button
@@ -474,12 +473,12 @@ function HomeView() {
 
         {/* ===== AGENTES EM DESTAQUE ===== */}
         <div className="rise d3 mt-9 flex items-center justify-between">
-          <h2 className="font-display text-[16px] font-semibold">Agentes em destaque</h2>
+          <h2 className="font-display text-[16px] font-semibold">{localize('com_nav_home_section_featured_agents')}</h2>
           <button
             onClick={() => navigate('/agents')}
             className="flex items-center gap-1 text-[13px] font-medium text-brand hover:underline"
           >
-            Ver todos
+            {localize('com_nav_home_section_view_all')}
             <ChevronRight className="h-[13px] w-[13px]" strokeWidth={2} />
           </button>
         </div>
@@ -521,8 +520,8 @@ function HomeView() {
               <div className="agent-ico bg-brand-soft text-brand">
                 <Bot className="h-5 w-5" strokeWidth={1.8} />
               </div>
-              <div className="text-[12px] font-medium">Nenhum agente ainda</div>
-              <div className="text-[11px] text-text-tertiary">Crie ou importe no marketplace</div>
+              <div className="text-[12px] font-medium">{localize('com_nav_home_no_agents_yet')}</div>
+              <div className="text-[11px] text-text-tertiary">{localize('com_nav_home_no_agents_yet_desc')}</div>
             </div>
           )}
           <button
@@ -532,14 +531,14 @@ function HomeView() {
             <div className="agent-ico bg-brand-soft text-brand">
               <ArrowRight className="h-5 w-5" strokeWidth={2} />
             </div>
-            <div className="text-[12px] font-medium">Explorar todos</div>
+            <div className="text-[12px] font-medium">{localize('com_nav_home_explore_all')}</div>
           </button>
         </div>
 
         {/* ===== IMAGENS RECENTES (placeholder visual) ===== */}
         <div className="rise d4 mt-9 flex items-center justify-between">
-          <h2 className="font-display text-[16px] font-semibold">Imagens geradas recentemente</h2>
-          <button className="text-[12px] font-medium text-brand hover:underline">Ver galeria</button>
+          <h2 className="font-display text-[16px] font-semibold">{localize('com_nav_home_section_recent_images')}</h2>
+          <button className="text-[12px] font-medium text-brand hover:underline">{localize('com_nav_home_section_view_gallery')}</button>
         </div>
         <div className="carousel rise d4 mt-3">
           {GALLERY_PLACEHOLDERS.map((g) => (
@@ -560,12 +559,12 @@ function HomeView() {
           {/* Continue de onde parou */}
           <div className="rise d4">
             <div className="mb-3 flex items-center justify-between">
-              <h2 className="font-display text-[16px] font-semibold">Continue de onde parou</h2>
+              <h2 className="font-display text-[16px] font-semibold">{localize('com_nav_home_section_continue')}</h2>
               <button
                 onClick={() => navigate('/c/new')}
                 className="text-[12px] font-medium text-brand hover:underline"
               >
-                Ver tudo
+                {localize('com_nav_home_section_view_all')}
               </button>
             </div>
             <div className="divide-y divide-border-light overflow-hidden rounded-lg border border-border-light">
@@ -583,7 +582,7 @@ function HomeView() {
                 ))
               ) : (
                 <div className="px-3.5 py-6 text-center text-[12.5px] text-text-tertiary">
-                  Nenhuma conversa ainda. Comece digitando acima.
+                  {localize('com_nav_home_no_history')}
                 </div>
               )}
             </div>
@@ -592,12 +591,12 @@ function HomeView() {
           {/* Prompts em destaque */}
           <div className="rise d5">
             <div className="mb-3 flex items-center justify-between">
-              <h2 className="font-display text-[16px] font-semibold">Prompts em destaque</h2>
+              <h2 className="font-display text-[16px] font-semibold">{localize('com_nav_home_section_featured_prompts')}</h2>
               <button
                 onClick={() => navigate('/d/prompts')}
                 className="text-[12px] font-medium text-brand hover:underline"
               >
-                Biblioteca
+                {localize('com_nav_home_section_library')}
               </button>
             </div>
             <div className="space-y-2">

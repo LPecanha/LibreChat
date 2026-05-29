@@ -84,8 +84,9 @@ const AgentHandoff: React.FC<AgentHandoffProps> = ({ name, args: _args = '' }) =
       </button>
       <div style={expandStyle}>
         <div className="overflow-hidden" ref={expandRef}>
+          {/* [EXT] Phase E.8 Navvia: tool-card unified */}
           {hasInfo && (
-            <div className="ml-8 mt-2 rounded-lg border border-border-light bg-surface-secondary p-3 text-xs">
+            <div className="tool-card ml-8 mt-2 text-xs">
               <div className="mb-1 font-medium text-text-secondary">
                 {localize('com_ui_handoff_instructions')}:
               </div>
