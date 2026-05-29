@@ -157,28 +157,29 @@ export default function Settings({ open, onOpenChange }: TDialogProps) {
               )}
             >
               <DialogTitle
-                className="mb-1 flex items-center justify-between p-6 pb-5 text-left"
+                className="mb-1 flex items-center justify-between border-b border-border-light p-6 pb-5 text-left"
                 as="div"
               >
-                <h2 className="text-lg font-medium leading-6 text-text-primary">
+                {/* [EXT] Phase G.5 Navvia: título em font-display + tracking tight */}
+                <h2 className="font-display text-[18px] font-semibold leading-6 tracking-tight text-text-primary">
                   {localize('com_nav_settings')}
                 </h2>
                 <button
                   type="button"
-                  className="rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-border-xheavy focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-surface-primary dark:focus:ring-offset-surface-primary"
+                  /* [EXT] Phase G.5 Navvia: close button com .msg-action style */
+                  className="msg-action !h-7 !w-7 focus:outline-none focus:ring-2 focus:ring-brand"
                   onClick={() => onOpenChange(false)}
                 >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
-                    width="24"
-                    height="24"
+                    width="16"
+                    height="16"
                     viewBox="0 0 24 24"
                     fill="none"
                     stroke="currentColor"
-                    strokeWidth="2"
+                    strokeWidth="1.9"
                     strokeLinecap="round"
                     strokeLinejoin="round"
-                    className="h-5 w-5 text-text-primary"
                   >
                     <line x1="18" x2="6" y1="6" y2="18"></line>
                     <line x1="6" x2="18" y1="6" y2="18"></line>
