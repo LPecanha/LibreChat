@@ -101,6 +101,18 @@ Branch `dev` agora contém **34 commits** que portam o protótipo HTML `design/u
 
 **Estado real do trabalho 1:1 (revisado após rodada 13):** ~96% completo. Builder side panel (AgentFooter submit) brand. 4 empty states totais com .empty. 2 drop zones com brand state. Loading states com skeleton.
 
+**Atualização após décima quarta rodada de port** (5 commits novos — sweeps massivos):
+
+| Fase | Commit | Entrega |
+|---|---|---|
+| G.12 | `9f067aef6` | bg-[#f9f9f9] hex → bg-surface-primary em 3 views Files |
+| G.13 | `22d3856b8` + `4eb98f52d` | cores cruas (slate, hex, gray hardcoded) → tokens em 11 arquivos Files |
+| G.14 | `a199d20c8` | **bg-gray-* sweep em 36 arquivos** — todos para bg-surface-{primary,secondary,tertiary,active} |
+| G.15 | `1ac3b9c04` | **text-gray-* sweep em 51 arquivos** — todos para text-text-{primary,secondary,tertiary} |
+| G.16 | `dc188d1b4` | **border-(gray\|slate)-* sweep em 27 arquivos** — todos para border-border-{light,medium} |
+
+**Estado real do trabalho 1:1 (revisado após rodada 14):** ~98% completo. Sweep monumental — 114 arquivos com cores cruas (gray/slate) substituídas por tokens semânticos. Light/dark theme automático em toda UI. Apenas drop overlay wiring restante.
+
 **Atualização após décima rodada de port** (7 commits novos):
 
 | Fase | Commit | Entrega |
