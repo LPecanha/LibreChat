@@ -13,7 +13,14 @@ Branch `dev` agora contém **34 commits** que portam o protótipo HTML `design/u
 | Sweep | `c0115f783` | 36 arquivos não-auth com verdes upstream → brand (dialogs, SidePanel, Prompts, Skills) |
 | E.3 | `0af83636a` | ThinkingContent + .thinking/.think-content do protótipo |
 
-**Estado real do trabalho 1:1:** ~60-65% completo. Falta principal: tool cards, side panels (Builder/Artifacts), conteúdo das 8 tabs de Settings, modais dispersos. Detalhes abaixo.
+**Atualização após terceira rodada de port** (2 commits novos — tool cards):
+
+| Fase | Commit | Entrega |
+|---|---|---|
+| E.4 | `2fc812d95` | Tool cards usam .tool-card + .codeblock-* — ToolCall, ExecuteCode (codeblock-card/body/out), CodeAnalyze (idem), RetrievalCall (tool-card), WebSearch (tool-card), SkillCall, ReadFileCall |
+| E.4b | `0bf927397` | SubagentCall — 2 wrappers (button container + section drawer) com .tool-card |
+
+**Estado real do trabalho 1:1 (revisado após rodada 3):** ~70% completo. Falta principal: conteúdo das 8 tabs de Settings, side panels (Builder/Artifacts), modais dispersos, alguns content parts (AgentHandoff, AgentUpdate, Attachment), citations + tables + latex no markdown render, drop overlay wiring, density picker, toasts globais.
 
 ## Fases executadas
 
