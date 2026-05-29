@@ -57,7 +57,14 @@ Branch `dev` agora contém **34 commits** que portam o protótipo HTML `design/u
 | J.3 + E.8 | `c3324ead7` | **HomeView 100% i18n** — 29 chaves novas em en + pt-BR para sections, stats, pill plano, greeting question, composer placeholder/hint, "View all/gallery/library", "Explore all", "No agents/history" · AgentHandoff usa `.tool-card` |
 | fix | `923336c05` | Placeholder i18next `{0}` → `{{0}}` (corrige "Where shall we start{0}?" → "Where shall we start, Teste?") |
 
-**Estado real do trabalho 1:1 (revisado após rodada 8):** ~84% completo. HomeView críticos 100% i18n. Tile labels e prompt highlights ainda em pt-BR (intencional — são exemplos de uso). i18next placeholder format conferido em todas chaves.
+**Atualização após nona rodada de port** (2 commits novos):
+
+| Fase | Commit | Entrega |
+|---|---|---|
+| G.4 + E.9 | `40880d5ff` | **OGDialog overlay + Settings backdrop** — `bg-black/80` → `bg-black/50 backdrop-blur-sm` (estilo `.modal-backdrop` do protótipo). Propaga p/ Share/Export/SetKey/EditBadges/Fork/Feedback/Variable/MemoryCreate/Edit/MCPConfig/ToolSelect/SkillSelect/BuyCredits/Settings — TODOS os modais ganham backdrop unified. **Citation chips** com hover brand-soft + border-brand + text-brand (estilo `.citation`) |
+| I.3 | `e2b6f9486` | **Banner global** (`<Banner />`) refeito com bg-brand-soft + text-brand + border-b border-light + ícone close opacity hover (estilo `#appBanner` do protótipo). Antes era bg-presentation + gradient dark + link azul cru |
+
+**Estado real do trabalho 1:1 (revisado após rodada 9):** ~86% completo. Modais com backdrop unified (impacto em 14+ dialogs). Banner global brand-aware. Citation chips brand no hover.
 
 Falta principal:
 - Settings 6 abas restantes (Speech, Chat, Beta, Personalization, Memory, Data, Account, Balance) — conteúdo upstream
