@@ -117,11 +117,12 @@ export default function UploadSkillDialog({ isOpen, setIsOpen }: UploadSkillDial
               onDragLeave={() => setIsDragging(false)}
               onDrop={handleDrop}
               disabled={importMutation.isLoading}
+              /* [EXT] Phase G.11 Navvia: drop zone com brand state quando isDragging */
               className={cn(
                 'flex h-[120px] w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border border-dashed text-sm text-text-secondary transition-colors',
                 isDragging
-                  ? 'border-border-heavy bg-surface-hover'
-                  : 'border-border-medium hover:bg-surface-hover',
+                  ? 'border-brand bg-brand-soft'
+                  : 'border-border-medium hover:border-brand hover:bg-surface-hover',
                 importMutation.isLoading && 'cursor-wait opacity-50',
               )}
             >
