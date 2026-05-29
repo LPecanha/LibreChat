@@ -76,6 +76,18 @@ Branch `dev` agora contém **34 commits** que portam o protótipo HTML `design/u
 
 **Estado real do trabalho 1:1 (revisado após rodada 11):** ~92% completo. Zero variant="submit" e zero text-blue-* upstream restantes. Theme token aponta para brand. Mermaid 100% unified. DeleteAccount warning consistente.
 
+**Atualização após décima segunda rodada de port** (5 commits novos):
+
+| Fase | Commit | Entrega |
+|---|---|---|
+| OAuth | `bb34c74d8` | OAuthSuccess refeito: bg-gray-50/white → tokens semânticos, text-indigo-500 → text-brand, h1 ganha font-display |
+| J.5 | `5b1eb5bda` | ShareView title em font-display + tracking-tight |
+| font | `b1d25656b` | font-display em 6 lugares: OAuthError, VerifyEmail (2), Marketplace (3), AgentDetail+Content, ExtBalancePanel (balance number) |
+| sweep | `d92d483b3` | hover:bg-gray-{100,200,300} → hover:bg-surface-hover/active em 10 arquivos. dark variants idem. |
+| sweep | `1a7d1721d` | text-black dark:text-white → text-text-primary (OptionsPopover, VerifyEmail, DeleteAccount) |
+
+**Estado real do trabalho 1:1 (revisado após rodada 12):** ~94% completo. Tipografia (font-display) e cores (tokens semânticos) consistentes em todos UI critical paths. Apenas builders/artifacts panels e drop overlay restantes para 100%.
+
 **Atualização após décima rodada de port** (7 commits novos):
 
 | Fase | Commit | Entrega |
