@@ -557,14 +557,14 @@ function HomeView() {
         </div>
         <div className="carousel rise d4 mt-3">
           {GALLERY_PLACEHOLDERS.map((g) => (
-            <div key={g.label} className="gallery-thumb" style={{ background: g.bg }}>
-              <span>{g.label}</span>
+            <div key={g.labelKey} className="gallery-thumb" style={{ background: g.bg }}>
+              <span>{localize(g.labelKey)}</span>
             </div>
           ))}
           <div className="gallery-thumb grid place-items-center" style={{ background: 'var(--surface-secondary)' }}>
             <span className="!static !text-text-tertiary !shadow-none">
               <Plus className="mx-auto h-4 w-4 mb-0.5" strokeWidth={1.8} />
-              Nova imagem
+              {localize('com_nav_home_gallery_new')}
             </span>
           </div>
         </div>
@@ -615,21 +615,26 @@ function HomeView() {
               </button>
             </div>
             <div className="space-y-2">
-              {PROMPT_HIGHLIGHTS.map((p) => (
-                <button
-                  key={p.title}
-                  onClick={() => startConversation(p.title)}
-                  className="flex w-full items-start gap-3 rounded-lg border border-border-light bg-surface-secondary px-3.5 py-2.5 text-left hover:border-border-medium"
-                >
-                  <span className="grid h-8 w-8 shrink-0 place-items-center rounded-md bg-surface-active">
-                    {p.emoji}
-                  </span>
-                  <div className="min-w-0">
-                    <div className="truncate text-[13px] font-medium">{p.title}</div>
-                    <div className="truncate text-[11.5px] text-text-tertiary">{p.desc}</div>
-                  </div>
-                </button>
-              ))}
+              {PROMPT_HIGHLIGHTS.map((p) => {
+                const title = localize(p.titleKey);
+                return (
+                  <button
+                    key={p.titleKey}
+                    onClick={() => startConversation(title)}
+                    className="flex w-full items-start gap-3 rounded-lg border border-border-light bg-surface-secondary px-3.5 py-2.5 text-left hover:border-border-medium"
+                  >
+                    <span className="grid h-8 w-8 shrink-0 place-items-center rounded-md bg-surface-active">
+                      {p.emoji}
+                    </span>
+                    <div className="min-w-0">
+                      <div className="truncate text-[13px] font-medium">{title}</div>
+                      <div className="truncate text-[11.5px] text-text-tertiary">
+                        {localize(p.descKey)}
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
             </div>
           </div>
         </div>
