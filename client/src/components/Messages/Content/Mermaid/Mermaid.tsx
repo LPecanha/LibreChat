@@ -153,15 +153,17 @@ const Mermaid: React.FC<MermaidProps> = memo(({ children, id, theme }) => {
       );
     }
 
+    /* [EXT] Phase E.11 Navvia: usar .codeblock-card unified */
     return (
-      <div className="w-full overflow-hidden rounded-lg border border-border-light">
+      <div className="codeblock-card w-full">
         <div className="flex items-center gap-2 border-b border-border-light bg-surface-secondary px-4 py-2 font-sans text-xs text-text-secondary">
           <Spinner className="h-3 w-3" />
           <span className="font-medium">{localize('com_ui_mermaid')}</span>
         </div>
         <pre
           ref={streamingCodeRef}
-          className="max-h-[350px] min-h-[150px] overflow-auto whitespace-pre-wrap bg-surface-primary-alt p-4 font-mono text-xs text-text-secondary"
+          /* [EXT] Phase E.11 Navvia: codeblock-body unified (dark sempre + JetBrains) */
+          className="codeblock-body max-h-[350px] min-h-[150px] overflow-auto whitespace-pre-wrap"
         >
           {children}
         </pre>
@@ -170,8 +172,9 @@ const Mermaid: React.FC<MermaidProps> = memo(({ children, id, theme }) => {
   }
 
   if (error) {
+    /* [EXT] Phase E.11 Navvia: usar .codeblock-card unified */
     return (
-      <div className="w-full overflow-hidden rounded-lg border border-border-light">
+      <div className="codeblock-card w-full">
         <MermaidHeader codeContent={children} showCode={showCode} onToggleCode={handleToggleCode} />
         <div className="border-t border-border-light bg-surface-tertiary p-4">
           <div className="mb-2 flex items-center justify-between">
