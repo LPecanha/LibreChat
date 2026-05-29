@@ -104,11 +104,11 @@ const BookmarkEditDialog = ({
         }
         buttons={
           <Button
-            variant="submit"
+            /* [EXT] Phase G.6 Navvia: submit Bookmark vira brand (azul) */
+            variant="brand"
             type="submit"
             disabled={mutation.isLoading}
             onClick={handleSubmitForm}
-            className="text-white"
           >
             {mutation.isLoading ? <Spinner /> : localize('com_ui_save')}
           </Button>
