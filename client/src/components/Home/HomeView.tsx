@@ -60,15 +60,13 @@ function getGreeting(): string {
   return 'Boa noite';
 }
 
-/* [EXT] Phase J.4 Navvia: chips e tiles agora referenciam i18n keys
- * (renderizados em runtime via localize()). Prompts ficam hardcoded
- * por enquanto — viram demos descartáveis pela conta. */
+/* [EXT] Phase J.5 Navvia: chips e tiles 100% via localize() */
 const SUGGESTION_CHIPS = [
-  { emoji: '🎨', labelKey: 'com_nav_home_chip_image' as const, prompt: 'Gere uma imagem de um mascote para o Navvia' },
-  { emoji: '📄', labelKey: 'com_nav_home_chip_doc' as const, prompt: 'Analise este documento e resuma os pontos principais' },
-  { emoji: '🌐', labelKey: 'com_nav_home_chip_search' as const, prompt: 'Pesquise na web as novidades de IA desta semana' },
-  { emoji: '💻', labelKey: 'com_nav_home_chip_code' as const, prompt: 'Escreva uma função em TypeScript para debounce' },
-  { emoji: '📝', labelKey: 'com_nav_home_chip_summary' as const, prompt: 'Resuma este texto em 3 tópicos' },
+  { emoji: '🎨', labelKey: 'com_nav_home_chip_image' as const, promptKey: 'com_nav_home_prompt_image_full' as const },
+  { emoji: '📄', labelKey: 'com_nav_home_chip_doc' as const, promptKey: 'com_nav_home_prompt_doc_full' as const },
+  { emoji: '🌐', labelKey: 'com_nav_home_chip_search' as const, promptKey: 'com_nav_home_prompt_search_full' as const },
+  { emoji: '💻', labelKey: 'com_nav_home_chip_code' as const, promptKey: 'com_nav_home_prompt_code_full' as const },
+  { emoji: '📝', labelKey: 'com_nav_home_chip_summary' as const, promptKey: 'com_nav_home_prompt_summary_full' as const },
 ];
 
 const TOOLS_TILES = [
@@ -117,17 +115,17 @@ const TOOLS_TILES = [
 ];
 
 const GALLERY_PLACEHOLDERS = [
-  { label: 'Logo minimalista', bg: 'linear-gradient(135deg,#2469e2,#11b38d)' },
-  { label: 'Banner produto', bg: 'linear-gradient(135deg,#0d9488,#00d4ff)' },
-  { label: 'Ícone app', bg: 'linear-gradient(135deg,#f59e0b,#ef4444)' },
-  { label: 'Ilustração hero', bg: 'linear-gradient(135deg,#ec4899,#8b5cf6)' },
-  { label: 'Mockup mobile', bg: 'linear-gradient(135deg,#11b38d,#2469e2)' },
+  { labelKey: 'com_nav_home_gallery_logo' as const, bg: 'linear-gradient(135deg,#2469e2,#11b38d)' },
+  { labelKey: 'com_nav_home_gallery_banner' as const, bg: 'linear-gradient(135deg,#0d9488,#00d4ff)' },
+  { labelKey: 'com_nav_home_gallery_icon' as const, bg: 'linear-gradient(135deg,#f59e0b,#ef4444)' },
+  { labelKey: 'com_nav_home_gallery_illustration' as const, bg: 'linear-gradient(135deg,#ec4899,#8b5cf6)' },
+  { labelKey: 'com_nav_home_gallery_mockup' as const, bg: 'linear-gradient(135deg,#11b38d,#2469e2)' },
 ];
 
 const PROMPT_HIGHLIGHTS = [
-  { emoji: '⚡', title: 'Resumir reunião', desc: 'Transforma transcrição em ata + ações' },
-  { emoji: '📧', title: 'E-mail comercial', desc: 'Escreve follow-up persuasivo' },
-  { emoji: '🐛', title: 'Explicar stack trace', desc: 'Diagnostica erro e sugere fix' },
+  { emoji: '⚡', titleKey: 'com_nav_home_prompt_meeting_title' as const, descKey: 'com_nav_home_prompt_meeting_desc' as const },
+  { emoji: '📧', titleKey: 'com_nav_home_prompt_email_title' as const, descKey: 'com_nav_home_prompt_email_desc' as const },
+  { emoji: '🐛', titleKey: 'com_nav_home_prompt_debug_title' as const, descKey: 'com_nav_home_prompt_debug_desc' as const },
 ];
 
 function relativeTime(updatedAt?: string): string {
@@ -397,7 +395,11 @@ function HomeView() {
           {/* Chips de ações sugeridas */}
           <div className="mt-5 flex flex-wrap justify-center gap-2">
             {SUGGESTION_CHIPS.map((c) => (
-              <button key={c.labelKey} onClick={() => startConversation(c.prompt)} className="chip">
+              <button
+                key={c.labelKey}
+                onClick={() => startConversation(localize(c.promptKey))}
+                className="chip"
+              >
                 <span aria-hidden="true">{c.emoji}</span>
                 {localize(c.labelKey)}
               </button>

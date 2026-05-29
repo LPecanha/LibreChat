@@ -85,10 +85,14 @@
 html {
   --brand-purple: #ab68ff;
   --presentation: var(--white);
-  --text-primary: var(--gray-800);
-  --text-secondary: var(--gray-600);
-  --text-secondary-alt: var(--gray-500);
-  --text-tertiary: var(--gray-500);
+  /* [EXT] Navvia: hierarquia text-* tokens do protótipo (mais contraste light).
+   * Antes (upstream): primary #212121, secondary #424242, tertiary #595959 — todas
+   * muito escuras. Agora: primary #1a1d21 (mais escuro nos headings), secondary
+   * #5c6066 (cinza médio legível), tertiary #8a8f98 (cinza claro p/ meta info). */
+  --text-primary: #1a1d21;
+  --text-secondary: #5c6066;
+  --text-secondary-alt: #6e737a;
+  --text-tertiary: #8a8f98;
   --text-warning: var(--amber-500);
   --text-destructive: var(--red-600);
   --ring-primary: var(--gray-500);
@@ -151,10 +155,14 @@ html {
 .dark {
   --brand-purple: #ab68ff;
   --presentation: var(--gray-800);
-  --text-primary: var(--gray-100);
-  --text-secondary: var(--gray-300);
-  --text-secondary-alt: var(--gray-400);
-  --text-tertiary: var(--gray-500);
+  /* [EXT] Navvia: hierarquia text-* tokens em dark do protótipo (mais contraste).
+   * Antes (upstream): primary #ececec, secondary #cdcdcd, tertiary #595959 — gap
+   * entre secondary e tertiary muito grande. Agora: primary #eceef1 (branco suave
+   * legível), secondary #9fa3aa (cinza médio), tertiary #6c7077 (cinza dark p/ meta). */
+  --text-primary: #eceef1;
+  --text-secondary: #9fa3aa;
+  --text-secondary-alt: #80858d;
+  --text-tertiary: #6c7077;
   --text-warning: var(--amber-500);
   --text-destructive: var(--red-600);
   --header-primary: var(--gray-700);

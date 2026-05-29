@@ -6,10 +6,11 @@ import { IThemeRGB } from '../types';
  */
 export const darkTheme: IThemeRGB = {
   // Text colors
-  'rgb-text-primary': '236 236 236', // #ececec (gray-100)
-  'rgb-text-secondary': '205 205 205', // #cdcdcd (gray-300)
-  'rgb-text-secondary-alt': '153 150 150', // #999696 (gray-400)
-  'rgb-text-tertiary': '89 89 89', // #595959 (gray-500)
+  /* [EXT] Navvia: hierarquia do protótipo em dark (gap menor entre níveis) */
+  'rgb-text-primary': '236 238 241', // #eceef1 (branco suave)
+  'rgb-text-secondary': '159 163 170', // #9fa3aa (cinza médio)
+  'rgb-text-secondary-alt': '128 133 141', // #80858d
+  'rgb-text-tertiary': '108 112 119', // #6c7077 (cinza dark)
   'rgb-text-warning': '245 158 11', // #f59e0b (amber-500)
   // [EXT] text-destructive (previously missing — synced with style.css var(--red-600))
   'rgb-text-destructive': '220 38 38', // #dc2626 (red-600)
