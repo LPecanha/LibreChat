@@ -17,9 +17,14 @@ export const ThinkingContent: FC<{
 }> = memo(({ children }) => {
   const fontSize = useAtomValue(fontSizeAtom);
 
+  /* [EXT] Phase E.3 Navvia: usar .thinking + .think-content do protótipo
+   * (design/ui-preview.html linhas 191-196). Mantém p-3 pb-8 por causa do
+   * FloatingThinkingBar absolute no canto inferior. */
   return (
-    <div className="relative rounded-lg border border-border-light bg-surface-secondary p-3 pb-8 text-text-secondary">
-      <p className={cn('whitespace-pre-wrap leading-[26px]', fontSize)}>{children}</p>
+    <div className="thinking relative">
+      <p className={cn('think-content whitespace-pre-wrap leading-[26px]', fontSize)}>
+        {children}
+      </p>
     </div>
   );
 });
