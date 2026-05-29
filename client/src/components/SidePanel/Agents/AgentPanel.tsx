@@ -550,12 +550,11 @@ export default function AgentPanel() {
           </div>
           {agentQuery.isInitialLoading && <AgentPanelSkeleton />}
           {!canEditAgent && !agentQuery.isInitialLoading && (
-            <div className="flex h-[30vh] w-full items-center justify-center">
-              <div className="text-center">
-                <h2 className="text-token-text-primary m-2 text-xl font-semibold">
-                  {localize('com_agents_not_available')}
-                </h2>
-                <p className="text-token-text-secondary">{localize('com_agents_no_access')}</p>
+            /* [EXT] Phase G.9 Navvia: usar .empty do protótipo */
+            <div className="my-4 px-4">
+              <div className="empty">
+                <h3>{localize('com_agents_not_available')}</h3>
+                <p>{localize('com_agents_no_access')}</p>
               </div>
             </div>
           )}
