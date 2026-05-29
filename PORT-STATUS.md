@@ -50,7 +50,14 @@ Branch `dev` agora contém **34 commits** que portam o protótipo HTML `design/u
 | E.6 | `469869139` | Mermaid diagrams com `.mermaid-box` do protótipo (hover border-medium, cursor zoom-in, .exp button absoluto top-right) |
 | E.7 | `c4598438b` | KaTeX equações display (\$\$...\$\$) recebem styling `.latex-block` via override CSS (sem mexer em markup nem plugin) |
 
-**Estado real do trabalho 1:1 (revisado após rodada 7):** ~82% completo. Toast global agora é Navvia em toda a plataforma. Mermaid e LaTeX unified com .tool-card/.codeblock-card.
+**Atualização após oitava rodada de port** (2 commits novos):
+
+| Fase | Commit | Entrega |
+|---|---|---|
+| J.3 + E.8 | `c3324ead7` | **HomeView 100% i18n** — 29 chaves novas em en + pt-BR para sections, stats, pill plano, greeting question, composer placeholder/hint, "View all/gallery/library", "Explore all", "No agents/history" · AgentHandoff usa `.tool-card` |
+| fix | `923336c05` | Placeholder i18next `{0}` → `{{0}}` (corrige "Where shall we start{0}?" → "Where shall we start, Teste?") |
+
+**Estado real do trabalho 1:1 (revisado após rodada 8):** ~84% completo. HomeView críticos 100% i18n. Tile labels e prompt highlights ainda em pt-BR (intencional — são exemplos de uso). i18next placeholder format conferido em todas chaves.
 
 Falta principal:
 - Settings 6 abas restantes (Speech, Chat, Beta, Personalization, Memory, Data, Account, Balance) — conteúdo upstream
