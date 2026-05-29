@@ -88,6 +88,19 @@ Branch `dev` agora contém **34 commits** que portam o protótipo HTML `design/u
 
 **Estado real do trabalho 1:1 (revisado após rodada 12):** ~94% completo. Tipografia (font-display) e cores (tokens semânticos) consistentes em todos UI critical paths. Apenas builders/artifacts panels e drop overlay restantes para 100%.
 
+**Atualização após décima terceira rodada de port** (5 commits novos):
+
+| Fase | Commit | Entrega |
+|---|---|---|
+| G.9 | `c560b584b` | AgentPanel empty state `.empty` + AgentFooter submit brand (legacy btn btn-primary → bg-brand text-brand-fg) |
+| I.7 | `ba875d176` | VirtualizedAgentGrid loading com 4 cards `.skeleton` (consistente com AgentGrid) |
+| G.10 | `eb7d8eac1` | Avatar drop zone hover brand-soft + border-brand |
+| G.11 | `8ce0e3b58` | UploadSkillDialog drop zone com brand state quando isDragging |
+| I.8 | `a22c4d6db` | MemoryCard hover ganha border-medium + transition |
+| I.9 | `7f97acc7a` | BookmarkEmptyState usa `.empty` |
+
+**Estado real do trabalho 1:1 (revisado após rodada 13):** ~96% completo. Builder side panel (AgentFooter submit) brand. 4 empty states totais com .empty. 2 drop zones com brand state. Loading states com skeleton.
+
 **Atualização após décima rodada de port** (7 commits novos):
 
 | Fase | Commit | Entrega |
