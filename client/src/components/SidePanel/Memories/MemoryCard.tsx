@@ -21,10 +21,11 @@ export default function MemoryCard({ memory, hasUpdateAccess }: MemoryCardProps)
 
   return (
     <div
+      /* [EXT] Phase I.8 Navvia: hover ganha border-medium (consistente com .agent-card) */
       className={cn(
         'rounded-lg px-3 py-2.5',
-        'border border-border-light bg-transparent',
-        'hover:bg-surface-secondary',
+        'border border-border-light bg-transparent transition-colors',
+        'hover:border-border-medium hover:bg-surface-secondary',
       )}
     >
       {/* Row 1: Key + Token count + Actions */}
