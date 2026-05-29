@@ -20,7 +20,25 @@ Branch `dev` agora contém **34 commits** que portam o protótipo HTML `design/u
 | E.4 | `2fc812d95` | Tool cards usam .tool-card + .codeblock-* — ToolCall, ExecuteCode (codeblock-card/body/out), CodeAnalyze (idem), RetrievalCall (tool-card), WebSearch (tool-card), SkillCall, ReadFileCall |
 | E.4b | `0bf927397` | SubagentCall — 2 wrappers (button container + section drawer) com .tool-card |
 
-**Estado real do trabalho 1:1 (revisado após rodada 3):** ~70% completo. Falta principal: conteúdo das 8 tabs de Settings, side panels (Builder/Artifacts), modais dispersos, alguns content parts (AgentHandoff, AgentUpdate, Attachment), citations + tables + latex no markdown render, drop overlay wiring, density picker, toasts globais.
+**Atualização após quarta rodada de port** (2 commits novos):
+
+| Fase | Commit | Entrega |
+|---|---|---|
+| G.2 | `47a0d00c7` | **DensitySelector novo** em Settings/General — usuário escolhe compacta/cozy/confortável. Persiste em localStorage. Root.tsx aplica `body[data-density]` ao montar. Tokens (--row-h, --ui-font, --msg-font, --radius) já em CSS Phase A respondem automaticamente |
+| D.4 | `5fdebaf8c` | ConversationStarters agora usa `.starter` do protótipo (consistência com .tile, .agent-card, .stat) |
+
+**Estado real do trabalho 1:1 (revisado após rodada 4):** ~73% completo. Density picker era uma funcionalidade ausente que protótipo definia — implementada de verdade. ConversationStarters agora consistente com resto do design system.
+
+Falta principal:
+- Settings 6 abas restantes (Speech, Chat, Beta, Personalization, Memory, Data, Account, Balance) — conteúdo upstream
+- Side panels (Builder agente / Artifacts preview) — não tocados
+- 13 modais dispersos
+- Content parts: AgentHandoff, AgentUpdate, Attachment, ToolArtifactCard, OpenAIImageGen
+- Citations `[1]`, tables `.tbl`, latex `.latex-block`, mermaid `.mermaid-box`
+- Drop overlay wiring (drag-drop CSS existe, comportamento não amarrado)
+- Toasts globais (createToast + ToastHost)
+- AppBanner global
+- i18n proper p/ strings hardcoded em NavviaSidebar/HomeView/MobileTabs/DensitySelector
 
 ## Fases executadas
 
