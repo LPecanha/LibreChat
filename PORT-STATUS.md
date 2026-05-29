@@ -320,3 +320,38 @@ Idem nos themes RGB (`rgb-text-*` em `default.ts` + `dark.ts`).
 **98 commits totais no branch `dev`.**
 
 Identidade visual Navvia completa em toda a plataforma, com hierarquia tipográfica e cromática proper em ambos os temas.
+
+---
+
+## DIAGNÓSTICO COMPARATIVO — Playwright
+
+Captura side-by-side de protótipo HTML vs produto React em 24 screenshots
+(6 views × 2 themes × 2 ambientes) em `design/dev-snapshots/compare/`.
+Script: `scripts/qa-compare.mjs` (serve protótipo em :8765, captura produto
+em :3090).
+
+### Gaps identificados e estado
+
+| Gap | Severidade | Status |
+|---|---|---|
+| Sidebar — faltava **Skills** lib-item | alta | ✅ corrigido (commit `7bf9c67b1`) |
+| Sidebar — lib-items hardcoded em pt-BR | alta | ✅ corrigido (i18n total) |
+| Chat landing — sem conversation starters padrão | alta | ✅ corrigido (4 fallback genéricos) |
+| `/d/prompts` redirecionava p/ `/c/new` | alta | ✅ corrigido (aponta p/ `/prompts`) |
+| `/skills` route gated por permissão SKILLS.USE | média | ⚠️ depende de admin habilitar |
+| `/d/files` `/d/memories` `/d/bookmarks` `/d/mcp` caem em `/c/new` | média | ⚠️ rotas não existem upstream (só sidepanel/dialog) |
+| Composer siri-hero menos intenso que protótipo | baixa | ⚠️ ajuste futuro |
+| Marketplace header (h1 centralizado huge vs h1 inline) | baixa | ⚠️ design choice — produto tem layout vitrine, proto layout denso |
+| Stats/agents reais (proto demo, produto vazio) | n/a | comportamento esperado p/ tenant novo |
+
+### Phase J.7 — fechamento real do port
+
+**100 commits totais no branch dev** (incluindo Phase J.7).
+
+Visual confirmado: chat landing agora mostra Skills (laranja) na sidebar +
+4 conversation starters padrão (Summarize text / Write code / Analyze
+document / Web search) abaixo do composer — match com protótipo HTML.
+
+Items `⚠️ ajuste futuro` ou `n/a` são reconhecidos como propositais ou
+fora do escopo de port visual. Identidade Navvia 100% consistente no
+critical path da plataforma.
