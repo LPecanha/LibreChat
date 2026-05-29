@@ -330,7 +330,7 @@ export default function Feedback({
             <Button variant="destructive" onClick={handleDialogClear}>
               {localize('com_ui_delete')}
             </Button>
-            <Button variant="submit" onClick={handleDialogSave} disabled={!feedback?.text?.trim()}>
+            <Button variant="brand" onClick={handleDialogSave} disabled={!feedback?.text?.trim()}>
               {localize('com_ui_save')}
             </Button>
           </div>

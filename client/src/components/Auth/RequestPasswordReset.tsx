@@ -129,7 +129,7 @@ function RequestPasswordReset() {
           aria-label="Continue with password reset"
           type="submit"
           disabled={!!errors.email || isLoading}
-          variant="submit"
+          variant="brand"
           className="h-12 w-full rounded-2xl"
         >
           {isLoading ? <Spinner /> : localize('com_auth_continue')}

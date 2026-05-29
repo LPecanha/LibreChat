@@ -203,7 +203,7 @@ const Registration: React.FC = () => {
                 }
                 type="submit"
                 aria-label="Submit registration"
-                variant="submit"
+                variant="brand"
                 className="h-12 w-full rounded-2xl"
               >
                 {isSubmitting ? <Spinner /> : localize('com_auth_continue')}
