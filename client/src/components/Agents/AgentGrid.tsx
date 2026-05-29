@@ -1,5 +1,6 @@
 import React, { useMemo, useEffect } from 'react';
 import { Spinner } from '@librechat/client';
+import { Bot } from 'lucide-react';
 import { PermissionBits } from 'librechat-data-provider';
 import type t from 'librechat-data-provider';
 import { useMarketplaceAgentsInfiniteQuery } from '~/data-provider/Agents';
@@ -159,8 +160,9 @@ const AgentGrid: React.FC<AgentGridProps> = ({
     >
       {/* Handle empty results with enhanced accessibility */}
       {(!currentAgents || currentAgents.length === 0) && !isLoading && !isFetching ? (
+        /* [EXT] Phase I.1 Navvia: usar .empty do protótipo (linhas 295-298) */
         <div
-          className="py-12 text-center text-text-secondary"
+          className="empty mx-auto my-8 max-w-md"
           role="status"
           aria-live="polite"
           aria-label={
@@ -169,7 +171,11 @@ const AgentGrid: React.FC<AgentGridProps> = ({
               : localize('com_agents_empty_state_heading')
           }
         >
-          <h3 className="mb-2 text-lg font-medium">{localize('com_agents_empty_state_heading')}</h3>
+          <span className="ic" aria-hidden="true">
+            <Bot className="h-6 w-6" strokeWidth={1.7} />
+          </span>
+          <h3>{localize('com_agents_empty_state_heading')}</h3>
+          {searchQuery && <p>{localize('com_agents_search_empty_heading')}</p>}
         </div>
       ) : (
         <>
