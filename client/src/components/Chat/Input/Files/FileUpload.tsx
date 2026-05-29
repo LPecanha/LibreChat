@@ -75,7 +75,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
         type="button"
         onClick={handleClick}
         className={cn(
-          'mr-1 flex h-auto cursor-pointer items-center rounded bg-transparent px-2 py-1 text-xs font-normal transition-colors hover:bg-gray-100 hover:text-brand focus:ring-ring dark:bg-transparent dark:text-gray-300 dark:hover:bg-gray-700 dark:hover:text-brand',
+          'mr-1 flex h-auto cursor-pointer items-center rounded bg-transparent px-2 py-1 text-xs font-normal transition-colors hover:bg-surface-hover hover:text-brand focus:ring-ring dark:bg-transparent dark:text-gray-300 dark:hover:bg-surface-hover dark:hover:text-brand',
           statusColor,
           containerClassName,
         )}

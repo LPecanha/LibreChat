@@ -65,7 +65,7 @@ export default function OptionsPopover({
               {presetsDisabled ? null : (
                 <Button
                   type="button"
-                  className="h-auto w-[150px] justify-start rounded-md border border-gray-300/50 bg-transparent px-2 py-1 text-xs font-normal text-black hover:bg-gray-100 hover:text-black focus-visible:ring-1 focus-visible:ring-ring-primary dark:border-gray-600 dark:bg-transparent dark:text-white dark:hover:bg-gray-600 dark:focus-visible:ring-white"
+                  className="h-auto w-[150px] justify-start rounded-md border border-gray-300/50 bg-transparent px-2 py-1 text-xs font-normal text-black hover:bg-surface-hover hover:text-black focus-visible:ring-1 focus-visible:ring-ring-primary dark:border-gray-600 dark:bg-transparent dark:text-white dark:hover:bg-gray-600 dark:focus-visible:ring-white"
                   onClick={saveAsPreset}
                 >
                   <Save className="mr-1 w-[14px]" />
@@ -76,7 +76,7 @@ export default function OptionsPopover({
               <Button
                 type="button"
                 className={cn(
-                  'ml-auto h-auto bg-transparent px-3 py-2 text-xs font-normal text-black hover:bg-gray-100 hover:text-black dark:bg-transparent dark:text-white dark:hover:bg-gray-700 dark:hover:text-white',
+                  'ml-auto h-auto bg-transparent px-3 py-2 text-xs font-normal text-black hover:bg-surface-hover hover:text-black dark:bg-transparent dark:text-white dark:hover:bg-surface-hover dark:hover:text-white',
                   removeFocusOutlines,
                 )}
                 onClick={closePopover}
