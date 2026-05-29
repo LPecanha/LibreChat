@@ -35,11 +35,14 @@ export default function SelectedPrincipalsList({
   };
 
   if (principles.length === 0) {
+    /* [EXT] Phase I.4 Navvia: usar .empty do protótipo */
     return (
       <div className={`space-y-3 ${className}`}>
-        <div className="rounded-lg border border-dashed border-border-medium py-8 text-center text-muted-foreground">
-          <Users className="mx-auto mb-2 h-8 w-8 opacity-50" aria-hidden="true" />
-          <p className="mt-1 text-xs">{localize('com_ui_search_above_to_add_all')}</p>
+        <div className="empty">
+          <span className="ic" aria-hidden="true">
+            <Users className="h-6 w-6" strokeWidth={1.7} />
+          </span>
+          <p>{localize('com_ui_search_above_to_add_all')}</p>
         </div>
       </div>
     );
