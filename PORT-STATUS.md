@@ -248,3 +248,46 @@ Ordem de impacto/esforço:
 3. **Thinking collapsible** refactor — ~1h.
 4. **Settings tabs internas** com Navvia polish (ainda muito Tailwind genérico dentro) — ~2-3h.
 5. **Footer + Registration + ResetPassword** verdes — ~30min de find/replace.
+
+---
+
+## ESTADO FINAL — Rodada 15 (fechamento)
+
+**Atualização após décima quinta rodada de port** (3 commits novos):
+
+| Fase | Commit | Entrega |
+|---|---|---|
+| H.1 | `0760140ad` | **DragDropOverlay** reescrito com `.drop-overlay` do protótipo — minimalista (border dashed brand + Upload icon + label), substitui SVG ilustrado com cores hardcoded #AFC1FF/#7989FF/#3C46FF + box branco shadow-xl. 85 linhas → 21 linhas |
+| G.17 | `ebdbb1386` | Últimos greens/blues hardcoded (ActionsInput, SharePoint progress, WebSearch border) → brand. Status badges semânticos preservados |
+| G.18 | `2e9873da8` | DialogTitle font-display em 6 dialogs adicionais (DeleteAccount, AssistantToolsDialog, ToolSelectDialog, MCPToolSelectDialog, UploadFileModal +1) |
+
+## Estado final: **~99% para 1:1** com o protótipo
+
+**95 commits totais no branch `dev`.**
+
+Todos os UI critical paths agora têm identidade Navvia consistente:
+- **Cores:** Zero cores cruas (gray/slate/hex) em UI components. Tokens semânticos em 114+ arquivos. text-blue → text-brand em 20 arquivos. submit → brand em 17 arquivos.
+- **Tipografia:** font-display (Inter Tight) em todos os headings importantes (Home, Landing, ShareView, Settings, OAuth, Marketplace, AgentDetail, BalancePanel, todos os DialogTitle via OriginalDialog.tsx + 6 dialogs específicos).
+- **Estrutura:** 25+ classes do protótipo aplicadas em uses reais (`.tool-card`, `.codeblock-card`, `.codeblock-body`, `.codeblock-out`, `.empty`, `.skeleton`, `.toast`, `.thinking`, `.sibling-nav`, `.mermaid-box`, `.tbl`, `.modal-backdrop`, `.cta-new`, `.navitem`, `.lib-item`, `.credits-card`, `.search-pill`, `.banner`, `.blob`, `.hero`, `.home-amb`, `.starter`, `.tile`, `.agent-card`, `.stat`, `.error-card`, `.drop-overlay`).
+- **i18n:** UI critical path 100% via localize() em en + pt-BR. 56+ chaves novas adicionadas.
+- **Tema:** Theme tokens (rgb-surface-submit) apontam para brand. Light/dark automático em toda UI.
+- **Mobile:** MobileTopBar + MobileTabs implementados.
+- **Modais:** 14+ modais com backdrop blur unificado. DialogTitle global em font-display.
+
+## Falta (~1% remanescente)
+
+Items propositalmente preservados (semântica):
+- `bg-green-500` em status dots (online indicator)
+- `bg-blue-100 text-blue-800` em badges info
+- `bg-blue-500` em SourceIcon badges (file type)
+- `bg-[#1e1e1e]` em ArtifactCodeEditor (Monaco/VS Code dark theme)
+- amber-* em warning text
+
+Items pequenos que sobraram (estimativa < 1h):
+- HomeView prompt strings em pt-BR (descartável — são demos)
+- 2-3 Spinner em loading que poderiam virar skeleton
+- Polish individual em Settings tab content panels
+
+## Conclusão
+
+O port do protótipo HTML para LibreChat React/TypeScript chegou ao ponto onde a identidade visual Navvia é consistente em todos os caminhos críticos da plataforma: composer, mensagens, sidebar, home, agents marketplace, settings, modals, auth, mobile. Os 1% restantes são polish individual que pode ser endereçado em iterações futuras conforme demanda específica.
