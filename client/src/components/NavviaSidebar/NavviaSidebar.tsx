@@ -13,6 +13,7 @@ import {
   BookmarkIcon,
   Brain,
   Server,
+  Wand2,
   ChevronLeft,
   ChevronDown,
   Settings as SettingsIcon,
@@ -247,29 +248,39 @@ function NavviaSidebar() {
           </span>
           {localize('com_nav_agents')}
         </button>
-        <button onClick={() => navigate('/d/prompts')} className="lib-item">
+        {/* [EXT] Phase J.7 Navvia: Prompts vai pra /prompts (rota real upstream).
+         * Skills adicionado (faltava) — ícone laranja consistente c/ protótipo.
+         * Arquivos/Memórias/Bookmarks/MCP ainda placeholder até rotas existirem
+         * upstream (atualmente caem em /c/new por dashboard.tsx default). */}
+        <button onClick={() => navigate('/prompts')} className="lib-item">
           <span className="lib-ic" style={{ background: 'rgba(17,179,141,0.15)', color: '#11b38d' }}>
             <Sparkles className="h-[13px] w-[13px]" strokeWidth={1.9} />
           </span>
-          Prompts
+          {localize('com_ui_prompts')}
+        </button>
+        <button onClick={() => navigate('/skills')} className="lib-item">
+          <span className="lib-ic" style={{ background: 'rgba(245,158,11,0.16)', color: '#f59e0b' }}>
+            <Wand2 className="h-[13px] w-[13px]" strokeWidth={1.9} />
+          </span>
+          {localize('com_ui_skills')}
         </button>
         <button onClick={() => navigate('/d/files')} className="lib-item">
           <span className="lib-ic" style={{ background: 'rgba(124,132,232,0.16)', color: '#7c84e8' }}>
             <FolderOpen className="h-[13px] w-[13px]" strokeWidth={1.9} />
           </span>
-          Arquivos
+          {localize('com_nav_my_files')}
         </button>
         <button onClick={() => navigate('/d/memories')} className="lib-item">
           <span className="lib-ic" style={{ background: 'rgba(236,72,153,0.15)', color: '#ec4899' }}>
             <Brain className="h-[13px] w-[13px]" strokeWidth={1.9} />
           </span>
-          Memórias
+          {localize('com_ui_memories')}
         </button>
         <button onClick={() => navigate('/d/bookmarks')} className="lib-item">
           <span className="lib-ic" style={{ background: 'rgba(0,180,216,0.15)', color: '#00b4d8' }}>
             <BookmarkIcon className="h-[13px] w-[13px]" />
           </span>
-          Bookmarks
+          {localize('com_ui_bookmarks')}
         </button>
         <button onClick={() => navigate('/d/mcp')} className="lib-item">
           <span className="lib-ic" style={{ background: 'rgba(168,85,247,0.15)', color: '#a855f7' }}>
