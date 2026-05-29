@@ -52,7 +52,7 @@ function MultiSelectPop({
             <button
               data-testid="select-dropdown-button"
               className={cn(
-                'relative flex flex-col rounded-md border border-black/10 bg-white py-2 pl-3 pr-10 text-left focus:outline-none focus:ring-0 focus:ring-offset-0 dark:border-gray-700 dark:bg-surface-secondary sm:text-sm',
+                'relative flex flex-col rounded-md border border-black/10 bg-white py-2 pl-3 pr-10 text-left focus:outline-none focus:ring-0 focus:ring-offset-0 dark:border-border-light dark:bg-surface-secondary sm:text-sm',
                 'pointer-cursor font-normal',
                 'hover:bg-surface-primary radix-state-open:bg-surface-primary dark:hover:bg-surface-secondary dark:radix-state-open:bg-surface-secondary',
               )}
@@ -112,7 +112,7 @@ function MultiSelectPop({
               side="bottom"
               align="center"
               className={cn(
-                'mt-2 max-h-[52vh] min-w-full overflow-hidden overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-surface-secondary dark:text-white',
+                'mt-2 max-h-[52vh] min-w-full overflow-hidden overflow-y-auto rounded-lg border border-border-light bg-white shadow-lg dark:border-border-light dark:bg-surface-secondary dark:text-white',
                 hasSearchRender && 'relative',
               )}
             >

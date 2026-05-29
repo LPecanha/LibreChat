@@ -96,7 +96,7 @@ export default function MCPConfigDialog({
                       type="text"
                       {...field}
                       placeholder={localize('com_ui_mcp_enter_var', { 0: details.title })}
-                      className="w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-600 dark:bg-surface-secondary dark:text-white sm:text-sm"
+                      className="w-full rounded-md border-border-medium shadow-sm focus:border-indigo-500 focus:ring-indigo-500 dark:border-border-medium dark:bg-surface-secondary dark:text-white sm:text-sm"
                     />
                   )}
                 />

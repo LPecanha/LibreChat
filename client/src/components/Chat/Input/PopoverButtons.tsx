@@ -102,7 +102,7 @@ export default function PopoverButtons({
             type="button"
             className={cn(
               button.buttonClass,
-              'border border-gray-300/50 focus:ring-1 focus:ring-brand/90 dark:border-gray-500/50 dark:focus:ring-brand',
+              'border border-border-medium/50 focus:ring-1 focus:ring-brand/90 dark:border-border-medium/50 dark:focus:ring-brand',
               'ml-1 h-full bg-transparent px-2 py-1 text-xs font-normal text-black hover:bg-surface-hover hover:text-black dark:bg-transparent dark:text-white dark:hover:bg-surface-tertiary dark:hover:text-white',
               buttonClass ?? '',
             )}
@@ -121,7 +121,7 @@ export default function PopoverButtons({
               type="button"
               className={cn(
                 button.buttonClass,
-                'flex justify-center border border-gray-300/50 focus:ring-1 focus:ring-brand/90 dark:border-gray-500/50 dark:focus:ring-brand',
+                'flex justify-center border border-border-medium/50 focus:ring-1 focus:ring-brand/90 dark:border-border-medium/50 dark:focus:ring-brand',
                 'h-full w-full bg-transparent px-2 py-1 text-xs font-normal text-black hover:bg-surface-hover hover:text-black dark:bg-transparent dark:text-white dark:hover:bg-surface-tertiary dark:hover:text-white',
                 buttonClass ?? '',
               )}

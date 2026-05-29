@@ -283,15 +283,15 @@ export default function AssistantSelect({
       containerClassName="flex-grow"
       searchClassName="dark:from-gray-850"
       searchPlaceholder={localize('com_assistants_search_name')}
-      optionsClass="hover:bg-gray-20/50 dark:border-gray-700"
-      optionsListClass="rounded-lg shadow-lg dark:bg-gray-850 dark:border-gray-700 dark:last:border"
+      optionsClass="hover:bg-gray-20/50 dark:border-border-light"
+      optionsListClass="rounded-lg shadow-lg dark:bg-gray-850 dark:border-border-light dark:last:border"
       currentValueClass={cn(
         'text-md font-semibold text-text-primary dark:text-white',
         value === '' ? 'text-text-tertiary' : '',
       )}
       className={cn(
-        'mt-1 rounded-md dark:border-gray-700 dark:bg-gray-850',
-        'z-50 flex h-[40px] w-full flex-none items-center justify-center px-4 hover:cursor-pointer hover:border-green-500 focus:border-gray-400',
+        'mt-1 rounded-md dark:border-border-light dark:bg-gray-850',
+        'z-50 flex h-[40px] w-full flex-none items-center justify-center px-4 hover:cursor-pointer hover:border-green-500 focus:border-border-medium',
       )}
       renderOption={() => (
         <span className="flex items-center gap-1.5 truncate">

@@ -81,7 +81,7 @@ function MultiSelectDropDown({
             <>
               <ListboxButton
                 className={cn(
-                  'relative flex w-full cursor-default flex-col rounded-md border border-black/10 bg-white py-2 pl-3 pr-10 text-left focus:outline-none focus:ring-0 focus:ring-offset-0 dark:border-gray-600 dark:border-white/20 dark:bg-surface-secondary sm:text-sm',
+                  'relative flex w-full cursor-default flex-col rounded-md border border-black/10 bg-white py-2 pl-3 pr-10 text-left focus:outline-none focus:ring-0 focus:ring-offset-0 dark:border-border-medium dark:border-white/20 dark:bg-surface-secondary sm:text-sm',
                   className ?? '',
                 )}
                 id={excludeIds[0]}

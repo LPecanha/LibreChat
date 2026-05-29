@@ -24,7 +24,7 @@ export default function MessagesView({
         >
           <div className="flex flex-col pb-16 text-sm dark:bg-transparent">
             {(_messagesTree && _messagesTree.length === 0) || _messagesTree === null ? (
-              <div className="flex w-full items-center justify-center gap-1 bg-surface-primary p-3 text-sm text-text-tertiary dark:border-gray-800/50 dark:bg-surface-secondary dark:text-text-secondary">
+              <div className="flex w-full items-center justify-center gap-1 bg-surface-primary p-3 text-sm text-text-tertiary dark:border-border-light/50 dark:bg-surface-secondary dark:text-text-secondary">
                 {localize('com_ui_nothing_found')}
               </div>
             ) : (
@@ -40,7 +40,7 @@ export default function MessagesView({
                 </div>
               </>
             )}
-            <div className="dark:gpt-dark-gray group h-0 w-full flex-shrink-0 dark:border-gray-800/50" />
+            <div className="dark:gpt-dark-gray group h-0 w-full flex-shrink-0 dark:border-border-light/50" />
           </div>
         </div>
       </div>

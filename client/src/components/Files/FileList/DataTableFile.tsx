@@ -132,7 +132,7 @@ export default function DataTableFile<TData, TValue>({
               </DropdownMenuTrigger>
               <DropdownMenuContent
                 align="end"
-                className="z-[1001] dark:border-gray-700 dark:bg-gray-850"
+                className="z-[1001] dark:border-border-light dark:bg-gray-850"
               >
                 {table
                   .getAllColumns()
@@ -254,7 +254,7 @@ export default function DataTableFile<TData, TValue>({
           })}
         </div>
         <Button
-          className="dark:border-gray-500 dark:hover:bg-surface-tertiary"
+          className="dark:border-border-medium dark:hover:bg-surface-tertiary"
           variant="outline"
           size="sm"
           onClick={() => table.previousPage()}
@@ -263,7 +263,7 @@ export default function DataTableFile<TData, TValue>({
           {localize('com_ui_prev')}
         </Button>
         <Button
-          className="dark:border-gray-500 dark:hover:bg-surface-tertiary"
+          className="dark:border-border-medium dark:hover:bg-surface-tertiary"
           variant="outline"
           size="sm"
           onClick={() => table.nextPage()}
