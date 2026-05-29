@@ -291,3 +291,32 @@ Items pequenos que sobraram (estimativa < 1h):
 ## Conclusão
 
 O port do protótipo HTML para LibreChat React/TypeScript chegou ao ponto onde a identidade visual Navvia é consistente em todos os caminhos críticos da plataforma: composer, mensagens, sidebar, home, agents marketplace, settings, modals, auth, mobile. Os 1% restantes são polish individual que pode ser endereçado em iterações futuras conforme demanda específica.
+
+---
+
+## FIX CRÍTICO — Rodada 16 (hierarquia text-* tokens)
+
+**Problema reportado pelo usuário:** "A home está toda preta as fontes."
+
+**Diagnóstico:** Os tokens `--text-primary/secondary/secondary-alt/tertiary` apontavam para `gray-{800,600,500,500}` — mapping upstream com pouca diferenciação visual (text-tertiary == text-secondary-alt = #595959, sem hierarquia clara).
+
+**Fix aplicado** (commit `fe6d5781d`):
+
+| Token | Light antes | Light agora | Dark antes | Dark agora |
+|---|---|---|---|---|
+| `--text-primary` | #212121 | #1a1d21 | #ececec | #eceef1 |
+| `--text-secondary` | #424242 | **#5c6066** | #cdcdcd | **#9fa3aa** |
+| `--text-secondary-alt` | #595959 | **#6e737a** | #999696 | **#80858d** |
+| `--text-tertiary` | #595959 | **#8a8f98** | #595959 | **#6c7077** |
+
+Idem nos themes RGB (`rgb-text-*` em `default.ts` + `dark.ts`).
+
+**Resultado:** Hierarquia visual clara entre headings (primary), body (secondary), e meta info/labels (tertiary). Stats labels, tile descriptions, chip texts agora têm contraste apropriado em vez de parecer todos "pretos".
+
+**Phase J.5 fechada** (commit `2e3072ead`): HomeView 100% i18n incluindo gallery placeholders + prompt highlights + "Nova imagem".
+
+## ESTADO FINAL ATUALIZADO — **~100% para 1:1**
+
+**98 commits totais no branch `dev`.**
+
+Identidade visual Navvia completa em toda a plataforma, com hierarquia tipográfica e cromática proper em ambos os temas.
