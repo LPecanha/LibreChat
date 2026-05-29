@@ -178,7 +178,7 @@ function Avatar() {
 
       <OGDialogContent showCloseButton={false} className="w-11/12 max-w-md">
         <OGDialogHeader>
-          <OGDialogTitle className="text-lg font-medium leading-6 text-text-primary">
+          <OGDialogTitle className="font-display text-[18px] font-semibold leading-6 tracking-tight text-text-primary">
             {image != null ? localize('com_ui_preview') : localize('com_ui_upload_image')}
           </OGDialogTitle>
         </OGDialogHeader>

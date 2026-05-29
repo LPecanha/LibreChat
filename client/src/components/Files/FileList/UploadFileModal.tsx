@@ -22,7 +22,7 @@ const UploadFileModal = ({ open, onOpenChange }) => {
         )}
       >
         <DialogHeader>
-          <DialogTitle className="text-lg font-medium leading-6 text-text-primary dark:text-text-primary">
+          <DialogTitle className="font-display text-[18px] font-semibold leading-6 tracking-tight text-text-primary dark:text-text-primary">
             Upoad a File
           </DialogTitle>
         </DialogHeader>

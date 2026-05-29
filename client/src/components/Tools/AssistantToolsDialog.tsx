@@ -159,7 +159,7 @@ function AssistantToolsDialog({
           <div className="flex items-center justify-between border-b-[1px] border-border-medium px-4 pb-4 pt-5 sm:p-6">
             <div className="flex items-center">
               <div className="text-center sm:text-left">
-                <DialogTitle className="text-lg font-medium leading-6 text-text-primary">
+                <DialogTitle className="font-display text-[18px] font-semibold leading-6 tracking-tight text-text-primary">
                   {isAgentTools
                     ? localize('com_nav_tool_dialog_agents')
                     : localize('com_nav_tool_dialog')}
