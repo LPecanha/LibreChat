@@ -60,54 +60,57 @@ function getGreeting(): string {
   return 'Boa noite';
 }
 
+/* [EXT] Phase J.4 Navvia: chips e tiles agora referenciam i18n keys
+ * (renderizados em runtime via localize()). Prompts ficam hardcoded
+ * por enquanto — viram demos descartáveis pela conta. */
 const SUGGESTION_CHIPS = [
-  { emoji: '🎨', label: 'Gerar imagem', prompt: 'Gere uma imagem de um mascote para o Navvia' },
-  { emoji: '📄', label: 'Analisar documento', prompt: 'Analise este documento e resuma os pontos principais' },
-  { emoji: '🌐', label: 'Busca web', prompt: 'Pesquise na web as novidades de IA desta semana' },
-  { emoji: '💻', label: 'Escrever código', prompt: 'Escreva uma função em TypeScript para debounce' },
-  { emoji: '📝', label: 'Resumir texto', prompt: 'Resuma este texto em 3 tópicos' },
+  { emoji: '🎨', labelKey: 'com_nav_home_chip_image' as const, prompt: 'Gere uma imagem de um mascote para o Navvia' },
+  { emoji: '📄', labelKey: 'com_nav_home_chip_doc' as const, prompt: 'Analise este documento e resuma os pontos principais' },
+  { emoji: '🌐', labelKey: 'com_nav_home_chip_search' as const, prompt: 'Pesquise na web as novidades de IA desta semana' },
+  { emoji: '💻', labelKey: 'com_nav_home_chip_code' as const, prompt: 'Escreva uma função em TypeScript para debounce' },
+  { emoji: '📝', labelKey: 'com_nav_home_chip_summary' as const, prompt: 'Resuma este texto em 3 tópicos' },
 ];
 
 const TOOLS_TILES = [
   {
     emoji: '💬',
-    label: 'Conversar',
-    desc: 'Chat com qualquer modelo disponível.',
+    labelKey: 'com_nav_home_tile_chat' as const,
+    descKey: 'com_nav_home_tile_chat_full_desc' as const,
     iconBg: 'var(--brand-soft)',
     iconColor: 'var(--brand)',
   },
   {
     emoji: '🎨',
-    label: 'Gerar imagem',
-    desc: 'Crie imagens a partir de texto.',
+    labelKey: 'com_nav_home_tile_image_label' as const,
+    descKey: 'com_nav_home_tile_image_desc_full' as const,
     iconBg: 'rgba(236,72,153,.14)',
     iconColor: '#ec4899',
   },
   {
     emoji: '📄',
-    label: 'Analisar documento',
-    desc: 'PDFs, planilhas e imagens.',
+    labelKey: 'com_nav_home_tile_doc_label' as const,
+    descKey: 'com_nav_home_tile_doc_desc_full' as const,
     iconBg: 'rgba(16,185,129,.14)',
     iconColor: '#10b981',
   },
   {
     emoji: '🌐',
-    label: 'Pesquisa profunda',
-    desc: 'Busca web com fontes citadas.',
+    labelKey: 'com_nav_home_tile_search_label' as const,
+    descKey: 'com_nav_home_tile_search_desc_full' as const,
     iconBg: 'rgba(0,180,216,.14)',
     iconColor: '#00b4d8',
   },
   {
     emoji: '💻',
-    label: 'Escrever código',
-    desc: 'Com interpretador e artifacts.',
+    labelKey: 'com_nav_home_tile_code_label' as const,
+    descKey: 'com_nav_home_tile_code_desc_full' as const,
     iconBg: 'rgba(124,132,232,.16)',
     iconColor: '#7c84e8',
   },
   {
     emoji: '🎙️',
-    label: 'Transcrever áudio',
-    desc: 'Fala para texto e resumo.',
+    labelKey: 'com_nav_home_tile_audio_label' as const,
+    descKey: 'com_nav_home_tile_audio_desc_full' as const,
     iconBg: 'rgba(245,158,11,.14)',
     iconColor: '#f59e0b',
   },
@@ -312,15 +315,15 @@ function HomeView() {
                     setToolsOpen(false);
                   }}
                   className="ctrl focus-ring grid w-8 place-items-center rounded-md text-text-secondary hover:bg-surface-hover"
-                  title="Anexar"
+                  title={localize('com_nav_home_attach_label')}
                 >
                   <Paperclip className="h-[17px] w-[17px]" strokeWidth={1.8} />
                 </button>
                 <div className="pop bottom-10 left-0 w-56 rounded-lg border border-border-light bg-surface-overlay p-1">
-                  <div className="menu-label">Anexar</div>
-                  <button className="menu-item">Imagem</button>
-                  <button className="menu-item">Arquivo / documento</button>
-                  <button className="menu-item">Texto p/ OCR</button>
+                  <div className="menu-label">{localize('com_nav_home_attach_label')}</div>
+                  <button className="menu-item">{localize('com_ui_image') || 'Image'}</button>
+                  <button className="menu-item">{localize('com_ui_file') || 'File'}</button>
+                  <button className="menu-item">OCR</button>
                   <button className="menu-item">SharePoint</button>
                 </div>
               </div>
@@ -339,21 +342,21 @@ function HomeView() {
                     setAttachOpen(false);
                   }}
                   className="ctrl focus-ring flex items-center gap-1.5 rounded-md px-2 text-[12.5px] font-medium text-text-secondary hover:bg-surface-hover"
-                  title="Ferramentas"
+                  title={localize('com_nav_home_tools_label')}
                 >
                   <Wrench className="h-[15px] w-[15px]" strokeWidth={1.8} />
-                  Ferramentas
+                  {localize('com_nav_home_tools_label')}
                 </button>
                 <div className="pop bottom-10 left-0 w-64 rounded-lg border border-border-light bg-surface-overlay p-1">
-                  <div className="menu-label">Ferramentas</div>
+                  <div className="menu-label">{localize('com_nav_home_tools_label')}</div>
                   <label className="menu-item">
-                    Busca web
+                    {localize('com_nav_home_chip_search')}
                     <span className="toggle-proto on ml-auto">
                       <span className="knob" />
                     </span>
                   </label>
                   <label className="menu-item">
-                    Interpretador de código
+                    {localize('com_nav_home_tile_code_label')}
                     <span className="toggle-proto off ml-auto">
                       <span className="knob" />
                     </span>
@@ -373,9 +376,9 @@ function HomeView() {
 
               {/* Atalho de kbd */}
               <span className="ml-auto hidden items-center gap-1.5 text-[11px] text-text-tertiary sm:flex">
-                <kbd>/</kbd>comandos
+                <kbd>/</kbd>{localize('com_nav_home_kbd_commands')}
                 <span className="opacity-50">·</span>
-                <kbd>@</kbd>agentes
+                <kbd>@</kbd>{localize('com_nav_home_kbd_agents')}
               </span>
 
               {/* Send */}
@@ -383,8 +386,8 @@ function HomeView() {
                 onClick={() => startConversation()}
                 disabled={!composer.trim()}
                 className="ctrl focus-ring grid w-9 place-items-center rounded-md bg-brand text-brand-fg transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
-                title="Enviar"
-                aria-label="Enviar"
+                title={localize('com_nav_home_send_label')}
+                aria-label={localize('com_nav_home_send_label')}
               >
                 <Send className="h-[17px] w-[17px]" strokeWidth={2} />
               </button>
@@ -394,9 +397,9 @@ function HomeView() {
           {/* Chips de ações sugeridas */}
           <div className="mt-5 flex flex-wrap justify-center gap-2">
             {SUGGESTION_CHIPS.map((c) => (
-              <button key={c.label} onClick={() => startConversation(c.prompt)} className="chip">
+              <button key={c.labelKey} onClick={() => startConversation(c.prompt)} className="chip">
                 <span aria-hidden="true">{c.emoji}</span>
-                {c.label}
+                {localize(c.labelKey)}
               </button>
             ))}
           </div>
@@ -410,65 +413,75 @@ function HomeView() {
           <div className="stat rise d1">
             <div className="flex items-center gap-1.5 text-[11.5px] text-text-tertiary">
               <CreditCard className="h-[13px] w-[13px]" strokeWidth={1.9} />
-              Créditos
+              {localize('com_nav_home_stat_credits')}
             </div>
             <div className="mt-1 font-display text-[20px] font-bold">
               {balanceFormatted ?? '—'}
             </div>
             <div className="text-[11px] text-text-tertiary">
-              {startupConfig?.balance?.enabled ? 'Disponível agora' : 'Plano flat'}
+              {startupConfig?.balance?.enabled
+                ? localize('com_nav_home_stat_credits_available')
+                : localize('com_nav_home_stat_credits_flat')}
             </div>
           </div>
 
           <div className="stat rise d2">
             <div className="flex items-center gap-1.5 text-[11.5px] text-text-tertiary">
               <MessageSquare className="h-[13px] w-[13px]" strokeWidth={1.9} />
-              Conversas
+              {localize('com_nav_home_stat_conversations')}
             </div>
             <div className="mt-1 font-display text-[20px] font-bold">{conversationsCount}</div>
-            <div className="text-[11px] text-text-tertiary">No histórico</div>
+            <div className="text-[11px] text-text-tertiary">
+              {localize('com_nav_home_stat_conversations_history')}
+            </div>
           </div>
 
           <div className="stat rise d3">
             <div className="flex items-center gap-1.5 text-[11.5px] text-text-tertiary">
               <Bot className="h-[13px] w-[13px]" strokeWidth={1.9} />
-              Agentes disponíveis
+              {localize('com_nav_home_stat_agents_available')}
             </div>
             <div className="mt-1 font-display text-[20px] font-bold">{agentsCount}</div>
             <div className="text-[11px] text-text-tertiary">
-              {agentsCount > 0 ? 'Explore o marketplace' : 'Nenhum ainda'}
+              {agentsCount > 0
+                ? localize('com_nav_home_stat_explore_marketplace')
+                : localize('com_nav_home_stat_none_yet')}
             </div>
           </div>
 
           <div className="stat rise d4">
             <div className="flex items-center gap-1.5 text-[11.5px] text-text-tertiary">
               <Star className="h-[13px] w-[13px]" strokeWidth={1.9} />
-              Modelo padrão
+              {localize('com_nav_home_stat_default_model')}
             </div>
             <div className="mt-1 font-display text-[20px] font-bold">{activeModel}</div>
-            <div className="text-[11px] text-text-tertiary">Pré-selecionado</div>
+            <div className="text-[11px] text-text-tertiary">
+              {localize('com_nav_home_stat_preselected')}
+            </div>
           </div>
         </div>
 
         {/* ===== FERRAMENTAS ===== */}
         <h2 className="rise d2 mt-9 font-display text-[16px] font-semibold">{localize('com_nav_home_section_tools')}</h2>
         <div className="mt-3 grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
-          {TOOLS_TILES.map((t, i) => (
-            <button
-              key={t.label}
-              onClick={() => startConversation(t.label)}
-              className={`tile rise d${Math.min(i + 2, 5)}`}
-            >
-              <div
-                className="tile-ico"
-                style={{ background: t.iconBg, color: t.iconColor }}
+          {TOOLS_TILES.map((t, i) => {
+            const label = localize(t.labelKey);
+            return (
+              <button
+                key={t.labelKey}
+                onClick={() => startConversation(label)}
+                className={`tile rise d${Math.min(i + 2, 5)}`}
               >
-                {t.emoji}
-              </div>
-              <div className="font-medium">{t.label}</div>
-              <div className="text-[12px] leading-snug text-text-tertiary">{t.desc}</div>
-            </button>
-          ))}
+                <div className="tile-ico" style={{ background: t.iconBg, color: t.iconColor }}>
+                  {t.emoji}
+                </div>
+                <div className="font-medium">{label}</div>
+                <div className="text-[12px] leading-snug text-text-tertiary">
+                  {localize(t.descKey)}
+                </div>
+              </button>
+            );
+          })}
         </div>
 
         {/* ===== AGENTES EM DESTAQUE ===== */}
