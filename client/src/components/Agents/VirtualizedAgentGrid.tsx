@@ -206,10 +206,12 @@ const VirtualizedAgentGrid: React.FC<VirtualizedAgentGridProps> = ({
     ],
   );
 
-  // Simple loading spinner
+  /* [EXT] Phase I.7 Navvia: skeleton em vez de spinner (consistente com AgentGrid) */
   const loadingSpinner = (
-    <div className="flex justify-center py-12">
-      <Spinner className="h-8 w-8 text-primary" />
+    <div className="grid grid-cols-1 gap-4 py-4 sm:grid-cols-2">
+      {Array.from({ length: 4 }).map((_, i) => (
+        <div key={i} className="skeleton h-32 rounded-xl md:h-36 lg:h-40" />
+      ))}
     </div>
   );
 
