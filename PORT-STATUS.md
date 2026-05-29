@@ -34,14 +34,15 @@ Branch `dev` agora contém **34 commits** que portam o protótipo HTML `design/u
 | G.3 | `d56dce92f` | Speech sub-tabs (Simple/Advanced) com active brand-soft + text-brand · `customFooter` Navvia no librechat.yaml (precisa também `.env CUSTOM_FOOTER`) — substitui "LibreChat v0.8.6-rc1 - Every AI for Everyone." por "Navvia · 2026" |
 | J.1 | `a6d58325a` | i18n proper — adiciona 7 chaves em en + pt-BR (com_nav_my_conversations, com_nav_library, com_nav_density*, com_nav_servers_mcp) + NavviaSidebar e DensitySelector usando localize() |
 
-**Atualização após sexta rodada de port** (2 commits novos):
+**Atualização após sexta rodada de port** (3 commits novos):
 
 | Fase | Commit | Entrega |
 |---|---|---|
 | J.2 | `24a7cad7a` | i18n completo — 7 chaves adicionais (com_nav_home_init, com_nav_agents, com_nav_credits, com_nav_credits_buy, com_nav_chat_mobile, com_nav_more_mobile, com_nav_help_and_faq_short) · NavviaSidebar/MobileTabs/MobileTopBar **100% via localize()** (zero hardcoded em UI critical path) |
 | E.5 | `dde8f3ab0` | Markdown tables com `.tbl` do protótipo — renderer customizado em ReactMarkdown registrado em components |
+| I.1 | `81d09a711` | Empty state em AgentGrid usa `.empty` do protótipo (ícone Bot circular + heading + message) |
 
-**Estado real do trabalho 1:1 (revisado após rodada 6):** ~79% completo. i18n praticamente completo no UI critical path. Tables markdown agora têm a hierarquia visual unified.
+**Estado real do trabalho 1:1 (revisado após rodada 6):** ~80% completo. i18n praticamente completo no UI critical path. Tables markdown unified. Empty states começando a receber `.empty` (1 de N).
 
 Falta principal:
 - Settings 6 abas restantes (Speech, Chat, Beta, Personalization, Memory, Data, Account, Balance) — conteúdo upstream
