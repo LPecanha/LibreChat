@@ -40,7 +40,7 @@ export default function MCPStatusBadge({
         aria-live="polite"
         className={cn(
           badgeBaseClass,
-          'bg-blue-50 text-blue-600 dark:bg-blue-950 dark:text-blue-400',
+          'bg-blue-50 text-brand dark:bg-blue-950 dark:text-brand',
         )}
       >
         <Spinner className="size-3" />
@@ -63,7 +63,7 @@ export default function MCPStatusBadge({
         aria-live="polite"
         className={cn(
           badgeBaseClass,
-          'bg-blue-50 text-blue-600 dark:bg-blue-950 dark:text-blue-400',
+          'bg-blue-50 text-brand dark:bg-blue-950 dark:text-brand',
         )}
       >
         <Spinner className="size-3" />

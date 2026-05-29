@@ -108,7 +108,7 @@ function AuthField({ name, config, hasValue, control, errors, autoFocus }: AuthF
       />
       {sanitizedDescription && (
         <p
-          className="text-xs text-text-secondary [&_a]:text-blue-500 [&_a]:hover:underline"
+          className="text-xs text-text-secondary [&_a]:text-brand [&_a]:hover:underline"
           dangerouslySetInnerHTML={{ __html: sanitizedDescription }}
         />
       )}

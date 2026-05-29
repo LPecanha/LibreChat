@@ -44,7 +44,7 @@ const categoryColorMap: Record<string, string> = {
   finance: 'text-orange-400',
   roleplay: 'text-orange-400',
   teach_or_explain: 'text-blue-300',
-  general: 'text-blue-500',
+  general: 'text-brand',
   hr: 'text-brand',
   rd: 'text-purple-500',
   it: 'text-red-500',

@@ -40,7 +40,7 @@ export default function PrincipalAvatar({
         return {
           Icon: User,
           containerClass: 'bg-blue-100 dark:bg-blue-900',
-          iconClass: 'text-blue-600 dark:text-blue-400',
+          iconClass: 'text-brand dark:text-brand',
         };
       case PrincipalType.GROUP:
         return {

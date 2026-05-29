@@ -27,7 +27,7 @@ const VersionBadge = ({
             'inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium',
             isProduction
               ? 'bg-green-100 text-brand dark:bg-green-900/40 dark:text-brand'
-              : 'bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-400',
+              : 'bg-blue-100 text-brand dark:bg-blue-900/40 dark:text-brand',
           )}
         >
           {isProduction ? (

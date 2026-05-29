@@ -34,7 +34,7 @@ export function ExtBalanceDisplay({ tokenCredits }: { tokenCredits: number }) {
             className="select-item w-full text-sm hover:bg-surface-hover hover:text-text-primary"
             aria-label={localize('com_nav_buy_credits')}
           >
-            <Zap className="icon-md text-blue-500" aria-hidden="true" />
+            <Zap className="icon-md text-brand" aria-hidden="true" />
             {localize('com_nav_buy_credits')}
           </button>
         </>

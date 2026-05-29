@@ -51,7 +51,7 @@ export default function VersionItem({
       <div className="text-sm text-text-secondary">{getVersionTimestamp(version)}</div>
       {!isActive && (
         <button
-          className="mt-2 text-sm text-blue-500 hover:text-blue-600"
+          className="mt-2 text-sm text-brand hover:text-brand"
           onClick={() => {
             if (window.confirm(localize('com_ui_agent_version_restore_confirm'))) {
               onRestore(index);

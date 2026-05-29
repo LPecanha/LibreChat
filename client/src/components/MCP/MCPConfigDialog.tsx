@@ -91,7 +91,7 @@ export default function MCPConfigDialog({
     // Connecting: blue (in progress)
     if (connectionState === 'connecting') {
       return (
-        <div className="flex items-center gap-2 rounded-full bg-blue-50 px-2 py-0.5 text-xs font-medium text-blue-600 dark:bg-blue-950 dark:text-blue-400">
+        <div className="flex items-center gap-2 rounded-full bg-blue-50 px-2 py-0.5 text-xs font-medium text-brand dark:bg-blue-950 dark:text-brand">
           <Spinner className="size-3" />
           <span>{localize('com_ui_connecting')}</span>
         </div>

@@ -64,7 +64,7 @@ const PluginPagination: React.FC<TPluginPaginationProps> = ({
           tabIndex={0}
           className={`flex h-5 w-5 items-center justify-center text-sm ${
             currentPage === page
-              ? 'text-blue-600 hover:text-blue-600 dark:text-blue-600 dark:hover:text-blue-600'
+              ? 'text-brand hover:text-brand dark:text-brand dark:hover:text-brand'
               : 'text-black/70 hover:text-black/50 dark:text-white/70 dark:hover:text-white/50'
           }`}
           style={{ userSelect: 'none' }}
