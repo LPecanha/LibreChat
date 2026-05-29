@@ -218,8 +218,11 @@ const Mermaid: React.FC<MermaidProps> = memo(({ children, id, theme }) => {
         blobUrl={blobUrl}
         codeContent={children}
       />
+      {/* [EXT] Phase E.6 Navvia: usar .mermaid-box do protótipo
+       * (linhas 241-244) — border, radius, bg surface-secondary,
+       * hover border-medium. !p-0 pq tem children que controlam padding. */}
       <div
-        className="relative w-full overflow-hidden rounded-lg border border-border-light transition-all duration-200"
+        className="mermaid-box relative w-full overflow-hidden !p-0 transition-all duration-200"
         {...hoverHandlers}
         onClick={handleContainerClick}
       >
