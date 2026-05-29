@@ -2,6 +2,7 @@ import { memo } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Home as HouseIcon, Bot, MessageSquare, MoreHorizontal } from 'lucide-react';
 import { Constants } from 'librechat-data-provider';
+import { useLocalize } from '~/hooks';
 import { cn } from '~/utils';
 
 /**
@@ -32,32 +33,33 @@ type Tab = {
 function MobileTabs() {
   const navigate = useNavigate();
   const location = useLocation();
+  const localize = useLocalize();
 
   const tabs: Tab[] = [
     {
       id: 'home',
-      label: 'Início',
+      label: localize('com_nav_home_init'),
       Icon: HouseIcon,
       onClick: () => navigate('/home'),
       isActive: (p) => p === '/home' || p.startsWith('/home/'),
     },
     {
       id: 'agents',
-      label: 'Agentes',
+      label: localize('com_nav_agents'),
       Icon: Bot,
       onClick: () => navigate('/agents'),
       isActive: (p) => p === '/agents' || p.startsWith('/agents/'),
     },
     {
       id: 'chat',
-      label: 'Chat',
+      label: localize('com_nav_chat_mobile'),
       Icon: MessageSquare,
       onClick: () => navigate(`/c/${Constants.NEW_CONVO}`),
       isActive: (p) => p.startsWith('/c/'),
     },
     {
       id: 'more',
-      label: 'Mais',
+      label: localize('com_nav_more_mobile'),
       Icon: MoreHorizontal,
       onClick: () => navigate('/d/settings'),
       isActive: (p) => p.startsWith('/d/'),

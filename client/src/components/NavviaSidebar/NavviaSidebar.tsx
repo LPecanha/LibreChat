@@ -164,7 +164,7 @@ function NavviaSidebar() {
         <button onClick={newChat} className="cta-new focus-ring">
           <span>
             <Plus className="h-[15px] w-[15px] shrink-0" strokeWidth={2.2} />
-            Nova conversa
+            {localize('com_ui_new_chat')}
             <span className="ml-auto">
               <kbd>⌘K</kbd>
             </span>
@@ -175,7 +175,7 @@ function NavviaSidebar() {
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Buscar"
+            placeholder={localize('com_ui_search')}
           />
         </div>
       </div>
@@ -187,14 +187,14 @@ function NavviaSidebar() {
           className={cn('navitem', isActiveRoute('/home') && 'active')}
         >
           <House className="h-[15px] w-[15px] shrink-0" strokeWidth={1.8} />
-          Início
+          {localize('com_nav_home_init')}
         </button>
         <button
           onClick={() => navigate('/agents')}
           className={cn('navitem', isActiveRoute('/agents') && 'active')}
         >
           <Bot className="h-[15px] w-[15px] shrink-0" strokeWidth={1.8} />
-          Agentes
+          {localize('com_nav_agents')}
         </button>
       </nav>
 
@@ -245,7 +245,7 @@ function NavviaSidebar() {
           <span className="lib-ic" style={{ background: 'rgba(36,105,226,0.13)', color: '#2469e2' }}>
             <Bot className="h-[13px] w-[13px]" strokeWidth={1.9} />
           </span>
-          Agentes
+          {localize('com_nav_agents')}
         </button>
         <button onClick={() => navigate('/d/prompts')} className="lib-item">
           <span className="lib-ic" style={{ background: 'rgba(17,179,141,0.15)', color: '#11b38d' }}>
@@ -286,13 +286,13 @@ function NavviaSidebar() {
             <div className="credits-card-inner">
               <div className="flex flex-col">
                 <span className="text-[10.5px] uppercase tracking-wide text-text-tertiary">
-                  Créditos
+                  {localize('com_nav_credits')}
                 </span>
                 <span className="font-display text-[15px] font-bold">{balanceFormatted}</span>
               </div>
               <button onClick={() => navigate('/d/credits')} className="credits-buy focus-ring">
                 <Plus className="h-[11px] w-[11px]" strokeWidth={2.4} />
-                Comprar
+                {localize('com_nav_credits_buy')}
               </button>
             </div>
           </div>
@@ -328,7 +328,7 @@ function NavviaSidebar() {
                 className="menu-item"
               >
                 <FolderOpen className="h-[14px] w-[14px]" strokeWidth={1.8} />
-                Meus arquivos
+                {localize('com_nav_my_files')}
               </button>
               <button
                 onClick={() => {
@@ -338,7 +338,7 @@ function NavviaSidebar() {
                 className="menu-item"
               >
                 <HelpCircle className="h-[14px] w-[14px]" strokeWidth={1.8} />
-                Ajuda & FAQ
+                {localize('com_nav_help_and_faq_short')}
               </button>
               <button
                 onClick={() => {
@@ -348,7 +348,7 @@ function NavviaSidebar() {
                 className="menu-item"
               >
                 <SettingsIcon className="h-[14px] w-[14px]" strokeWidth={1.8} />
-                Configurações
+                {localize('com_nav_settings')}
               </button>
               <div className="menu-sep" />
               <button
@@ -359,7 +359,7 @@ function NavviaSidebar() {
                 className="menu-item danger"
               >
                 <LogOut className="h-[14px] w-[14px]" strokeWidth={1.8} />
-                Sair
+                {localize('com_nav_log_out')}
               </button>
             </div>
           )}

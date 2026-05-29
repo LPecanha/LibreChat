@@ -4,6 +4,7 @@ import { useSetRecoilState } from 'recoil';
 import { Menu, Plus } from 'lucide-react';
 import { NavviaLogo } from '@librechat/client';
 import { Constants } from 'librechat-data-provider';
+import { useLocalize } from '~/hooks';
 import store from '~/store';
 
 /**
@@ -24,6 +25,7 @@ import store from '~/store';
  */
 function MobileTopBar() {
   const navigate = useNavigate();
+  const localize = useLocalize();
   const setSidebarExpanded = useSetRecoilState(store.sidebarExpanded);
 
   return (
@@ -38,8 +40,8 @@ function MobileTopBar() {
       <button
         onClick={() => setSidebarExpanded(true)}
         className="grid h-8 w-8 place-items-center rounded-md text-text-primary hover:bg-surface-hover"
-        title="Menu"
-        aria-label="Abrir menu"
+        title={localize('com_nav_open_sidebar')}
+        aria-label={localize('com_nav_open_sidebar')}
       >
         <Menu className="h-[18px] w-[18px]" strokeWidth={1.9} />
       </button>
@@ -47,7 +49,7 @@ function MobileTopBar() {
       <button
         onClick={() => navigate('/home')}
         className="-ml-0.5 inline-flex items-center"
-        aria-label="Navvia — Home"
+        aria-label={`Navvia — ${localize('com_nav_home_init')}`}
       >
         <NavviaLogo size="sm" />
       </button>
@@ -55,8 +57,8 @@ function MobileTopBar() {
       <button
         onClick={() => navigate(`/c/${Constants.NEW_CONVO}`)}
         className="ml-auto grid h-8 w-8 place-items-center rounded-md border border-border-medium text-text-primary hover:bg-surface-hover"
-        title="Nova conversa"
-        aria-label="Nova conversa"
+        title={localize('com_ui_new_chat')}
+        aria-label={localize('com_ui_new_chat')}
       >
         <Plus className="h-[16px] w-[16px]" strokeWidth={2} />
       </button>
