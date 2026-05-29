@@ -127,18 +127,18 @@ export default function VectorStorePreview() {
       <div className="mt-3 flex flex-col">
         <div className="flex flex-row">
           <span className="flex w-1/2 flex-row items-center md:w-2/5">
-            <InfoIcon className="text-base text-gray-500 md:text-lg lg:text-xl" />
+            <InfoIcon className="text-base text-text-tertiary md:text-lg lg:text-xl" />
             &nbsp; ID
           </span>
-          <span className="w-1/2 break-words text-gray-500 md:w-3/5">{vectorStore._id}</span>
+          <span className="w-1/2 break-words text-text-tertiary md:w-3/5">{vectorStore._id}</span>
         </div>
         <div className="mt-3 flex flex-row">
           <span className="flex w-1/2 flex-row items-center md:w-2/5">
-            <BarChart4Icon className="text-base text-gray-500 md:text-lg lg:text-xl" />
+            <BarChart4Icon className="text-base text-text-tertiary md:text-lg lg:text-xl" />
             &nbsp;Usage this &nbsp;month
           </span>
           <div className="w-1/2 md:w-3/5">
-            <p className="text-gray-500">
+            <p className="text-text-tertiary">
               <span className="text-green-700">0 KB hours</span>
               &nbsp; Free until end of 2024
             </p>
@@ -146,38 +146,38 @@ export default function VectorStorePreview() {
         </div>
         <div className="mt-3 flex flex-row">
           <span className="flex w-1/2 flex-row items-center md:w-2/5">
-            <InfoIcon className="text-base text-gray-500 md:text-lg lg:text-xl" />
+            <InfoIcon className="text-base text-text-tertiary md:text-lg lg:text-xl" />
             &nbsp;Size
           </span>
-          <span className="w-1/2 text-gray-500 md:w-3/5">{vectorStore.bytes} bytes</span>
+          <span className="w-1/2 text-text-tertiary md:w-3/5">{vectorStore.bytes} bytes</span>
         </div>
         <div className="mt-3 flex flex-row">
           <span className="flex w-1/2 flex-row items-center md:w-2/5">
-            <Clock3 className="text-base text-gray-500 md:text-lg lg:text-xl" />
+            <Clock3 className="text-base text-text-tertiary md:text-lg lg:text-xl" />
             &nbsp;Last active
           </span>
-          <span className="w-1/2 text-gray-500 md:w-3/5">{vectorStore.lastActive}</span>
+          <span className="w-1/2 text-text-tertiary md:w-3/5">{vectorStore.lastActive}</span>
         </div>
         <div className="mt-3 flex flex-row">
           <span className="flex w-1/2 flex-row items-center md:w-2/5">
-            <InfoIcon className="text-base text-gray-500 md:text-lg lg:text-xl" />
+            <InfoIcon className="text-base text-text-tertiary md:text-lg lg:text-xl" />
             &nbsp;Expiration policy
           </span>
-          <span className="w-1/2 text-gray-500 md:w-3/5">{vectorStore.expirationPolicy}</span>
+          <span className="w-1/2 text-text-tertiary md:w-3/5">{vectorStore.expirationPolicy}</span>
         </div>
         <div className="mt-3 flex flex-row">
           <span className="flex w-1/2 flex-row items-center md:w-2/5">
-            <FileClock className="text-base text-gray-500 md:text-lg lg:text-xl" />
+            <FileClock className="text-base text-text-tertiary md:text-lg lg:text-xl" />
             &nbsp;Expires
           </span>
-          <span className="w-1/2 text-gray-500 md:w-3/5">{vectorStore.expires}</span>
+          <span className="w-1/2 text-text-tertiary md:w-3/5">{vectorStore.expires}</span>
         </div>
         <div className="mt-3 flex flex-row">
           <span className="flex w-1/2 flex-row items-center md:w-2/5">
-            <Clock3 className="text-base text-gray-500 md:text-lg lg:text-xl" />
+            <Clock3 className="text-base text-text-tertiary md:text-lg lg:text-xl" />
             &nbsp;Created At
           </span>
-          <span className="w-1/2 text-gray-500 md:w-3/5">{vectorStore.createdAt.toString()}</span>
+          <span className="w-1/2 text-text-tertiary md:w-3/5">{vectorStore.createdAt.toString()}</span>
         </div>
       </div>
 
@@ -200,7 +200,7 @@ export default function VectorStorePreview() {
                 <div className="flex w-1/2 flex-row lg:w-1/3">
                   <div className="content-center text-nowrap">{file.createdAt?.toString()}</div>
                   <Button
-                    className="my-0 ml-3 h-min bg-transparent p-0 text-text-secondary hover:bg-slate-200"
+                    className="my-0 ml-3 h-min bg-transparent p-0 text-text-secondary hover:bg-surface-hover"
                     onClick={() => console.log('click')}
                   >
                     <TrashIcon className="m-0 p-0" />

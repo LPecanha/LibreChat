@@ -30,7 +30,7 @@ export default function Pages({
       <button
         onClick={clickHandler(previousPage)}
         className={
-          'btn btn-small bg-transition m-auto flex gap-2 transition hover:bg-gray-800 disabled:text-gray-300 dark:text-white dark:disabled:text-gray-400' +
+          'btn btn-small bg-transition m-auto flex gap-2 transition hover:bg-surface-secondary disabled:text-gray-300 dark:text-white dark:disabled:text-gray-400' +
           (pageNumber <= 1 ? ' hidden-visibility' : '')
         }
         disabled={pageNumber <= 1}
@@ -43,7 +43,7 @@ export default function Pages({
       <button
         onClick={clickHandler(nextPage)}
         className={
-          'btn btn-small bg-transition m-auto flex gap-2 transition hover:bg-gray-800 disabled:text-gray-300 dark:text-white dark:disabled:text-gray-400' +
+          'btn btn-small bg-transition m-auto flex gap-2 transition hover:bg-surface-secondary disabled:text-gray-300 dark:text-white dark:disabled:text-gray-400' +
           (pageNumber >= pages ? ' hidden-visibility' : '')
         }
         disabled={pageNumber >= pages}

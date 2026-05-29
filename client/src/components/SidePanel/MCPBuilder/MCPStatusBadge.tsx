@@ -95,7 +95,7 @@ export default function MCPStatusBadge({
         role="status"
         className={cn(
           badgeBaseClass,
-          'bg-gray-100 text-gray-600 dark:bg-gray-800 dark:text-gray-400',
+          'bg-surface-secondary text-gray-600 dark:bg-surface-secondary dark:text-gray-400',
         )}
       >
         <span>{localize('com_nav_mcp_status_disconnected')}</span>
@@ -153,7 +153,7 @@ export function getStatusDotColor(
   }
 
   if (!serverStatus) {
-    return 'bg-gray-400';
+    return 'bg-text-tertiary';
   }
 
   const { connectionState, requiresOAuth } = serverStatus;
@@ -172,8 +172,8 @@ export function getStatusDotColor(
 
   if (connectionState === 'disconnected') {
     // Needs OAuth = amber, otherwise gray
-    return requiresOAuth ? 'bg-amber-500' : 'bg-gray-400';
+    return requiresOAuth ? 'bg-amber-500' : 'bg-text-tertiary';
   }
 
-  return 'bg-gray-400';
+  return 'bg-text-tertiary';
 }

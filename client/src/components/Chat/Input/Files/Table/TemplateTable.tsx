@@ -6,16 +6,16 @@ export default function Template() {
       <table className="w-full border-separate border-spacing-0">
         <thead>
           <tr>
-            <th className="sticky top-0 rounded-t border-b border-black/10 bg-white px-4 py-2 text-left font-medium text-gray-700 dark:border-white/10 dark:bg-gray-900 dark:text-gray-100">
+            <th className="sticky top-0 rounded-t border-b border-black/10 bg-white px-4 py-2 text-left font-medium text-gray-700 dark:border-white/10 dark:bg-surface-primary dark:text-gray-100">
               Name
             </th>
-            <th className="sticky top-0 rounded-t border-b border-black/10 bg-white px-4 py-2 text-left font-medium text-gray-700 dark:border-white/10 dark:bg-gray-900 dark:text-gray-100">
+            <th className="sticky top-0 rounded-t border-b border-black/10 bg-white px-4 py-2 text-left font-medium text-gray-700 dark:border-white/10 dark:bg-surface-primary dark:text-gray-100">
               Date
             </th>
-            <th className="sticky top-0 rounded-t border-b border-black/10 bg-white px-4 py-2 text-left font-medium text-gray-700 dark:border-white/10 dark:bg-gray-900 dark:text-gray-100">
+            <th className="sticky top-0 rounded-t border-b border-black/10 bg-white px-4 py-2 text-left font-medium text-gray-700 dark:border-white/10 dark:bg-surface-primary dark:text-gray-100">
               Size
             </th>
-            <th className="sticky top-0 rounded-t border-b border-black/10 bg-white px-4 py-2 text-right font-medium text-gray-700 dark:border-white/10 dark:bg-gray-900 dark:text-gray-100">
+            <th className="sticky top-0 rounded-t border-b border-black/10 bg-white px-4 py-2 text-right font-medium text-gray-700 dark:border-white/10 dark:bg-surface-primary dark:text-gray-100">
               <button
                 className="text-gray-500 hover:text-gray-600 radix-state-open:text-gray-600 dark:hover:text-gray-400 dark:radix-state-open:text-gray-400"
                 type="button"

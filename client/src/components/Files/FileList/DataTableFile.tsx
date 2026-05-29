@@ -141,7 +141,7 @@ export default function DataTableFile<TData, TValue>({
                     return (
                       <DropdownMenuCheckboxItem
                         key={column.id}
-                        className="cursor-pointer capitalize dark:text-white dark:hover:bg-gray-800"
+                        className="cursor-pointer capitalize dark:text-white dark:hover:bg-surface-secondary"
                         checked={column.getIsVisible()}
                         onCheckedChange={(value) => column.toggleVisibility(Boolean(value))}
                       >
@@ -192,7 +192,7 @@ export default function DataTableFile<TData, TValue>({
                   return (
                     <TableHead
                       key={header.id}
-                      className="align-start sticky top-0 rounded-t border-b border-black/10 bg-white px-2 py-1 text-left font-medium text-gray-700 dark:border-white/10 dark:bg-gray-700 dark:text-gray-100 sm:px-4 sm:py-2"
+                      className="align-start sticky top-0 rounded-t border-b border-black/10 bg-white px-2 py-1 text-left font-medium text-gray-700 dark:border-white/10 dark:bg-surface-secondary dark:text-gray-100 sm:px-4 sm:py-2"
                       style={style}
                     >
                       {header.isPlaceholder
@@ -254,7 +254,7 @@ export default function DataTableFile<TData, TValue>({
           })}
         </div>
         <Button
-          className="dark:border-gray-500 dark:hover:bg-gray-600"
+          className="dark:border-gray-500 dark:hover:bg-surface-tertiary"
           variant="outline"
           size="sm"
           onClick={() => table.previousPage()}
@@ -263,7 +263,7 @@ export default function DataTableFile<TData, TValue>({
           {localize('com_ui_prev')}
         </Button>
         <Button
-          className="dark:border-gray-500 dark:hover:bg-gray-600"
+          className="dark:border-gray-500 dark:hover:bg-surface-tertiary"
           variant="outline"
           size="sm"
           onClick={() => table.nextPage()}

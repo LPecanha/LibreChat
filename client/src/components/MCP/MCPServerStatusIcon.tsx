@@ -107,12 +107,12 @@ function CompactStatusDot({ serverStatus, isInitializing }: CompactStatusDotProp
   }
 
   if (!serverStatus) {
-    return <div className="size-3 rounded-full border-2 border-surface-secondary bg-gray-400" />;
+    return <div className="size-3 rounded-full border-2 border-surface-secondary bg-text-tertiary" />;
   }
 
   const { connectionState, requiresOAuth } = serverStatus;
 
-  let colorClass = 'bg-gray-400';
+  let colorClass = 'bg-text-tertiary';
   if (connectionState === 'connected') {
     colorClass = 'bg-green-500';
   } else if (connectionState === 'connecting') {

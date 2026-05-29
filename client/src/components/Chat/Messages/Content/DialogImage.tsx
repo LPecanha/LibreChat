@@ -13,7 +13,7 @@ const getQualityStyles = (quality: string): string => {
   if (quality === 'low') {
     return 'bg-orange-100 text-orange-800';
   }
-  return 'bg-gray-100 text-gray-800';
+  return 'bg-surface-secondary text-gray-800';
 };
 
 export default function DialogImage({

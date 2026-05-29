@@ -63,7 +63,7 @@ function ToolItem({ tool, onAddTool, onRemoveTool, isInstalled = false }: ToolIt
             </button>
           ) : (
             <button
-              className="btn relative bg-gray-300 hover:bg-gray-400 dark:bg-gray-50 dark:hover:bg-surface-hover"
+              className="btn relative bg-surface-active hover:bg-text-tertiary dark:bg-surface-primary dark:hover:bg-surface-hover"
               onClick={handleClick}
               aria-label={`${localize('com_nav_tool_remove')} ${name}`}
             >

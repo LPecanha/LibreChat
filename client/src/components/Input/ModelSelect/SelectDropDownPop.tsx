@@ -68,8 +68,8 @@ function SelectDropDownPop({
             <button
               data-testid="select-dropdown-button"
               className={cn(
-                'pointer-cursor relative flex flex-col rounded-lg border border-black/10 bg-white py-2 pl-3 pr-10 text-left focus:ring-0 focus:ring-offset-0 dark:border-gray-700 dark:bg-gray-800 sm:text-sm',
-                'hover:bg-gray-50 radix-state-open:bg-gray-50 dark:hover:bg-gray-700 dark:radix-state-open:bg-gray-700',
+                'pointer-cursor relative flex flex-col rounded-lg border border-black/10 bg-white py-2 pl-3 pr-10 text-left focus:ring-0 focus:ring-offset-0 dark:border-gray-700 dark:bg-surface-secondary sm:text-sm',
+                'hover:bg-surface-primary radix-state-open:bg-surface-primary dark:hover:bg-surface-secondary dark:radix-state-open:bg-surface-secondary',
                 'min-w-[200px] max-w-[215px] sm:min-w-full sm:max-w-full',
               )}
               aria-label={`Select ${title}`}
@@ -114,7 +114,7 @@ function SelectDropDownPop({
               side="bottom"
               align="start"
               className={cn(
-                'z-50 mr-3 mt-2 max-h-[52vh] w-full max-w-[85vw] overflow-hidden overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-700 dark:text-white sm:max-w-full lg:max-h-[52vh]',
+                'z-50 mr-3 mt-2 max-h-[52vh] w-full max-w-[85vw] overflow-hidden overflow-y-auto rounded-lg border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-surface-secondary dark:text-white sm:max-w-full lg:max-h-[52vh]',
                 hasSearchRender && 'relative',
               )}
             >

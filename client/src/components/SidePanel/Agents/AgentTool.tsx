@@ -61,7 +61,7 @@ export default function AgentTool({
   return (
     <OGDialog>
       <div
-        className="group relative flex w-full items-center gap-1 rounded-lg p-1 text-sm hover:bg-gray-50 dark:hover:bg-surface-hover/50"
+        className="group relative flex w-full items-center gap-1 rounded-lg p-1 text-sm hover:bg-surface-primary dark:hover:bg-surface-hover/50"
         onMouseEnter={() => setIsHovering(true)}
         onMouseLeave={() => setIsHovering(false)}
         onFocus={() => setIsFocused(true)}
