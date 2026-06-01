@@ -26,10 +26,14 @@ import Root from './Root';
 /** [EXT] Index redirect: respeita interface.home do librechat.yaml.
  *  - 'dashboard' → /home (Home dashboard Navvia)
  *  - 'chat' (padrão) → /c/new (comportamento upstream)
- *  Enquanto startupConfig carrega, mantém comportamento upstream (/c/new).
+ *  Espera o startupConfig carregar antes de decidir — caso contrário um
+ *  Navigate para /c/new dispara antes do data chegar e ignora interface.home.
  */
 function IndexRedirect() {
-  const { data: startupConfig } = useGetStartupConfig();
+  const { data: startupConfig, isLoading } = useGetStartupConfig();
+  if (isLoading || !startupConfig) {
+    return null;
+  }
   const target = startupConfig?.interface?.home === 'dashboard' ? '/home' : '/c/new';
   return <Navigate to={target} replace={true} />;
 }

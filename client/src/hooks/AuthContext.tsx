@@ -108,7 +108,11 @@ const AuthContextProvider = ({
         return;
       }
       setError(undefined);
-      setUserContext({ token, isAuthenticated: true, user, redirect: '/c/new' });
+      /* [EXT] Navvia: redirect para '/' (raiz) deixa o IndexRedirect decidir
+       * entre /home (dashboard) e /c/new com base em interface.home do
+       * startupConfig — única fonte de verdade. Antes era hardcoded /c/new,
+       * o que ignorava interface.home: dashboard. */
+      setUserContext({ token, isAuthenticated: true, user, redirect: '/' });
     },
     onError: (error: TResError | unknown) => {
       const resError = error as TResError;
