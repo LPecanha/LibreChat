@@ -9,6 +9,7 @@ import {
   getCreditPlanModel,
 } from '../../db/models';
 import { tenantContext } from '../../lib/tenantContext';
+import { getTenants, isMultiTenant } from '../../config/tenants';
 import logger from '../../lib/logger';
 import { requireAdminJwt, requireUserJwt } from '../../middleware/auth';
 import { CREDIT_PLANS, getPlanById } from './plans';
@@ -508,6 +509,97 @@ router.get('/payment/:paymentId/status', requireUserJwt, async (req: Authenticat
 
 // ---------- Webhook ----------
 
+interface WebhookPayment {
+  id: string;
+  status: string;
+  billingType?: string;
+  externalReference?: string;
+  subscription?: string;
+  value?: number;
+}
+
+async function creditFromWebhook(event: string | undefined, payment: WebhookPayment): Promise<boolean> {
+  if (payment.subscription) {
+    const sub = await getSubscriptionModel().findOne({ externalSubId: payment.subscription });
+    if (!sub) return false;
+
+    // Idempotency: skip if already recorded
+    const existing = await getPaymentTxnModel().findOne({ externalTxnId: payment.id }).lean();
+    if (existing?.status === 'completed') return true;
+
+    const entityId = sub.entityId.toString();
+    await grantCredits(sub.entityType, entityId, sub.creditsPerCycle);
+
+    const now = new Date();
+    const nextEnd = new Date(now);
+    nextEnd.setDate(nextEnd.getDate() + sub.cycleIntervalDays);
+    await getSubscriptionModel().updateOne(
+      { _id: sub._id },
+      { $set: { currentPeriodStart: now, currentPeriodEnd: nextEnd, nextRefillAt: nextEnd } },
+    );
+
+    await getPaymentTxnModel().create({
+      entityType: sub.entityType,
+      entityId: sub.entityId,
+      amount: Math.round((payment.value ?? 0) * 100),
+      currency: 'BRL',
+      provider: 'asaas',
+      status: 'completed',
+      idempotencyKey: `asaas-webhook-${payment.id}`,
+      creditsGranted: sub.creditsPerCycle,
+      externalTxnId: payment.id,
+      subscriptionId: sub._id,
+      metadata: { method: 'webhook-sub', event: event ?? '' },
+    });
+
+    logger.info('[asaas/webhook] subscription credits granted', {
+      entityId,
+      credits: sub.creditsPerCycle,
+      paymentId: payment.id,
+    });
+    return true;
+  }
+
+  // One-time payment — look up txn by idempotencyKey stored in externalReference
+  const idempotencyKey = payment.externalReference;
+  if (!idempotencyKey) return false;
+
+  const PaymentTxn = getPaymentTxnModel();
+  const txn = await PaymentTxn.findOne({ idempotencyKey }).lean();
+  if (!txn) return false;
+  if (txn.status === 'completed') return true;
+
+  const meta = txn.metadata as unknown as Record<string, string> | undefined;
+  const credits = parseInt(meta?.credits ?? '0', 10);
+  const entityId = txn.entityId.toString();
+
+  await grantCredits(txn.entityType, entityId, credits);
+  await PaymentTxn.updateOne({ _id: txn._id }, { $set: { status: 'completed', creditsGranted: credits } });
+
+  logger.info('[asaas/webhook] one-time credits granted', { credits, entityId, paymentId: payment.id });
+  return true;
+}
+
+async function dispatchWebhook(event: string | undefined, payment: WebhookPayment): Promise<void> {
+  if (!isMultiTenant()) {
+    await creditFromWebhook(event, payment);
+    return;
+  }
+
+  // Server-to-server webhooks carry no Origin header, so `tenantFromOrigin` cannot
+  // resolve the tenant. Find the tenant whose DB owns this payment and process there.
+  for (const tenant of getTenants()) {
+    const handled = await tenantContext.run(tenant, () => creditFromWebhook(event, payment));
+    if (handled) return;
+  }
+
+  logger.warn('[asaas/webhook] No tenant owns payment', {
+    paymentId: payment.id,
+    subscription: payment.subscription,
+    externalReference: payment.externalReference,
+  });
+}
+
 router.post('/webhook', async (req, res) => {
   // Security: validate asaas-access-token header (timing-safe)
   const token = (req.headers['asaas-access-token'] as string | undefined) ?? '';
@@ -518,17 +610,7 @@ router.post('/webhook', async (req, res) => {
     return;
   }
 
-  const payload = req.body as {
-    event?: string;
-    payment?: {
-      id: string;
-      status: string;
-      billingType?: string;
-      externalReference?: string;
-      subscription?: string;
-      value?: number;
-    };
-  };
+  const payload = req.body as { event?: string; payment?: WebhookPayment };
 
   const { event, payment } = payload;
 
@@ -547,67 +629,7 @@ router.post('/webhook', async (req, res) => {
   res.json({ received: true });
 
   try {
-    if (payment.subscription) {
-      // Recurring subscription payment
-      const sub = await getSubscriptionModel().findOne({ externalSubId: payment.subscription });
-      if (!sub) {
-        logger.warn('[asaas/webhook] Subscription not found', { externalSubId: payment.subscription });
-        return;
-      }
-
-      // Idempotency: skip if already recorded
-      const existing = await getPaymentTxnModel().findOne({ externalTxnId: payment.id }).lean();
-      if (existing?.status === 'completed') return;
-
-      const entityId = sub.entityId.toString();
-      await grantCredits(sub.entityType, entityId, sub.creditsPerCycle);
-
-      const now = new Date();
-      const nextEnd = new Date(now);
-      nextEnd.setDate(nextEnd.getDate() + sub.cycleIntervalDays);
-      await getSubscriptionModel().updateOne(
-        { _id: sub._id },
-        { $set: { currentPeriodStart: now, currentPeriodEnd: nextEnd, nextRefillAt: nextEnd } },
-      );
-
-      await getPaymentTxnModel().create({
-        entityType: sub.entityType,
-        entityId: sub.entityId,
-        amount: Math.round((payment.value ?? 0) * 100),
-        currency: 'BRL',
-        provider: 'asaas',
-        status: 'completed',
-        idempotencyKey: `asaas-webhook-${payment.id}`,
-        creditsGranted: sub.creditsPerCycle,
-        externalTxnId: payment.id,
-        subscriptionId: sub._id,
-        metadata: { method: 'webhook-sub', event: event ?? '' },
-      });
-
-      logger.info('[asaas/webhook] subscription credits granted', {
-        entityId,
-        credits: sub.creditsPerCycle,
-        paymentId: payment.id,
-      });
-      return;
-    }
-
-    // One-time payment — look up txn by idempotencyKey stored in externalReference
-    const idempotencyKey = payment.externalReference;
-    if (!idempotencyKey) return;
-
-    const PaymentTxn = getPaymentTxnModel();
-    const txn = await PaymentTxn.findOne({ idempotencyKey }).lean();
-    if (!txn || txn.status === 'completed') return;
-
-    const meta = txn.metadata as unknown as Record<string, string> | undefined;
-    const credits = parseInt(meta?.credits ?? '0', 10);
-    const entityId = txn.entityId.toString();
-
-    await grantCredits(txn.entityType, entityId, credits);
-    await PaymentTxn.updateOne({ _id: txn._id }, { $set: { status: 'completed', creditsGranted: credits } });
-
-    logger.info('[asaas/webhook] one-time credits granted', { credits, entityId, paymentId: payment.id });
+    await dispatchWebhook(event, payment);
   } catch (err) {
     logger.error('[asaas/webhook] processing error', { err });
   }
