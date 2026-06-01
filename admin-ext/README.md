@@ -17,7 +17,7 @@ Separate Express server (TypeScript, port 3092) that adds billing and admin API 
 | `ext_org_profiles` | Organization metadata |
 | `ext_org_balances` | Organization credit pools |
 | `ext_subscriptions` | Subscription plans per entity |
-| `ext_payment_txns` | Payment transactions (Stripe/Pagar.me) |
+| `ext_payment_txns` | Payment transactions (ASAAS) |
 | `ext_credit_allocations` | Per-user/per-period credit distributions |
 | `ext_credit_audits` | Audit trail for all manual credit adjustments |
 | `ext_user_profiles` | Extended user metadata |
@@ -56,13 +56,13 @@ POST /ext/admin/agents/:agentId/acl
 DELETE /ext/admin/agents/:agentId/acl/:aclId
 
 GET  /ext/payment/plans
-POST /ext/payment/stripe/checkout
-POST /ext/payment/stripe/webhook              # Stripe webhook (raw body required)
-GET  /ext/payment/stripe/history
-
-POST /ext/payment/pagarme/pix                 # body: { planId, entityType, entityId, customer }
-GET  /ext/payment/pagarme/order/:orderId/status
-POST /ext/payment/pagarme/webhook             # Pagar.me webhook (HMAC-SHA1 verified)
+GET  /ext/payment/asaas/plans
+POST /ext/payment/asaas/checkout/pix          # one-time PIX — returns QR code
+POST /ext/payment/asaas/checkout/card         # one-time credit card — credits synchronously
+POST /ext/payment/asaas/subscription          # recurring PIX or card (ASAAS manages cycle)
+GET  /ext/payment/asaas/payment/:paymentId/status
+POST /ext/payment/asaas/webhook               # ASAAS webhook (asaas-access-token verified, tenant resolved from payload)
+GET  /ext/payment/asaas/history               # admin
 ```
 
 ## Environment Variables
@@ -73,10 +73,9 @@ POST /ext/payment/pagarme/webhook             # Pagar.me webhook (HMAC-SHA1 veri
 | `JWT_SECRET` | Yes | Same secret as LibreChat |
 | `EXT_PORT` | No | Port (default 3092) |
 | `CORS_ORIGINS` | No | Comma-separated allowed origins |
-| `STRIPE_SECRET_KEY` | For Stripe | Stripe secret key |
-| `STRIPE_WEBHOOK_SECRET` | For Stripe | Webhook signing secret |
-| `PAGARME_API_KEY` | For Pagar.me | Pagar.me API key |
-| `PAGARME_WEBHOOK_SECRET` | For Pagar.me | HMAC-SHA1 webhook secret |
+| `ASAAS_API_KEY` | For payments | ASAAS API key (single account, shared by all tenants) |
+| `ASAAS_SANDBOX` | No | `true` → sandbox API; anything else → production (default production) |
+| `ASAAS_WEBHOOK_TOKEN` | For webhook | Token checked (timing-safe) against the `asaas-access-token` header |
 | `CREDIT_SCHEDULER_CRON` | No | Cron for auto-refill (default `0 * * * *`) |
 | `LOG_LEVEL` | No | Winston log level (default `info`) |
 
@@ -91,4 +90,4 @@ npm start        # run compiled dist/
 
 ## Docker
 
-Deployed via `docker-compose.override.yml`. The service connects to the `mongodb` service in the default Docker network.
+Deployed via `deploy/admin/docker-compose.yml` (service `librechat-admin-ext`, joined to the external `4leads_network`). See `deploy/admin/.env.example` for the required variables.
