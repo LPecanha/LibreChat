@@ -151,68 +151,57 @@ export default function Settings({ open, onOpenChange }: TDialogProps) {
           leaveTo="opacity-0 scale-95"
         >
           <div className={cn('fixed inset-0 flex w-screen items-center justify-center p-4')}>
+            {/* [EXT] Phase J.9 Navvia: layout do protótipo (design/ui-preview.html linha 1217+).
+             *  - 860×640 (vs 680px upstream)
+             *  - Sidebar 210px com header "Configurações" + tabs + "Fechar" no fim
+             *  - Content right-pane: text-[13px], rows com border-b
+             *  - Sem border na title bar (header fica na sidebar) */}
             <DialogPanel
               className={cn(
-                'max-h-[90vh] overflow-hidden rounded-xl rounded-b-lg bg-background pb-6 shadow-2xl backdrop-blur-2xl animate-in sm:rounded-2xl md:w-[680px]',
+                'overflow-hidden rounded-xl border border-border-light bg-surface-overlay shadow-2xl backdrop-blur-2xl animate-in',
+                'flex w-full max-w-[860px]',
+                isSmallScreen ? 'h-[92vh] flex-col' : 'h-[640px] flex-row',
               )}
             >
-              <DialogTitle
-                className="mb-1 flex items-center justify-between border-b border-border-light p-6 pb-5 text-left"
-                as="div"
-              >
-                {/* [EXT] Phase G.5 Navvia: título em font-display + tracking tight */}
-                <h2 className="font-display text-[18px] font-semibold leading-6 tracking-tight text-text-primary">
-                  {localize('com_nav_settings')}
-                </h2>
-                <button
-                  type="button"
-                  /* [EXT] Phase G.5 Navvia: close button com .msg-action style */
-                  className="msg-action !h-7 !w-7 focus:outline-none focus:ring-2 focus:ring-brand"
-                  onClick={() => onOpenChange(false)}
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.9"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <line x1="18" x2="6" y1="6" y2="18"></line>
-                    <line x1="6" x2="18" y1="6" y2="18"></line>
-                  </svg>
-                  <span className="sr-only">{localize('com_ui_close_settings')}</span>
-                </button>
+              <DialogTitle as="div" className="sr-only">
+                {localize('com_nav_settings')}
               </DialogTitle>
-              <div className="max-h-[calc(90vh-120px)] overflow-auto px-6 md:w-[680px]">
-                <Tabs.Root
-                  value={activeTab}
-                  onValueChange={handleTabChange}
-                  className="flex flex-col gap-10 md:flex-row"
-                  orientation="vertical"
+
+              <Tabs.Root
+                value={activeTab}
+                onValueChange={handleTabChange}
+                orientation="vertical"
+                className={cn('flex h-full w-full', isSmallScreen ? 'flex-col' : 'flex-row')}
+              >
+                {/* Sidebar esquerda (210px) — header + tabs + Fechar */}
+                <aside
+                  className={cn(
+                    'flex',
+                    isSmallScreen
+                      ? 'w-full flex-row overflow-x-auto border-b border-border-light bg-surface-secondary p-2'
+                      : 'h-full w-[210px] shrink-0 flex-col gap-0.5 overflow-y-auto border-r border-border-light bg-surface-secondary p-2',
+                  )}
                 >
+                  {!isSmallScreen && (
+                    <div className="px-2 py-2 font-display text-[14px] font-semibold text-text-primary">
+                      {localize('com_nav_settings')}
+                    </div>
+                  )}
                   <Tabs.List
                     aria-label="Settings"
-                    className={cn(
-                      'min-w-auto max-w-auto relative -ml-[8px] flex flex-shrink-0 flex-col flex-nowrap overflow-auto sm:max-w-none',
-                      isSmallScreen
-                        ? 'flex-row rounded-xl bg-surface-secondary'
-                        : 'sticky top-0 h-full',
-                    )}
+                    className={cn('flex', isSmallScreen ? 'flex-row gap-1' : 'flex-col gap-0.5')}
                     onKeyDown={handleKeyDown}
                   >
                     {settingsTabs.map(({ value, icon, label }) => (
                       <Tabs.Trigger
                         key={value}
-                        /* [EXT] Navvia: aba ativa ganha bg-brand-soft + text-brand, hover suave */
+                        /* [EXT] Phase J.9 Navvia: tabbtn estilo .menu-item — gap-2 px-2.5 py-1.5,
+                         *  bg-surface-active na ativa (vs bg-brand-soft que era forte demais). */
                         className={cn(
-                          'group relative z-10 m-1 flex items-center justify-start gap-2 rounded-xl px-2 py-1.5 transition-all duration-200 ease-in-out',
-                          isSmallScreen
-                            ? 'flex-1 justify-center text-nowrap p-1 px-3 text-sm text-text-secondary hover:bg-surface-hover radix-state-active:bg-brand-soft radix-state-active:text-brand'
-                            : 'bg-transparent text-text-secondary hover:bg-surface-hover radix-state-active:bg-brand-soft radix-state-active:text-brand',
+                          'flex items-center gap-2 rounded-md px-2.5 py-1.5 text-[13px] text-text-secondary transition-colors',
+                          'hover:bg-surface-hover',
+                          'radix-state-active:bg-surface-active radix-state-active:text-text-primary',
+                          isSmallScreen ? 'shrink-0 text-nowrap' : 'justify-start',
                         )}
                         value={value}
                         ref={(el) => (tabRefs.current[value] = el)}
@@ -222,41 +211,65 @@ export default function Settings({ open, onOpenChange }: TDialogProps) {
                       </Tabs.Trigger>
                     ))}
                   </Tabs.List>
-                  <div className="overflow-auto sm:w-full sm:max-w-none md:pr-0.5 md:pt-0.5">
-                    <Tabs.Content value={SettingsTabValues.GENERAL} tabIndex={-1}>
-                      <General />
+                  {!isSmallScreen && (
+                    <button
+                      type="button"
+                      onClick={() => onOpenChange(false)}
+                      className="mt-auto rounded-md px-2.5 py-1.5 text-left text-[13px] text-text-secondary transition-colors hover:bg-surface-hover"
+                    >
+                      {localize('com_ui_close')}
+                    </button>
+                  )}
+                  {isSmallScreen && (
+                    <button
+                      type="button"
+                      onClick={() => onOpenChange(false)}
+                      className="msg-action !h-7 !w-7 ml-auto"
+                      aria-label={localize('com_ui_close_settings')}
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
+                        <line x1="18" x2="6" y1="6" y2="18" />
+                        <line x1="6" x2="18" y1="6" y2="18" />
+                      </svg>
+                    </button>
+                  )}
+                </aside>
+
+                {/* Content pane direito */}
+                <div className="flex-1 overflow-y-auto p-5 text-[13px]">
+                  <Tabs.Content value={SettingsTabValues.GENERAL} tabIndex={-1}>
+                    <General />
+                  </Tabs.Content>
+                  <Tabs.Content value={SettingsTabValues.CHAT} tabIndex={-1}>
+                    <Chat />
+                  </Tabs.Content>
+                  <Tabs.Content value={SettingsTabValues.COMMANDS} tabIndex={-1}>
+                    <Commands />
+                  </Tabs.Content>
+                  <Tabs.Content value={SettingsTabValues.SPEECH} tabIndex={-1}>
+                    <Speech />
+                  </Tabs.Content>
+                  {hasAnyPersonalizationFeature && (
+                    <Tabs.Content value={SettingsTabValues.PERSONALIZATION} tabIndex={-1}>
+                      <Personalization
+                        hasMemoryOptOut={hasMemoryOptOut}
+                        hasAnyPersonalizationFeature={hasAnyPersonalizationFeature}
+                      />
                     </Tabs.Content>
-                    <Tabs.Content value={SettingsTabValues.CHAT} tabIndex={-1}>
-                      <Chat />
+                  )}
+                  <Tabs.Content value={SettingsTabValues.DATA} tabIndex={-1}>
+                    <Data />
+                  </Tabs.Content>
+                  {startupConfig?.balance?.enabled && (
+                    <Tabs.Content value={SettingsTabValues.BALANCE} tabIndex={-1}>
+                      <Balance />
                     </Tabs.Content>
-                    <Tabs.Content value={SettingsTabValues.COMMANDS} tabIndex={-1}>
-                      <Commands />
-                    </Tabs.Content>
-                    <Tabs.Content value={SettingsTabValues.SPEECH} tabIndex={-1}>
-                      <Speech />
-                    </Tabs.Content>
-                    {hasAnyPersonalizationFeature && (
-                      <Tabs.Content value={SettingsTabValues.PERSONALIZATION} tabIndex={-1}>
-                        <Personalization
-                          hasMemoryOptOut={hasMemoryOptOut}
-                          hasAnyPersonalizationFeature={hasAnyPersonalizationFeature}
-                        />
-                      </Tabs.Content>
-                    )}
-                    <Tabs.Content value={SettingsTabValues.DATA} tabIndex={-1}>
-                      <Data />
-                    </Tabs.Content>
-                    {startupConfig?.balance?.enabled && (
-                      <Tabs.Content value={SettingsTabValues.BALANCE} tabIndex={-1}>
-                        <Balance />
-                      </Tabs.Content>
-                    )}
-                    <Tabs.Content value={SettingsTabValues.ACCOUNT} tabIndex={-1}>
-                      <Account />
-                    </Tabs.Content>
-                  </div>
-                </Tabs.Root>
-              </div>
+                  )}
+                  <Tabs.Content value={SettingsTabValues.ACCOUNT} tabIndex={-1}>
+                    <Account />
+                  </Tabs.Content>
+                </div>
+              </Tabs.Root>
             </DialogPanel>
           </div>
         </TransitionChild>
