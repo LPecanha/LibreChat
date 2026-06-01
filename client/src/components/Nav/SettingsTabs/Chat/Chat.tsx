@@ -5,6 +5,8 @@ import FontSizeSelector from './FontSizeSelector';
 import { ForkSettings } from './ForkSettings';
 import ChatDirection from './ChatDirection';
 import ToggleSwitch from '../ToggleSwitch';
+import { SectionHeader, SectionLabel } from '../components';
+import { useLocalize } from '~/hooks';
 import store from '~/store';
 
 const toggleSwitchConfigs = [
@@ -101,28 +103,77 @@ const toggleSwitchConfigs = [
   },
 ];
 
+/* [EXT] Phase J.9 Navvia: ordem dos toggles segue a ordem do protótipo
+ * (ui-preview.html#tab-chat). Display first (font, direction, layout
+ * toggles), depois Envio (Enter, draft, modular), depois Fork. */
+const DISPLAY_KEYS = new Set([
+  'maximizeChatSpace',
+  'centerFormOnLanding',
+  'showScrollButton',
+  'showThinking',
+  'autoExpandTools',
+  'latexParsing',
+]);
+
+const SEND_KEYS = new Set([
+  'enterToSend',
+  'autoSendPrompts',
+  'saveDrafts',
+  'showBadges',
+  'modularChat',
+  'defaultTemporaryChat',
+  'alwaysMakeProd',
+]);
+
 function Chat() {
+  const localize = useLocalize();
+  const displayToggles = toggleSwitchConfigs.filter((c) => DISPLAY_KEYS.has(c.key));
+  const sendToggles = toggleSwitchConfigs.filter((c) => SEND_KEYS.has(c.key));
+
   return (
-    <div className="flex flex-col gap-3 p-1 text-sm text-text-primary">
-      <div className="pb-3">
-        <FontSizeSelector />
-      </div>
-      <div className="pb-3">
-        <ChatDirection />
-      </div>
-      {toggleSwitchConfigs.map((config) => (
-        <div key={config.key} className="pb-3">
-          <ToggleSwitch
-            stateAtom={config.stateAtom}
-            localizationKey={config.localizationKey}
-            hoverCardText={config.hoverCardText}
-            switchId={config.switchId}
-          />
+    /* [EXT] Phase J.9 Navvia: layout dense do protótipo com seções:
+     * "Exibição" / "Envio" / "Fork" — cada uma com SectionLabel. */
+    <div className="flex flex-col gap-4 text-[13px] text-text-primary">
+      <SectionHeader>{localize('com_nav_setting_chat')}</SectionHeader>
+
+      <SectionLabel>{localize('com_nav_section_display')}</SectionLabel>
+      <div className="flex flex-col gap-2.5">
+        <div className="border-b border-border-light pb-2.5">
+          <FontSizeSelector />
         </div>
-      ))}
-      <div className="pb-3">
-        <AdvancedPrompts />
+        <div className="border-b border-border-light pb-2.5">
+          <ChatDirection />
+        </div>
+        {displayToggles.map((config) => (
+          <div key={config.key} className="border-b border-border-light pb-2.5">
+            <ToggleSwitch
+              stateAtom={config.stateAtom}
+              localizationKey={config.localizationKey}
+              hoverCardText={config.hoverCardText}
+              switchId={config.switchId}
+            />
+          </div>
+        ))}
       </div>
+
+      <SectionLabel>{localize('com_nav_section_send')}</SectionLabel>
+      <div className="flex flex-col gap-2.5">
+        {sendToggles.map((config) => (
+          <div key={config.key} className="border-b border-border-light pb-2.5">
+            <ToggleSwitch
+              stateAtom={config.stateAtom}
+              localizationKey={config.localizationKey}
+              hoverCardText={config.hoverCardText}
+              switchId={config.switchId}
+            />
+          </div>
+        ))}
+        <div className="border-b border-border-light pb-2.5">
+          <AdvancedPrompts />
+        </div>
+      </div>
+
+      <SectionLabel>{localize('com_nav_section_fork')}</SectionLabel>
       <ForkSettings />
     </div>
   );
