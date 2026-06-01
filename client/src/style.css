@@ -113,6 +113,10 @@ html {
   --surface-tertiary: #eef0f3;
   --surface-tertiary-alt: var(--white);
   --surface-dialog: var(--white);
+  /* [EXT] Navvia: surface-overlay (popovers, toasts, scroll-fab) — não
+   * existia upstream, sem ele a class bg-surface-overlay caía pra
+   * transparent e popovers ficavam vendo o conteúdo atrás. */
+  --surface-overlay: #ffffff;
   --surface-submit: var(--green-700);
   --surface-submit-hover: var(--green-800);
   --surface-destructive: var(--red-700);
@@ -183,6 +187,7 @@ html {
   --surface-tertiary: #1d1f22;
   --surface-tertiary-alt: #1d1f22;
   --surface-dialog: #1a1c1f;
+  --surface-overlay: #1a1c1f;
   --surface-submit: var(--green-700);
   --surface-submit-hover: var(--green-800);
   --surface-destructive: var(--red-800);
@@ -1843,8 +1848,9 @@ html {
 }
 .dark body,
 .dark html {
-  --tw-bg-opacity: 1;
-  background-color: rgba(33, 33, 33, var(--tw-bg-opacity));
+  /* [EXT] Navvia: usa --surface-primary (#0f1012) em vez de hardcode #212121.
+   * O hardcoded upstream era ~3 stops mais claro que o protótipo. */
+  background-color: var(--surface-primary);
 }
 #__next,
 #root {
@@ -3126,6 +3132,7 @@ html {
 body {
   font-size: var(--ui-font);
   color: var(--text-primary);
+  background: var(--surface-primary);
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
 }

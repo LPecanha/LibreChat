@@ -126,6 +126,10 @@ module.exports = {
         'surface-destructive': 'var(--surface-destructive)',
         'surface-destructive-hover': 'var(--surface-destructive-hover)',
         'surface-chat': 'var(--surface-chat)',
+        // [EXT] Navvia: surface-overlay (popovers/menus/toasts) — não existia
+        // upstream, sem o mapping a class bg-surface-overlay nunca foi
+        // gerada e os popovers ficavam transparentes.
+        'surface-overlay': 'var(--surface-overlay)',
         'border-light': 'var(--border-light)',
         'border-medium': 'var(--border-medium)',
         'border-medium-alt': 'var(--border-medium-alt)',

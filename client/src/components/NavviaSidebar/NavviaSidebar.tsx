@@ -26,6 +26,8 @@ import { useGetUserBalance } from '~/data-provider/Misc/queries';
 import { useAuthContext, useLocalize } from '~/hooks';
 import { groupConversationsByDate } from '~/utils/convos';
 import { useGetStartupConfig } from '~/data-provider';
+import Settings from '~/components/Nav/Settings';
+import { MyFilesModal } from '~/components/Chat/Input/Files/MyFilesModal';
 import { formatUsdBalance } from '~/components/Nav/BuyCredits/ExtBalanceDisplay';
 import { cn } from '~/utils';
 import store from '~/store';
@@ -70,6 +72,11 @@ function NavviaSidebar() {
 
   const [search, setSearch] = useState('');
   const [accountOpen, setAccountOpen] = useState(false);
+  /* [EXT] Navvia: Settings é um <Dialog> controlado (Nav/Settings.tsx), não
+   * uma rota. Antes navegávamos para /d/settings (rota inexistente) e o
+   * Outlet caía em fallback. */
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [filesOpen, setFilesOpen] = useState(false);
 
   const conversationsParams = useMemo(
     () => ({ isArchived: false, sortBy: 'updatedAt' as const, sortDirection: 'desc' as const }),
@@ -334,7 +341,7 @@ function NavviaSidebar() {
               <button
                 onClick={() => {
                   setAccountOpen(false);
-                  navigate('/d/files');
+                  setFilesOpen(true);
                 }}
                 className="menu-item"
               >
@@ -354,7 +361,7 @@ function NavviaSidebar() {
               <button
                 onClick={() => {
                   setAccountOpen(false);
-                  navigate('/d/settings');
+                  setSettingsOpen(true);
                 }}
                 className="menu-item"
               >
@@ -404,26 +411,32 @@ function NavviaSidebar() {
           onClick={handleCollapse}
           role="presentation"
         />
+        <Settings open={settingsOpen} onOpenChange={setSettingsOpen} />
+        <MyFilesModal open={filesOpen} onOpenChange={setFilesOpen} />
       </>
     );
   }
 
   /* Desktop: sidebar fixa 280px com botão collapse no edge */
   return (
-    <aside
-      className="sidebar-main relative flex w-[280px] shrink-0 flex-col border-r border-border-light bg-surface-secondary"
-      aria-label={localize('com_nav_control_panel')}
-    >
-      <button
-        onClick={handleCollapse}
-        className="sidebar-collapse"
-        title={localize('com_nav_close_sidebar') || 'Recolher sidebar'}
-        aria-label={localize('com_nav_close_sidebar') || 'Recolher sidebar'}
+    <>
+      <aside
+        className="sidebar-main relative flex w-[280px] shrink-0 flex-col border-r border-border-light bg-surface-secondary"
+        aria-label={localize('com_nav_control_panel')}
       >
-        <ChevronLeft className="h-[11px] w-[11px]" strokeWidth={2} />
-      </button>
-      {Inner}
-    </aside>
+        <button
+          onClick={handleCollapse}
+          className="sidebar-collapse"
+          title={localize('com_nav_close_sidebar') || 'Recolher sidebar'}
+          aria-label={localize('com_nav_close_sidebar') || 'Recolher sidebar'}
+        >
+          <ChevronLeft className="h-[11px] w-[11px]" strokeWidth={2} />
+        </button>
+        {Inner}
+      </aside>
+      <Settings open={settingsOpen} onOpenChange={setSettingsOpen} />
+      <MyFilesModal open={filesOpen} onOpenChange={setFilesOpen} />
+    </>
   );
 }
 
