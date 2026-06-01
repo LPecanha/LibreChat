@@ -214,7 +214,7 @@ endpoints:
   anthropic:
     apiKey: "${ANTHROPIC_API_KEY}"
     models:
-      - "claude-opus-4-7"
+      - "claude-opus-4-8"
       - "claude-sonnet-4-6"
 
   google:
@@ -280,13 +280,13 @@ modelSpecs:
             effort: "high"
 
     # ── Anthropic ───────────────────────────────────────────────────────────────
-    - name: "claude-opus-47"
-      label: "Claude Opus 4.7"
+    - name: "claude-opus-48"
+      label: "Claude Opus 4.8"
       webSearch: false
       fileSearch: false
       preset:
         endpoint: anthropic
-        model: "claude-opus-4-7"
+        model: "claude-opus-4-8"
         maxContextTokens: 200000
         max_tokens: 16000
 
