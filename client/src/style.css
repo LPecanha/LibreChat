@@ -99,16 +99,18 @@ html {
   --header-primary: var(--white);
   --header-hover: var(--gray-50);
   --header-button-hover: var(--gray-50);
-  --surface-active: var(--gray-100);
+  /* [EXT] Navvia: surfaces/borders alinhadas com o protótipo HTML (tons frios
+   * azulados em vez de cinza puro). Sobrescreve os var(--gray-XXX) upstream. */
+  --surface-active: #e6e9ee;
   --surface-active-alt: var(--gray-200);
-  --surface-hover: var(--gray-200);
+  --surface-hover: #f0f1f4;
   --surface-hover-alt: var(--gray-300);
-  --surface-primary: var(--white);
+  --surface-primary: #ffffff;
   --surface-primary-alt: var(--gray-50);
   --surface-primary-contrast: var(--gray-100);
-  --surface-secondary: var(--gray-50);
+  --surface-secondary: #f7f8fa;
   --surface-secondary-alt: var(--gray-200);
-  --surface-tertiary: var(--gray-100);
+  --surface-tertiary: #eef0f3;
   --surface-tertiary-alt: var(--white);
   --surface-dialog: var(--white);
   --surface-submit: var(--green-700);
@@ -116,9 +118,9 @@ html {
   --surface-destructive: var(--red-700);
   --surface-destructive-hover: var(--red-800);
   --surface-chat: var(--white);
-  --border-light: var(--gray-200);
-  --border-medium-alt: var(--gray-300);
-  --border-medium: var(--gray-300);
+  --border-light: #e7e9ed;
+  --border-medium-alt: #d6dae0;
+  --border-medium: #d6dae0;
   --border-heavy: var(--gray-400);
   --border-xheavy: var(--gray-500);
   --border-destructive: var(--red-600);
@@ -168,26 +170,27 @@ html {
   --header-primary: var(--gray-700);
   --header-hover: var(--gray-600);
   --header-button-hover: var(--gray-700);
-  --surface-active: var(--gray-500);
+  /* [EXT] Navvia dark: surfaces/borders alinhadas com o protótipo HTML. */
+  --surface-active: #26282d;
   --surface-active-alt: var(--gray-700);
-  --surface-hover: var(--gray-600);
+  --surface-hover: #202225;
   --surface-hover-alt: var(--gray-600);
-  --surface-primary: var(--gray-900);
-  --surface-primary-alt: var(--gray-850);
-  --surface-primary-contrast: var(--gray-850);
-  --surface-secondary: var(--gray-800);
-  --surface-secondary-alt: var(--gray-800);
-  --surface-tertiary: var(--gray-700);
-  --surface-tertiary-alt: var(--gray-700);
-  --surface-dialog: var(--gray-850);
+  --surface-primary: #0f1012;
+  --surface-primary-alt: #161719;
+  --surface-primary-contrast: #161719;
+  --surface-secondary: #161719;
+  --surface-secondary-alt: #1d1f22;
+  --surface-tertiary: #1d1f22;
+  --surface-tertiary-alt: #1d1f22;
+  --surface-dialog: #1a1c1f;
   --surface-submit: var(--green-700);
   --surface-submit-hover: var(--green-800);
   --surface-destructive: var(--red-800);
   --surface-destructive-hover: var(--red-900);
-  --surface-chat: var(--gray-700);
-  --border-light: var(--gray-700);
-  --border-medium-alt: var(--gray-600);
-  --border-medium: var(--gray-600);
+  --surface-chat: #0f1012;
+  --border-light: #232529;
+  --border-medium-alt: #2e3137;
+  --border-medium: #2e3137;
   --border-heavy: var(--gray-500);
   --border-xheavy: var(--gray-400);
   --border-destructive: var(--red-500);
@@ -3115,6 +3118,17 @@ html {
  *   .tab-btn, .drawer-backdrop, .src-stack, .mobile-only, .msg-image
  *   → componentes funcionais (do protótipo, não do upstream)
  * ============================================================================ */
+
+/* [EXT] Navvia: tipografia base do body herda os tokens de densidade.
+ * Sem isso, o body fica com font-size 16px (default do browser) e todos os
+ * elementos sem text-[Xpx] explícito ficam maiores que no protótipo.
+ * O protótipo HTML define body { font-size: var(--ui-font); color: var(--text-primary) }. */
+body {
+  font-size: var(--ui-font);
+  color: var(--text-primary);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
 
 /* Density modes — controlados via <body data-density="cozy|compact|comfortable">
  * Default = cozy (já definido em :root). */
