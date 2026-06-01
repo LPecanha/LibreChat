@@ -153,12 +153,12 @@ export default function Settings({ open, onOpenChange }: TDialogProps) {
           <div className={cn('fixed inset-0 flex w-screen items-center justify-center p-4')}>
             {/* [EXT] Phase J.9 Navvia: layout do protótipo (design/ui-preview.html linha 1217+).
              *  - 860×640 (vs 680px upstream)
-             *  - Sidebar 210px com header "Configurações" + tabs + "Fechar" no fim
-             *  - Content right-pane: text-[13px], rows com border-b
-             *  - Sem border na title bar (header fica na sidebar) */}
+             *  - Sidebar 210px com header "Configurações" + tabs
+             *  - Botão X absolute no canto superior direito (vs "Fechar" textual)
+             *  - Content right-pane: text-[13px], rows com border-b */}
             <DialogPanel
               className={cn(
-                'overflow-hidden rounded-xl border border-border-light bg-surface-overlay shadow-2xl backdrop-blur-2xl animate-in',
+                'relative overflow-hidden rounded-xl border border-border-light bg-surface-overlay shadow-2xl backdrop-blur-2xl animate-in',
                 'flex w-full max-w-[860px]',
                 isSmallScreen ? 'h-[92vh] flex-col' : 'h-[640px] flex-row',
               )}
@@ -167,13 +167,36 @@ export default function Settings({ open, onOpenChange }: TDialogProps) {
                 {localize('com_nav_settings')}
               </DialogTitle>
 
+              {/* Close button — sempre no canto superior direito */}
+              <button
+                type="button"
+                onClick={() => onOpenChange(false)}
+                className="absolute right-3 top-3 z-10 grid h-8 w-8 place-items-center rounded-md text-text-secondary transition-colors hover:bg-surface-hover focus:outline-none focus:ring-2 focus:ring-brand"
+                aria-label={localize('com_ui_close_settings')}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.9"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <line x1="18" x2="6" y1="6" y2="18" />
+                  <line x1="6" x2="18" y1="6" y2="18" />
+                </svg>
+              </button>
+
               <Tabs.Root
                 value={activeTab}
                 onValueChange={handleTabChange}
                 orientation="vertical"
                 className={cn('flex h-full w-full', isSmallScreen ? 'flex-col' : 'flex-row')}
               >
-                {/* Sidebar esquerda (210px) — header + tabs + Fechar */}
+                {/* Sidebar esquerda (210px) — header + tabs */}
                 <aside
                   className={cn(
                     'flex',
@@ -211,28 +234,6 @@ export default function Settings({ open, onOpenChange }: TDialogProps) {
                       </Tabs.Trigger>
                     ))}
                   </Tabs.List>
-                  {!isSmallScreen && (
-                    <button
-                      type="button"
-                      onClick={() => onOpenChange(false)}
-                      className="mt-auto rounded-md px-2.5 py-1.5 text-left text-[13px] text-text-secondary transition-colors hover:bg-surface-hover"
-                    >
-                      {localize('com_ui_close')}
-                    </button>
-                  )}
-                  {isSmallScreen && (
-                    <button
-                      type="button"
-                      onClick={() => onOpenChange(false)}
-                      className="msg-action !h-7 !w-7 ml-auto"
-                      aria-label={localize('com_ui_close_settings')}
-                    >
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round">
-                        <line x1="18" x2="6" y1="6" y2="18" />
-                        <line x1="6" x2="18" y1="6" y2="18" />
-                      </svg>
-                    </button>
-                  )}
                 </aside>
 
                 {/* Content pane direito */}

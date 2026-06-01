@@ -4,6 +4,7 @@ import { useRecoilState } from 'recoil';
 import { Dropdown, ThemeContext } from '@librechat/client';
 import ArchivedChats from './ArchivedChats';
 import ToggleSwitch from '../ToggleSwitch';
+import { Row, Segment, SectionHeader } from '../components';
 import { useLocalize } from '~/hooks';
 import store from '~/store';
 
@@ -45,37 +46,21 @@ const toggleSwitchConfigs = [
 export const ThemeSelector = ({
   theme,
   onChange,
-  portal = true,
 }: {
   theme: string;
   onChange: (value: string) => void;
   portal?: boolean;
 }) => {
   const localize = useLocalize();
-
-  const themeOptions = [
+  const options = [
     { value: 'system', label: localize('com_nav_theme_system') },
     { value: 'dark', label: localize('com_nav_theme_dark') },
     { value: 'light', label: localize('com_nav_theme_light') },
   ];
-
-  const labelId = 'theme-selector-label';
-
   return (
-    <div className="flex items-center justify-between">
-      <div id={labelId}>{localize('com_nav_theme')}</div>
-
-      <Dropdown
-        value={theme}
-        onChange={onChange}
-        options={themeOptions}
-        sizeClasses="w-[180px]"
-        testId="theme-selector"
-        className="z-50"
-        aria-labelledby={labelId}
-        portal={portal}
-      />
-    </div>
+    <Row label={localize('com_nav_theme')}>
+      <Segment value={theme} onChange={onChange} options={options} ariaLabel="theme" />
+    </Row>
   );
 };
 
@@ -90,34 +75,24 @@ export const ThemeSelector = ({
 export const DensitySelector = ({
   density,
   onChange,
-  portal = true,
 }: {
   density: string;
   onChange: (value: string) => void;
   portal?: boolean;
 }) => {
   const localize = useLocalize();
-  const labelId = 'density-selector-label';
   const options = [
     { value: 'compact', label: localize('com_nav_density_compact') },
     { value: 'cozy', label: localize('com_nav_density_cozy') },
     { value: 'comfortable', label: localize('com_nav_density_comfortable') },
   ];
-
   return (
-    <div className="flex items-center justify-between">
-      <div id={labelId}>{localize('com_nav_density')}</div>
-      <Dropdown
-        value={density}
-        onChange={onChange}
-        options={options}
-        sizeClasses="w-[180px]"
-        testId="density-selector"
-        className="z-50"
-        aria-labelledby={labelId}
-        portal={portal}
-      />
-    </div>
+    <Row
+      label={localize('com_nav_density')}
+      description={localize('com_nav_density_desc')}
+    >
+      <Segment value={density} onChange={onChange} options={options} ariaLabel="density" />
+    </Row>
   );
 };
 
@@ -177,26 +152,23 @@ export const LangSelector = ({
     { value: 'uk-UA', label: localize('com_nav_lang_ukrainian') },
   ];
 
-  const labelId = 'language-selector-label';
-
   return (
-    <div className="flex items-center justify-between">
-      <div id={labelId}>{localize('com_nav_language')}</div>
-
+    <Row label={localize('com_nav_language')}>
       <Dropdown
         value={langcode}
         onChange={onChange}
-        sizeClasses="[--anchor-max-height:256px] max-h-[60vh]"
+        sizeClasses="[--anchor-max-height:256px] max-h-[60vh] w-[180px]"
         options={languageOptions}
         className="z-50"
-        aria-labelledby={labelId}
+        aria-label={localize('com_nav_language')}
         portal={portal}
       />
-    </div>
+    </Row>
   );
 };
 
 function General() {
+  const localize = useLocalize();
   const { theme, setTheme } = useContext(ThemeContext);
 
   const [langcode, setLangcode] = useRecoilState(store.lang);
@@ -239,19 +211,15 @@ function General() {
   );
 
   return (
-    <div className="flex flex-col gap-3 p-1 text-sm text-text-primary">
-      <div className="pb-3">
-        <ThemeSelector theme={theme} onChange={changeTheme} />
-      </div>
-      <div className="pb-3">
-        <LangSelector langcode={langcode} onChange={changeLang} />
-      </div>
-      {/* [EXT] Phase G.2 Navvia: densidade da UI (compacta/padrão/confortável) */}
-      <div className="pb-3">
-        <DensitySelector density={density} onChange={changeDensity} />
-      </div>
+    /* [EXT] Phase J.9 Navvia: layout dense do protótipo (ui-preview.html#tab-geral).
+     * SectionHeader + rows com border-b. Cada Row contém label/control alinhados. */
+    <div className="flex flex-col gap-3 text-[13px] text-text-primary">
+      <SectionHeader>{localize('com_nav_setting_general')}</SectionHeader>
+      <ThemeSelector theme={theme} onChange={changeTheme} />
+      <DensitySelector density={density} onChange={changeDensity} />
+      <LangSelector langcode={langcode} onChange={changeLang} />
       {toggleSwitchConfigs.map((config) => (
-        <div key={config.key} className="pb-3">
+        <div key={config.key} className="border-b border-border-light pb-2.5">
           <ToggleSwitch
             stateAtom={config.stateAtom}
             localizationKey={config.localizationKey}
@@ -260,9 +228,7 @@ function General() {
           />
         </div>
       ))}
-      <div className="pb-3">
-        <ArchivedChats />
-      </div>
+      <ArchivedChats />
     </div>
   );
 }

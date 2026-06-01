@@ -602,6 +602,7 @@
   "com_nav_my_conversations": "Conversations",
   "com_nav_library": "Library",
   "com_nav_density": "Interface density",
+  "com_nav_density_desc": "Choose how compact the UI feels",
   "com_nav_density_compact": "Compact",
   "com_nav_density_cozy": "Default",
   "com_nav_density_comfortable": "Comfortable",

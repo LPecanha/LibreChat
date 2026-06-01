@@ -602,6 +602,7 @@
   "com_nav_my_conversations": "Conversas",
   "com_nav_library": "Biblioteca",
   "com_nav_density": "Densidade da interface",
+  "com_nav_density_desc": "Você escolhe o quão compacta a UI fica",
   "com_nav_density_compact": "Compacta",
   "com_nav_density_cozy": "Padrão",
   "com_nav_density_comfortable": "Confortável",
