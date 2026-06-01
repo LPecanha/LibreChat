@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useId } from 'react';
 
 /**
  * [EXT] Navvia wordmark logo.
@@ -39,6 +39,10 @@ export default function NavviaLogo({
   'aria-label': ariaLabel = 'Navvia',
 }: NavviaLogoProps) {
   const { h, w } = SIZES[size];
+  /* useId garante id único por instância — sem isso, duas <NavviaLogo /> na
+   * mesma página colidem o id do <linearGradient> e a segunda instância
+   * renderiza com fill transparente. */
+  const gradId = `navviaWordmarkGrad-${useId().replace(/:/g, '')}`;
   return (
     <svg
       role="img"
@@ -51,12 +55,12 @@ export default function NavviaLogo({
       style={{ flexShrink: 0 }}
     >
       <defs>
-        <linearGradient id="navviaWordmarkGrad" x1="0" y1="0" x2="1" y2="0">
+        <linearGradient id={gradId} x1="0" y1="0" x2="1" y2="0">
           <stop offset="0" stopColor="#2469e2" />
           <stop offset="1" stopColor="#11b38d" />
         </linearGradient>
       </defs>
-      <g fill="url(#navviaWordmarkGrad)">
+      <g fill={`url(#${gradId})`}>
         <path d="M0,103.2V5h20.3l43.5,69.4h1.1c-.4-9.7-.6-18.1-.6-27.1V4.9h18.6v98.2h-20.4L19,33.7h-1c.4,9.8.6,18,.6,27.1v42.4H0Z" />
         <path d="M163.9,65.6c0,12.6,0,25,.7,37.6h-16.4l-1.5-12.2h-1.2c-4.4,9-12,13.6-23.1,13.6s-22.7-8.4-22.7-21.3,9.7-21.9,28.9-23l17.4-1v-2.7c0-8.6-6.4-12.2-13.8-12.2s-13.3,3.9-15.6,11.2l-16-4.3c2.5-13.5,14.5-21,31.6-21s31.8,9.7,31.8,25.7v9.7l-.1-.1ZM146,71l-13.1.8c-9.9.7-15.3,3.2-15.3,10s4,8.7,10.5,8.7c9.7,0,17.4-7.7,18-19.5h-.1Z" />
         <path d="M198.9,103.2l-24.4-71.5h19.3l16.3,54.6h1l16.2-54.6h18.9l-24.6,71.5h-22.7Z" />

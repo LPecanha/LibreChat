@@ -6,14 +6,16 @@ import { getIconEndpoint, getEntity } from '~/utils';
 import { useLocalize, useSubmitMessage } from '~/hooks';
 import type { TranslationKeys } from '~/hooks';
 
-/* [EXT] Phase D.5 Navvia: starters genéricos default quando não há agent
- * nem assistant. Faz a Landing chat coincidir com o protótipo (que mostra
- * 4 sugestões em grid mesmo sem agent). Usa i18n para suportar en+pt-BR. */
+/* [EXT] Phase J.8 Navvia: starters genéricos default da chat landing.
+ * Conteúdo bate com DEFAULT_STARTERS do protótipo (ui-preview.html:1867):
+ * "Resuma este conteúdo / Crie um plano de ação / Explique de forma simples /
+ *  Dê exemplos práticos". Usa keys i18n próprias p/ separar do home (que tem
+ *  ações específicas — gerar imagem, busca web, etc.). */
 const GENERIC_STARTER_KEYS: TranslationKeys[] = [
-  'com_nav_home_chip_summary',  // Resumir texto
-  'com_nav_home_chip_code',     // Escrever código
-  'com_nav_home_chip_doc',      // Analisar documento
-  'com_nav_home_chip_search',   // Busca web
+  'com_nav_chat_starter_summary',
+  'com_nav_chat_starter_plan',
+  'com_nav_chat_starter_explain',
+  'com_nav_chat_starter_examples',
 ];
 
 const ConversationStarters = () => {
@@ -76,21 +78,20 @@ const ConversationStarters = () => {
   }
 
   return (
-    <div className="mt-8 flex flex-wrap justify-center gap-3 px-4">
+    /* [EXT] Phase J.8 Navvia: grid 2 colunas (vs flex wrap) com starters
+     * mais largos. Bate com ui-preview.html#view-chat: cada starter tem
+     * <span class="text-brand">✦</span> + texto, e o grid é 2×2. */
+    <div className="mx-auto mt-8 grid w-full max-w-2xl grid-cols-1 gap-2.5 px-4 sm:grid-cols-2">
       {conversation_starters
         .slice(0, Constants.MAX_CONVO_STARTERS)
         .map((text: string, index: number) => (
-          /* [EXT] Phase D.4 Navvia: usar .starter do protótipo
-           * (design/ui-preview.html linha 401-402): border-light + bg secondary,
-           * hover border-medium + bg-hover + lift -1px. Mantém w-40 + line-clamp. */
           <button
             key={index}
             onClick={() => sendConversationStarter(text)}
-            className="starter fade-in flex w-40 flex-col gap-2"
+            className="starter fade-in"
           >
-            <p className="line-clamp-3 overflow-hidden text-balance break-words text-text-secondary">
-              {text}
-            </p>
+            <span className="text-brand" aria-hidden>✦</span>
+            <span className="line-clamp-2 text-left">{text}</span>
           </button>
         ))}
     </div>

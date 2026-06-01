@@ -204,46 +204,48 @@ const AgentMarketplace: React.FC<AgentMarketplaceProps> = ({ className = '' }) =
             ref={scrollContainerRef}
             className="scrollbar-gutter-stable relative flex h-full flex-col overflow-y-auto overflow-x-hidden"
           >
-            {/* Hero Section - scrolls away */}
+            {/* [EXT] Navvia Phase J.8: layout dense alinhado com protótipo.
+             *  - h1 small (24px) alinhado à esquerda (vs hero 48px centered)
+             *  - max-w-[1600px] (vs 4xl ~896px)
+             *  - search inline com header (vs bloco separado abaixo) */}
             {!isSmallScreen && (
-              <div className="container mx-auto max-w-4xl">
-                <div className={cn('mb-8 text-center', 'mt-12')}>
-                  <h1 className="mb-3 text-3xl font-bold font-display tracking-tight text-text-primary md:text-5xl">
-                    {localize('com_agents_marketplace')}
-                  </h1>
-                  <p className="mx-auto mb-6 max-w-2xl text-lg text-text-secondary">
-                    {localize('com_agents_marketplace_subtitle')}
-                  </p>
-                </div>
+              <div className="container mx-auto max-w-[1600px] px-8 pt-6 lg:px-12">
+                <h1 className="font-display text-[24px] font-bold tracking-tight text-text-primary">
+                  {localize('com_agents_marketplace')}
+                </h1>
+                <p className="mt-1 text-[13px] text-text-secondary">
+                  {localize('com_agents_marketplace_subtitle')}
+                </p>
               </div>
             )}
             {/* Sticky wrapper for search bar and categories */}
             <div className="sticky top-0 z-10 mt-4 bg-presentation pb-4 md:mt-0">
-              <div className="container mx-auto max-w-4xl px-4">
-                <div className="mx-auto mb-3 flex max-w-2xl items-center justify-between gap-2 md:hidden">
+              <div className="container mx-auto max-w-[1600px] px-8 lg:px-12">
+                <div className="mx-auto mb-3 flex items-center justify-between gap-2 md:hidden">
                   <OpenSidebar />
                   <MarketplaceAdminSettings compact />
                 </div>
-                {/* Search bar */}
-                <div className="mx-auto flex max-w-2xl gap-2 pb-6">
-                  <SearchBar value={searchQuery} onSearch={handleSearch} />
-                  {/* TODO: Remove this once we have a better way to handle admin settings */}
-                  <div className="hidden md:block">
-                    <MarketplaceAdminSettings />
+                {/* Header row: categories à esquerda + search à direita (densidade Navvia) */}
+                <div className="mt-4 flex items-center justify-between gap-3 pb-4">
+                  <div className="min-w-0 flex-1">
+                    <CategoryTabs
+                      categories={categoriesQuery.data || []}
+                      activeTab={displayCategory}
+                      isLoading={categoriesQuery.isLoading}
+                      onChange={handleTabChange}
+                    />
+                  </div>
+                  <div className="flex w-72 shrink-0 items-center gap-2">
+                    <SearchBar value={searchQuery} onSearch={handleSearch} />
+                    <div className="hidden md:block">
+                      <MarketplaceAdminSettings />
+                    </div>
                   </div>
                 </div>
-
-                {/* Category tabs */}
-                <CategoryTabs
-                  categories={categoriesQuery.data || []}
-                  activeTab={displayCategory}
-                  isLoading={categoriesQuery.isLoading}
-                  onChange={handleTabChange}
-                />
               </div>
             </div>
             {/* Scrollable content area */}
-            <div className="container mx-auto max-w-4xl px-4 pb-8">
+            <div className="container mx-auto max-w-[1600px] px-8 pb-8 lg:px-12">
               {/* Two-pane animated container wrapping category header + grid */}
               <div className="relative overflow-hidden">
                 {/* Current content pane */}
@@ -302,9 +304,9 @@ const AgentMarketplace: React.FC<AgentMarketplaceProps> = ({ className = '' }) =
 
                         return (
                           <div className="text-left">
-                            <h2 className="text-2xl font-bold font-display text-text-primary">{name}</h2>
+                            <h2 className="font-display text-[15px] font-semibold text-text-primary">{name}</h2>
                             {description && (
-                              <p className="mt-2 text-text-secondary">{description}</p>
+                              <p className="mt-0.5 text-[12.5px] text-text-tertiary">{description}</p>
                             )}
                           </div>
                         );
