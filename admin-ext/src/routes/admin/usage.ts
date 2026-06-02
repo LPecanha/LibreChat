@@ -1,13 +1,12 @@
 import { Router } from 'express';
 import mongoose from 'mongoose';
-import { tenantContext } from '../../lib/tenantContext';
 import logger from '../../lib/logger';
 import type { AuthenticatedRequest } from '../../middleware/auth';
 
 const router = Router();
 
 function getTransactionModel() {
-  const db = tenantContext.getDb();
+  const db = mongoose.connection;
   if (db.models['Transaction']) return db.models['Transaction'];
   const schema = new mongoose.Schema(
     {
@@ -26,7 +25,7 @@ function getTransactionModel() {
 }
 
 function getBalanceModel() {
-  const db = tenantContext.getDb();
+  const db = mongoose.connection;
   if (db.models['Balance']) return db.models['Balance'];
   const schema = new mongoose.Schema(
     { user: mongoose.Schema.Types.ObjectId, tokenCredits: Number },
@@ -60,7 +59,7 @@ function cleanModelName(model: string): string {
 interface AgentDoc { id: string; name?: string; model?: string; }
 
 function getAgentModel() {
-  const db = tenantContext.getDb();
+  const db = mongoose.connection;
   if (db.models['Agent']) return db.models['Agent'] as mongoose.Model<AgentDoc>;
   const schema = new mongoose.Schema<AgentDoc>(
     { id: String, name: String, model: String },
@@ -523,7 +522,7 @@ router.get('/group/:groupId', async (req: AuthenticatedRequest, res) => {
     const since = new Date();
     since.setDate(since.getDate() - parseInt(days, 10));
 
-    const db = tenantContext.getDb();
+    const db = mongoose.connection;
     const [groupDoc] = await db.collection('groups').find(
       { _id: new mongoose.Types.ObjectId(groupId) },
       { projection: { name: 1, memberIds: 1 } },

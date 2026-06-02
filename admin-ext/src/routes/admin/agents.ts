@@ -1,6 +1,5 @@
 import { Router } from 'express';
 import mongoose from 'mongoose';
-import { tenantContext } from '../../lib/tenantContext';
 import { requireAdminJwt } from '../../middleware/auth';
 import logger from '../../lib/logger';
 import type { AuthenticatedRequest } from '../../middleware/auth';
@@ -36,14 +35,14 @@ interface AclDoc {
 interface NameDoc { _id: mongoose.Types.ObjectId; name?: string; email?: string; }
 
 function getNameModel(collection: string, modelName: string): mongoose.Model<NameDoc> {
-  const db = tenantContext.getDb();
+  const db = mongoose.connection;
   if (db.models[modelName]) return db.models[modelName] as mongoose.Model<NameDoc>;
   const schema = new mongoose.Schema<NameDoc>({ name: String, email: String }, { collection, strict: false });
   return db.model<NameDoc>(modelName, schema);
 }
 
 function getAgentModel(): mongoose.Model<AgentDoc> {
-  const db = tenantContext.getDb();
+  const db = mongoose.connection;
   if (db.models['Agent']) return db.models['Agent'] as mongoose.Model<AgentDoc>;
   const schema = new mongoose.Schema<AgentDoc>(
     { id: String, name: String, description: String, model: String, author: mongoose.Schema.Types.ObjectId, authorName: String, access_level: Number },
@@ -53,7 +52,7 @@ function getAgentModel(): mongoose.Model<AgentDoc> {
 }
 
 function getAclModel(): mongoose.Model<AclDoc> {
-  const db = tenantContext.getDb();
+  const db = mongoose.connection;
   if (db.models['AclEntry']) return db.models['AclEntry'] as mongoose.Model<AclDoc>;
   const schema = new mongoose.Schema<AclDoc>(
     {

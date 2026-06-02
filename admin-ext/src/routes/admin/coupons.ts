@@ -1,6 +1,5 @@
 import { Router } from 'express';
 import mongoose, { type Model } from 'mongoose';
-import { tenantContext } from '../../lib/tenantContext';
 import logger from '../../lib/logger';
 import type { AuthenticatedRequest } from '../../middleware/auth';
 
@@ -48,7 +47,7 @@ const couponSchema = new mongoose.Schema<CouponDoc>(
 );
 
 function getCouponModel(): Model<CouponDoc> {
-  const db = tenantContext.getDb();
+  const db = mongoose.connection;
   if (db.models['Coupon']) return db.models['Coupon'] as Model<CouponDoc>;
   return db.model<CouponDoc>('Coupon', couponSchema);
 }

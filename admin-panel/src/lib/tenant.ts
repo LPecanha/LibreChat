@@ -1,4 +1,14 @@
-const TENANT_KEY = 'lc_admin_tenant';
+/**
+ * [EXT] Phase J.19 Navvia: tenant helpers single-tenant.
+ *
+ * Antes esse modulo parseava `VITE_TENANTS` (JSON array), guardava o tenant
+ * ativo em localStorage e oferecia `isMultiTenant()` pra UI condicional.
+ * Agora roda Navvia-only: a TenantInfo vem direto das env vars do build
+ * (`VITE_LIBRECHAT_URL`, `VITE_BRAND_NAME`).
+ *
+ * Mantemos a interface `TenantInfo` + `getActiveTenant()` por compat —
+ * callers em `api.ts` e `models.ts` precisam de `librechatUrl`.
+ */
 
 export interface TenantInfo {
   id: string;
@@ -6,37 +16,12 @@ export interface TenantInfo {
   librechatUrl: string;
 }
 
-export function getAvailableTenants(): TenantInfo[] {
-  try {
-    const raw = (import.meta.env.VITE_TENANTS as string | undefined) ?? '[]';
-    return JSON.parse(raw) as TenantInfo[];
-  } catch {
-    return [];
-  }
-}
+const NAVVIA_TENANT: TenantInfo = {
+  id: 'navvia',
+  name: (import.meta.env.VITE_BRAND_NAME as string | undefined) ?? 'Navvia',
+  librechatUrl: (import.meta.env.VITE_LIBRECHAT_URL as string | undefined) ?? '',
+};
 
-export function getActiveTenant(): TenantInfo | null {
-  const raw = localStorage.getItem(TENANT_KEY);
-  if (!raw) {
-    const tenants = getAvailableTenants();
-    if (tenants.length === 1) return tenants[0] ?? null;
-    return null;
-  }
-  try {
-    return JSON.parse(raw) as TenantInfo;
-  } catch {
-    return null;
-  }
-}
-
-export function setActiveTenant(tenant: TenantInfo): void {
-  localStorage.setItem(TENANT_KEY, JSON.stringify(tenant));
-}
-
-export function clearTenant(): void {
-  localStorage.removeItem(TENANT_KEY);
-}
-
-export function isMultiTenant(): boolean {
-  return getAvailableTenants().length > 1;
+export function getActiveTenant(): TenantInfo {
+  return NAVVIA_TENANT;
 }

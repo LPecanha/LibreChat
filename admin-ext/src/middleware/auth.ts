@@ -2,7 +2,7 @@ import jwt from 'jsonwebtoken';
 import mongoose from 'mongoose';
 import type { Model } from 'mongoose';
 import type { Request, Response, NextFunction } from 'express';
-import { tenantContext } from '../lib/tenantContext';
+import { getConfig } from '../config';
 
 export interface AdminJwtPayload {
   id: string;
@@ -25,12 +25,8 @@ const adminUserSchema = new mongoose.Schema<AdminUserDoc>(
   { collection: 'users', strict: false },
 );
 
-function getSecret(): string | null {
-  return tenantContext.get()?.jwtSecret ?? process.env.JWT_SECRET ?? null;
-}
-
 function getAdminUserModel(): Model<AdminUserDoc> {
-  const db = tenantContext.getDb();
+  const db = mongoose.connection;
   if (db.models['AdminAuthUser']) return db.models['AdminAuthUser'] as Model<AdminUserDoc>;
   return db.model<AdminUserDoc>('AdminAuthUser', adminUserSchema);
 }
@@ -49,15 +45,11 @@ export async function requireAdminJwt(
     return;
   }
 
-  const secret = getSecret();
-  if (!secret) {
-    res.status(500).json({ error: 'Server misconfiguration' });
-    return;
-  }
+  const { jwtSecret } = getConfig();
 
   let payload: AdminJwtPayload;
   try {
-    payload = jwt.verify(token, secret) as AdminJwtPayload;
+    payload = jwt.verify(token, jwtSecret) as AdminJwtPayload;
   } catch {
     res.status(401).json({ error: 'Invalid or expired token' });
     return;
@@ -93,14 +85,10 @@ export async function requireUserJwt(
     return;
   }
 
-  const secret = getSecret();
-  if (!secret) {
-    res.status(500).json({ error: 'Server misconfiguration' });
-    return;
-  }
+  const { jwtSecret } = getConfig();
 
   try {
-    req.user = jwt.verify(token, secret) as AdminJwtPayload;
+    req.user = jwt.verify(token, jwtSecret) as AdminJwtPayload;
     next();
   } catch {
     res.status(401).json({ error: 'Invalid or expired token' });

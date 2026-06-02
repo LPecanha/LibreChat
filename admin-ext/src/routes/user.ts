@@ -1,7 +1,6 @@
 import { Router } from 'express';
 import mongoose, { type Model } from 'mongoose';
 import { getSubscriptionModel, getOrgProfileModel, getCreditAuditModel } from '../db/models';
-import { tenantContext } from '../lib/tenantContext';
 import logger from '../lib/logger';
 import { requireUserJwt } from '../middleware/auth';
 import type { AuthenticatedRequest } from '../middleware/auth';
@@ -11,7 +10,7 @@ interface CouponUsage { userId: string; userName: string; userEmail: string; use
 interface CouponDoc { code: string; credits: number; expiresAt?: Date; maxUses?: number; isActive: boolean; usages: CouponUsage[]; }
 
 function getBalanceModel(): Model<BalanceDoc> {
-  const db = tenantContext.getDb();
+  const db = mongoose.connection;
   if (db.models['UserBalance']) return db.models['UserBalance'] as Model<BalanceDoc>;
   const schema = new mongoose.Schema<BalanceDoc>(
     { user: mongoose.Schema.Types.ObjectId, tokenCredits: Number },
@@ -21,7 +20,7 @@ function getBalanceModel(): Model<BalanceDoc> {
 }
 
 function getCouponModel(): Model<CouponDoc> {
-  const db = tenantContext.getDb();
+  const db = mongoose.connection;
   if (db.models['UserCoupon']) return db.models['UserCoupon'] as Model<CouponDoc>;
   const schema = new mongoose.Schema<CouponDoc>(
     {
@@ -45,7 +44,7 @@ interface GroupDoc {
 }
 
 function getGroupModel(): Model<GroupDoc> {
-  const db = tenantContext.getDb();
+  const db = mongoose.connection;
   if (db.models['Group']) return db.models['Group'] as Model<GroupDoc>;
   const schema = new mongoose.Schema<GroupDoc>(
     { memberIds: [String] },

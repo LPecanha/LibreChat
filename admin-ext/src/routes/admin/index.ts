@@ -1,6 +1,5 @@
 import { Router } from 'express';
 import { requireAdminJwt } from '../../middleware/auth';
-import { tenantFromHeader } from '../../middleware/tenant';
 import usageRouter from './usage';
 import revenueRouter from './revenue';
 import organizationsRouter from './organizations';
@@ -9,18 +8,20 @@ import subscriptionsRouter from './subscriptions';
 import agentsRouter from './agents';
 import usersRouter from './users';
 import plansRouter from './plans';
-import tenantsRouter from './tenants';
 import loginRouter from './login';
 import modelAccessRouter from './modelAccess';
 import categoriesRouter from './categories';
 import couponsRouter from './coupons';
 
+/**
+ * [EXT] Phase J.19 Navvia: rotas admin sem `tenantFromHeader`. O endpoint
+ * /tenants foi removido — a admin-panel passou a usar a config fixa do
+ * tenant ativo no client.
+ */
 const router = Router();
 
 router.use('/login', loginRouter);
-router.use('/tenants', tenantsRouter);
 
-router.use(tenantFromHeader);
 router.use(requireAdminJwt);
 
 router.use('/usage', usageRouter);

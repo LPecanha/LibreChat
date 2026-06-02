@@ -17,11 +17,9 @@ function handleSessionExpired(): never {
 async function request<T>(url: string, options: RequestOptions = {}): Promise<T> {
   if (isTokenExpired()) handleSessionExpired();
   const token = getToken();
-  const tenant = getActiveTenant();
   const headers: Record<string, string> = {
     'Content-Type': 'application/json',
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
-    ...(tenant ? { 'X-Tenant-ID': tenant.id } : {}),
     ...options.headers,
   };
 
@@ -48,13 +46,9 @@ export interface LoginResponse {
 }
 
 export async function loginWithPassword(email: string, password: string): Promise<LoginResponse> {
-  const tenant = getActiveTenant();
   const res = await fetch(`${extUrl()}/ext/admin/login`, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      ...(tenant ? { 'X-Tenant-ID': tenant.id } : {}),
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ email, password }),
   });
   if (!res.ok) {

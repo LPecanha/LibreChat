@@ -1,7 +1,6 @@
 import bcrypt from 'bcryptjs';
 import { Router } from 'express';
 import mongoose, { type Model } from 'mongoose';
-import { tenantContext } from '../../lib/tenantContext';
 import logger from '../../lib/logger';
 import type { AuthenticatedRequest } from '../../middleware/auth';
 
@@ -21,7 +20,7 @@ interface UserDoc {
 }
 
 function getUserModel(): Model<UserDoc> {
-  const db = tenantContext.getDb();
+  const db = mongoose.connection;
   if (db.models['ExtUser']) return db.models['ExtUser'] as Model<UserDoc>;
   const schema = new mongoose.Schema<UserDoc>(
     {

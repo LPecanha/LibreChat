@@ -8,7 +8,6 @@ import {
   getSubscriptionModel,
   getCreditPlanModel,
 } from '../../db/models';
-import { tenantContext } from '../../lib/tenantContext';
 import logger from '../../lib/logger';
 import { requireAdminJwt, requireUserJwt } from '../../middleware/auth';
 import { CREDIT_PLANS, getPlanById } from './plans';
@@ -147,7 +146,7 @@ async function getOrCreateCustomer(
 interface BalanceDoc { user: mongoose.Types.ObjectId; tokenCredits: number }
 
 function getBalanceModel(): Model<BalanceDoc> {
-  const db = tenantContext.getDb();
+  const db = mongoose.connection;
   if (db.models['Balance']) return db.models['Balance'] as Model<BalanceDoc>;
   const schema = new mongoose.Schema<BalanceDoc>(
     { user: mongoose.Schema.Types.ObjectId, tokenCredits: Number },

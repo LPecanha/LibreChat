@@ -3,10 +3,8 @@ import { Sun, Moon } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { loginWithPassword } from '~/lib/api';
 import { setToken, setUser, clearAuth } from '~/lib/auth';
-import { getAvailableTenants, setActiveTenant, isMultiTenant } from '~/lib/tenant';
 import { BRAND_NAME } from '~/lib/brand';
 import { useTheme } from '~/hooks/useTheme';
-import type { TenantInfo } from '~/lib/tenant';
 
 function friendlyError(err: unknown): string {
   const msg = err instanceof Error ? err.message : String(err);
@@ -29,11 +27,8 @@ const floatingLabel = 'absolute start-3 top-1.5 z-10 origin-[0] -translate-y-4 s
 
 export function Login() {
   const navigate = useNavigate();
-  const tenants = getAvailableTenants();
-  const multi = isMultiTenant();
   const { theme, toggle } = useTheme();
 
-  const [selectedTenant, setSelectedTenant] = useState<TenantInfo | null>(tenants[0] ?? null);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -41,15 +36,10 @@ export function Login() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!selectedTenant) {
-      setError('Selecione um servidor.');
-      return;
-    }
     setError('');
     setLoading(true);
     clearAuth();
     try {
-      setActiveTenant(selectedTenant);
       const res = await loginWithPassword(email, password);
       setToken(res.token);
       setUser(res.user);
@@ -79,30 +69,6 @@ export function Login() {
           >
             Painel de Gerenciamento
           </h1>
-
-          {multi && (
-            <div className="mb-4">
-              <div className="relative">
-                <select
-                  id="tenant"
-                  className="peer w-full appearance-none rounded-2xl border border-border bg-surface-primary px-3.5 pb-2.5 pt-5 text-text-primary duration-200 focus:border-green-500 focus:outline-none"
-                  value={selectedTenant?.id ?? ''}
-                  onChange={(e) => setSelectedTenant(tenants.find((x) => x.id === e.target.value) ?? null)}
-                  required
-                >
-                  {tenants.map((t) => (
-                    <option key={t.id} value={t.id}>{t.name}</option>
-                  ))}
-                </select>
-                <label
-                  htmlFor="tenant"
-                  className="absolute start-3 top-1.5 z-10 origin-[0] -translate-y-0 scale-75 transform bg-surface-primary px-2 text-sm text-muted-foreground"
-                >
-                  Servidor
-                </label>
-              </div>
-            </div>
-          )}
 
           <form className="mt-6" aria-label="Login form" onSubmit={handleSubmit}>
             <div className="mb-4">

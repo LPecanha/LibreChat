@@ -2,7 +2,6 @@ import express from 'express';
 import cors from 'cors';
 import rateLimit from 'express-rate-limit';
 import routes from './routes';
-import { getTenants } from './config/tenants';
 import logger from './lib/logger';
 
 function extractUserId(authHeader: string | undefined): string | null {
@@ -15,12 +14,17 @@ function extractUserId(authHeader: string | undefined): string | null {
   }
 }
 
+/**
+ * [EXT] Phase J.19 Navvia: single-tenant. CORS lê só `CORS_ORIGINS` —
+ * antes também adicionava `getTenants().map((t) => t.origin)` para
+ * permitir todos os domínios dos tenants registrados.
+ */
 export function createApp() {
   const app = express();
 
-  const configuredOrigins = (process.env.CORS_ORIGINS ?? 'http://localhost:3091').split(',').map((s) => s.trim());
-  const tenantOrigins = getTenants().map((t) => t.origin);
-  const allowedOrigins = Array.from(new Set([...configuredOrigins, ...tenantOrigins]));
+  const allowedOrigins = (process.env.CORS_ORIGINS ?? 'http://localhost:3091')
+    .split(',')
+    .map((s) => s.trim());
 
   app.use(cors({
     origin: (origin, cb) => {

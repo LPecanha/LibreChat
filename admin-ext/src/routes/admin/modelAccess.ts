@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import mongoose from 'mongoose';
-import { tenantContext } from '../../lib/tenantContext';
+import { getConfig } from '../../config';
 import { getModelPresetModel } from '../../db/models/modelPreset';
 import { getUserModelAccessModel } from '../../db/models/userModelAccess';
 import logger from '../../lib/logger';
@@ -11,12 +11,8 @@ const router = Router();
 interface SpecItem { name: string; label: string; }
 
 async function fetchAvailableSpecs(): Promise<SpecItem[]> {
-  const tenant = tenantContext.get();
-  if (!tenant) {
-    logger.warn('[modelAccess] fetchAvailableSpecs: no tenant in context');
-    return [];
-  }
-  const url = tenant.internalLibrechatUrl ?? tenant.librechatUrl;
+  const { internalLibrechatUrl } = getConfig();
+  const url = internalLibrechatUrl;
   logger.info(`[modelAccess] fetching specs from ${url}/api/config`);
   try {
     const resp = await fetch(`${url}/api/config`);

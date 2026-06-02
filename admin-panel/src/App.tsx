@@ -1,7 +1,6 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
 import { Layout } from '~/components/layout/Layout';
 import { useAuth } from '~/hooks/useAuth';
-import { getActiveTenant, isMultiTenant } from '~/lib/tenant';
 import { Login } from '~/pages/Login';
 import { Dashboard } from '~/pages/Dashboard';
 import { Users } from '~/pages/Users';
@@ -21,7 +20,6 @@ import { Coupons } from '~/pages/Coupons';
 function RequireAuth({ children }: { children: React.ReactNode }) {
   const { authenticated } = useAuth();
   if (!authenticated) return <Navigate to="/login" replace />;
-  if (isMultiTenant() && !getActiveTenant()) return <Navigate to="/login" replace />;
   return <>{children}</>;
 }
 

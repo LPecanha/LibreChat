@@ -1,7 +1,6 @@
 import { Router } from 'express';
 import mongoose, { type Model } from 'mongoose';
 import { getOrgProfileModel, getOrgBalanceModel } from '../../db/models';
-import { tenantContext } from '../../lib/tenantContext';
 import logger from '../../lib/logger';
 import type { AuthenticatedRequest } from '../../middleware/auth';
 
@@ -18,7 +17,7 @@ interface GroupDoc {
 }
 
 function getGroupModel(): Model<GroupDoc> {
-  const db = tenantContext.getDb();
+  const db = mongoose.connection;
   if (db.models['Group']) return db.models['Group'] as Model<GroupDoc>;
   const schema = new mongoose.Schema<GroupDoc>(
     {

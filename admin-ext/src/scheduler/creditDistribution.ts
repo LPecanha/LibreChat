@@ -1,8 +1,6 @@
 import cron from 'node-cron';
 import mongoose, { type Model } from 'mongoose';
 import { getSubscriptionModel, getOrgBalanceModel } from '../db/models';
-import { getTenants } from '../config/tenants';
-import { tenantContext } from '../lib/tenantContext';
 import type { ISubscription } from '../db/models';
 import logger from '../lib/logger';
 
@@ -12,7 +10,7 @@ interface BalanceDoc {
 }
 
 function getBalanceModel(): Model<BalanceDoc> {
-  const db = tenantContext.getDb();
+  const db = mongoose.connection;
   if (db.models['Balance']) return db.models['Balance'] as Model<BalanceDoc>;
   const schema = new mongoose.Schema<BalanceDoc>(
     { user: mongoose.Schema.Types.ObjectId, tokenCredits: Number },
@@ -58,7 +56,12 @@ async function processSubscription(sub: ISubscription): Promise<void> {
   });
 }
 
-async function runDistributionForTenant(): Promise<void> {
+/**
+ * [EXT] Phase J.19 Navvia: rodava antes em loop sobre todos os tenants via
+ * `tenantContext.run(tenant, ...)`. Single-tenant agora — só um pass na
+ * conexão default do mongoose.
+ */
+async function runDistribution(): Promise<void> {
   const now = new Date();
 
   // ASAAS-managed subscriptions are refilled via webhook — skip them here
@@ -81,25 +84,6 @@ async function runDistributionForTenant(): Promise<void> {
       if (r.status === 'rejected') logger.error('Subscription processing error', { reason: r.reason });
     });
   }
-}
-
-async function runDistribution(): Promise<void> {
-  const tenants = getTenants();
-
-  if (tenants.length === 0) {
-    await runDistributionForTenant();
-    return;
-  }
-
-  await Promise.allSettled(
-    tenants.map((tenant) =>
-      tenantContext.run(tenant, () =>
-        runDistributionForTenant().catch((err) => {
-          logger.error(`Scheduler error for tenant ${tenant.id}`, { err });
-        }),
-      ),
-    ),
-  );
 }
 
 export function startCreditScheduler(): void {

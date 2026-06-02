@@ -1,6 +1,5 @@
 import { Router } from 'express';
 import mongoose from 'mongoose';
-import { tenantContext } from '../../lib/tenantContext';
 import { requireAdminJwt } from '../../middleware/auth';
 import type { AuthenticatedRequest } from '../../middleware/auth';
 
@@ -19,7 +18,7 @@ interface CategoryDoc {
 }
 
 function getCategoryModel(): mongoose.Model<CategoryDoc> {
-  const db = tenantContext.getDb();
+  const db = mongoose.connection;
   if (db.models['AgentCategory']) return db.models['AgentCategory'] as mongoose.Model<CategoryDoc>;
   const schema = new mongoose.Schema<CategoryDoc>(
     {

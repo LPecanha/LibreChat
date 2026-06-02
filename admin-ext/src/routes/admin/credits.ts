@@ -1,7 +1,6 @@
 import { Router } from 'express';
 import mongoose, { type Model } from 'mongoose';
 import { getOrgBalanceModel, getCreditAllocationModel, getCreditAuditModel } from '../../db/models';
-import { tenantContext } from '../../lib/tenantContext';
 import logger from '../../lib/logger';
 import { requireAdminJwt } from '../../middleware/auth';
 import type { AuthenticatedRequest } from '../../middleware/auth';
@@ -15,7 +14,7 @@ interface BalanceDoc {
 }
 
 function getBalanceModel(): Model<BalanceDoc> {
-  const db = tenantContext.getDb();
+  const db = mongoose.connection;
   if (db.models['Balance']) return db.models['Balance'] as Model<BalanceDoc>;
   const schema = new mongoose.Schema<BalanceDoc>(
     { user: mongoose.Schema.Types.ObjectId, tokenCredits: Number, autoRefillEnabled: Boolean },

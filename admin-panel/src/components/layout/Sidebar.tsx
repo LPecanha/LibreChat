@@ -14,15 +14,12 @@ import {
   SlidersHorizontal,
   Settings,
   LogOut,
-  Server,
-  ArrowLeftRight,
   X,
   ShieldX,
 } from 'lucide-react';
 import { cn } from '~/lib/utils';
 import { BRAND_NAME } from '~/lib/brand';
 import { clearAuth } from '~/lib/auth';
-import { getActiveTenant, clearTenant, isMultiTenant } from '~/lib/tenant';
 import { Separator } from '~/components/ui/separator';
 
 interface NavItem {
@@ -84,18 +81,8 @@ interface Props {
 }
 
 export function Sidebar({ open, onClose }: Props) {
-  const tenant = getActiveTenant();
-  const multi = isMultiTenant();
-
   function handleLogout() {
     clearAuth();
-    clearTenant();
-    window.location.href = '/login';
-  }
-
-  function handleSwitchTenant() {
-    clearAuth();
-    clearTenant();
     window.location.href = '/login';
   }
 
@@ -116,26 +103,6 @@ export function Sidebar({ open, onClose }: Props) {
           <X className="h-4 w-4" />
         </button>
       </div>
-
-      {tenant && (
-        <div className="border-b border-border px-3 py-2">
-          <div className="flex items-center justify-between gap-2">
-            <div className="flex min-w-0 items-center gap-2">
-              <Server className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
-              <span className="truncate text-xs text-text-secondary">{tenant.name}</span>
-            </div>
-            {multi && (
-              <button
-                onClick={handleSwitchTenant}
-                title="Trocar servidor"
-                className="shrink-0 rounded p-0.5 text-muted-foreground transition-colors hover:bg-surface-hover hover:text-text-primary"
-              >
-                <ArrowLeftRight className="h-3 w-3" />
-              </button>
-            )}
-          </div>
-        </div>
-      )}
 
       <nav className="flex flex-1 flex-col overflow-y-auto p-2 gap-1">
         {navGroups.map((group, gi) => (
