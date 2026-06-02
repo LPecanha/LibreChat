@@ -23,7 +23,7 @@ import { useGetAllPromptGroups, useGetCategories, useDeletePromptGroup } from '~
 import { useLocalize, useHasAccess, useAuthContext, useResourcePermissions } from '~/hooks';
 import { useLiveAnnouncer } from '~/Providers';
 import CategoryIcon from '~/components/Prompts/utils/CategoryIcon';
-import PreviewPrompt from '~/components/Prompts/dialogs/PreviewPrompt';
+import { PreviewPrompt, CreatePromptDialog } from '~/components/Prompts/dialogs';
 import { cn } from '~/utils';
 import LibraryPageLayout from './PageLayout';
 
@@ -242,6 +242,7 @@ export default function PromptsPage() {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategory, setActiveCategory] = useState<string>('all');
+  const [createOpen, setCreateOpen] = useState(false);
 
   const hasReadAccess = useHasAccess({
     permissionType: PermissionTypes.PROMPTS,
@@ -277,7 +278,7 @@ export default function PromptsPage() {
   const cta = hasCreateAccess && (
     <button
       type="button"
-      onClick={() => navigate('/prompts/new')}
+      onClick={() => setCreateOpen(true)}
       className="flex h-8 items-center gap-1.5 rounded-md bg-brand px-3 text-[13px] font-medium text-brand-fg transition-opacity hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-brand"
     >
       <Plus className="h-[15px] w-[15px]" strokeWidth={2} aria-hidden="true" />
@@ -359,7 +360,7 @@ export default function PromptsPage() {
           {hasCreateAccess && (
             <button
               type="button"
-              onClick={() => navigate('/prompts/new')}
+              onClick={() => setCreateOpen(true)}
               className="agent-card border-dashed text-center"
               style={{ alignItems: 'center', justifyContent: 'center' }}
               aria-label={localize('com_ui_create_prompt')}
@@ -379,6 +380,12 @@ export default function PromptsPage() {
           )}
         </div>
       )}
+
+      <CreatePromptDialog
+        isOpen={createOpen}
+        setIsOpen={setCreateOpen}
+        onCreated={(groupId) => navigate(`/prompts/${groupId}`)}
+      />
     </LibraryPageLayout>
   );
 }
