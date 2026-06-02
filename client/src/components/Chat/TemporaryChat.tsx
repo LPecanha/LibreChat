@@ -36,11 +36,12 @@ export function TemporaryChat() {
             onClick={handleBadgeToggle}
             aria-label={localize('com_ui_temporary')}
             aria-pressed={isTemporary}
+            /* [EXT] Phase J.16 Navvia: ghost button h-8 rounded-md (proto linha 800). */
             className={cn(
-              'inline-flex size-9 flex-shrink-0 items-center justify-center rounded-xl border border-border-light text-text-primary transition-all ease-in-out',
+              'grid h-8 w-8 shrink-0 place-items-center rounded-md transition-colors',
               isTemporary
-                ? 'bg-surface-active'
-                : 'bg-presentation shadow-sm hover:bg-surface-active-alt',
+                ? 'bg-surface-active text-text-primary'
+                : 'text-text-secondary hover:bg-surface-hover hover:text-text-primary',
             )}
           >
             <MessageCircleDashed className="icon-md" aria-hidden="true" />
