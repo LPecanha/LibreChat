@@ -104,6 +104,14 @@ function NavviaMCPCard({
               ? localize('com_nav_mcp_status_needs_auth')
               : description || ''}
         </p>
+        {/* Proto code-vs-code (linhas 950-953):
+         *   - filesystem (connected) → [Configurar border] [Testar border]
+         *   - github (needs OAuth)   → [Conectar bg-brand] [Testar border]
+         *   - brave (connected)      → [Configurar border] [Testar border]
+         *   - postgres (error)       → [Configurar border] [Testar border]
+         *
+         * Apenas needsAuth aciona o botão azul "Conectar". Erro e demais
+         * estados continuam com "Configurar" border-medium. */}
         <div className="mt-3 flex gap-1.5">
           <button
             ref={triggerRef}
@@ -111,14 +119,12 @@ function NavviaMCPCard({
             onClick={handleConnect}
             className={cn(
               'flex h-8 flex-1 items-center justify-center rounded-md px-3 text-[12px] font-medium transition-colors',
-              needsAuth || hasError
+              needsAuth
                 ? 'bg-brand text-brand-fg hover:opacity-90'
                 : 'border border-border-medium text-text-primary hover:bg-surface-hover',
             )}
           >
-            {needsAuth || hasError
-              ? localize('com_ui_connect')
-              : localize('com_ui_configure')}
+            {needsAuth ? localize('com_ui_connect') : localize('com_ui_configure')}
           </button>
           {canEdit && (
             <button
