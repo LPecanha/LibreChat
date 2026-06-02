@@ -1,5 +1,5 @@
 import { useForm } from 'react-hook-form';
-import { Spinner, Button } from '@librechat/client';
+import { Spinner } from '@librechat/client';
 import { useOutletContext } from 'react-router-dom';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useResetPasswordMutation } from 'librechat-data-provider/react-query';
@@ -7,6 +7,11 @@ import type { TResetPassword } from 'librechat-data-provider';
 import type { TLoginLayoutContext } from '~/common';
 import { useLocalize } from '~/hooks';
 
+/**
+ * [EXT] Phase J.22 Navvia: refatorado pra usar `.inp` + `.field-label` +
+ * botão proto-style. Senha + Confirmação em grid 2 colunas (mesmo padrão
+ * do Registration).
+ */
 function ResetPassword() {
   const localize = useLocalize();
   const {
@@ -34,52 +39,58 @@ function ResetPassword() {
 
   if (resetPassword.isSuccess) {
     return (
-      <>
-        <div
-          className="relative mt-6 rounded-xl border border-green-500/20 bg-green-50/50 px-6 py-4 text-brand shadow-sm transition-all dark:bg-green-950/30 dark:text-green-100"
-          role="alert"
-        >
-          <div className="flex flex-col space-y-4">
-            <p>{localize('com_auth_login_with_new_password')}</p>
-            <Button
-              onClick={() => navigate('/login')}
-              aria-label={localize('com_auth_sign_in')}
-              variant="brand"
-            >
-              {localize('com_auth_continue')}
-            </Button>
-          </div>
+      <div
+        className="relative rounded-md border border-green-500/40 bg-green-500/10 px-4 py-3 text-[13px] text-brand"
+        role="alert"
+      >
+        <div className="flex flex-col space-y-3">
+          <p>{localize('com_auth_login_with_new_password')}</p>
+          <button
+            type="button"
+            onClick={() => navigate('/login')}
+            aria-label={localize('com_auth_sign_in')}
+            className="flex h-9 w-full items-center justify-center rounded-md bg-brand text-[13.5px] font-medium text-brand-fg transition-opacity hover:opacity-90"
+          >
+            {localize('com_auth_continue')}
+          </button>
         </div>
-      </>
+      </div>
     );
   }
 
   return (
     <form
-      className="mt-6"
+      className="space-y-3"
       aria-label="Password reset form"
       method="POST"
       onSubmit={handleSubmit(onSubmit)}
     >
-      <div className="mb-2">
-        <div className="relative">
-          <input
-            type="hidden"
-            id="token"
-            value={params.get('token') ?? ''}
-            {...register('token', { required: 'Unable to process: No valid reset token' })}
-          />
-          <input
-            type="hidden"
-            id="userId"
-            value={params.get('userId') ?? ''}
-            {...register('userId', { required: 'Unable to process: No valid user id' })}
-          />
+      <input
+        type="hidden"
+        id="token"
+        value={params.get('token') ?? ''}
+        {...register('token', { required: 'Unable to process: No valid reset token' })}
+      />
+      <input
+        type="hidden"
+        id="userId"
+        value={params.get('userId') ?? ''}
+        {...register('userId', { required: 'Unable to process: No valid user id' })}
+      />
+
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label htmlFor="password" className="field-label">
+            {localize('com_auth_password')}
+          </label>
           <input
             type="password"
             id="password"
-            autoComplete="current-password"
+            autoComplete="new-password"
+            placeholder="••••••••"
             aria-label={localize('com_auth_password')}
+            aria-invalid={!!errors.password}
+            className="inp focus:border-brand focus:outline-none"
             {...register('password', {
               required: localize('com_auth_password_required'),
               minLength: {
@@ -91,71 +102,57 @@ function ResetPassword() {
                 message: localize('com_auth_password_max_length'),
               },
             })}
-            aria-invalid={!!errors.password}
-            className="webkit-dark-styles transition-color peer w-full rounded-2xl border border-border-light bg-surface-primary px-3.5 pb-2.5 pt-3 text-text-primary duration-200 focus:border-green-500 focus:outline-none"
-            placeholder=" "
           />
-          <label
-            htmlFor="password"
-            className="absolute start-3 top-1.5 z-10 origin-[0] -translate-y-4 scale-75 transform bg-surface-primary px-2 text-sm text-text-secondary-alt duration-200 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:scale-100 peer-focus:top-1.5 peer-focus:-translate-y-4 peer-focus:scale-75 peer-focus:px-2 peer-focus:text-brand rtl:peer-focus:left-auto rtl:peer-focus:translate-x-1/4"
-          >
-            {localize('com_auth_password')}
-          </label>
+          {errors.password && (
+            <span role="alert" className="mt-1 block text-[11.5px] text-text-destructive">
+              {errors.password.message}
+            </span>
+          )}
         </div>
 
-        {errors.password && (
-          <span role="alert" className="mt-1 text-sm text-red-500 dark:text-red-900">
-            {errors.password.message}
-          </span>
-        )}
-      </div>
-      <div className="mb-2">
-        <div className="relative">
+        <div>
+          <label htmlFor="confirm_password" className="field-label">
+            {localize('com_auth_password_confirm')}
+          </label>
           <input
             type="password"
             id="confirm_password"
+            autoComplete="new-password"
+            placeholder="••••••••"
             aria-label={localize('com_auth_password_confirm')}
+            aria-invalid={!!errors.confirm_password}
+            className="inp focus:border-brand focus:outline-none"
             {...register('confirm_password', {
               validate: (value) => value === password || localize('com_auth_password_not_match'),
             })}
-            aria-invalid={!!errors.confirm_password}
-            className="webkit-dark-styles transition-color peer w-full rounded-2xl border border-border-light bg-surface-primary px-3.5 pb-2.5 pt-3 text-text-primary duration-200 focus:border-green-500 focus:outline-none"
-            placeholder=" "
           />
-          <label
-            htmlFor="confirm_password"
-            className="absolute start-3 top-1.5 z-10 origin-[0] -translate-y-4 scale-75 transform bg-surface-primary px-2 text-sm text-text-secondary-alt duration-200 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:scale-100 peer-focus:top-1.5 peer-focus:-translate-y-4 peer-focus:scale-75 peer-focus:px-2 peer-focus:text-brand rtl:peer-focus:left-auto rtl:peer-focus:translate-x-1/4"
-          >
-            {localize('com_auth_password_confirm')}
-          </label>
+          {errors.confirm_password && (
+            <span role="alert" className="mt-1 block text-[11.5px] text-text-destructive">
+              {errors.confirm_password.message}
+            </span>
+          )}
         </div>
-        {errors.confirm_password && (
-          <span role="alert" className="mt-1 text-sm text-red-500 dark:text-red-900">
-            {errors.confirm_password.message}
-          </span>
-        )}
-        {errors.token && (
-          <span role="alert" className="mt-1 text-sm text-red-500 dark:text-red-900">
-            {errors.token.message}
-          </span>
-        )}
-        {errors.userId && (
-          <span role="alert" className="mt-1 text-sm text-red-500 dark:text-red-900">
-            {errors.userId.message}
-          </span>
-        )}
       </div>
-      <div className="mt-6">
-        <Button
-          type="submit"
-          aria-label={localize('com_auth_submit_registration')}
-          disabled={!!errors.password || !!errors.confirm_password || isSubmitting}
-          variant="brand"
-          className="h-12 w-full rounded-2xl"
-        >
-          {isSubmitting ? <Spinner /> : localize('com_auth_continue')}
-        </Button>
-      </div>
+
+      {errors.token && (
+        <span role="alert" className="block text-[11.5px] text-text-destructive">
+          {errors.token.message}
+        </span>
+      )}
+      {errors.userId && (
+        <span role="alert" className="block text-[11.5px] text-text-destructive">
+          {errors.userId.message}
+        </span>
+      )}
+
+      <button
+        type="submit"
+        aria-label={localize('com_auth_submit_registration')}
+        disabled={!!errors.password || !!errors.confirm_password || isSubmitting}
+        className="flex h-9 w-full items-center justify-center rounded-md bg-brand text-[13.5px] font-medium text-brand-fg transition-opacity hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-brand disabled:opacity-60"
+      >
+        {isSubmitting ? <Spinner className="size-4" /> : localize('com_auth_continue')}
+      </button>
     </form>
   );
 }

@@ -1,6 +1,6 @@
 import { useForm } from 'react-hook-form';
 import { useState, ReactNode } from 'react';
-import { Spinner, Button } from '@librechat/client';
+import { Spinner } from '@librechat/client';
 import { useOutletContext } from 'react-router-dom';
 import { useRequestPasswordResetMutation } from 'librechat-data-provider/react-query';
 import { loginPage } from 'librechat-data-provider';
@@ -9,10 +9,16 @@ import type { TLoginLayoutContext } from '~/common';
 import type { FC } from 'react';
 import { useLocalize } from '~/hooks';
 
+/**
+ * [EXT] Phase J.22 Navvia: refatorado pra usar `.inp` + `.field-label` +
+ * botão proto-style (h-9 bg-brand). Mesmo padrão visual do LoginForm e
+ * Registration.
+ */
+
 const BodyTextWrapper: FC<{ children: ReactNode }> = ({ children }) => {
   return (
     <div
-      className="relative mt-6 rounded-xl border border-green-500/20 bg-green-50/50 px-6 py-4 text-brand shadow-sm transition-all dark:bg-green-950/30 dark:text-green-100"
+      className="relative rounded-md border border-green-500/40 bg-green-500/10 px-4 py-3 text-[13px] text-brand"
       role="alert"
     >
       {children}
@@ -23,10 +29,10 @@ const BodyTextWrapper: FC<{ children: ReactNode }> = ({ children }) => {
 const ResetPasswordBodyText = () => {
   const localize = useLocalize();
   return (
-    <div className="flex flex-col space-y-4">
+    <div className="flex flex-col space-y-3">
       <p>{localize('com_auth_reset_password_if_email_exists')}</p>
       <a
-        className="inline-flex text-sm font-medium text-brand transition-colors hover:opacity-80 dark:text-brand dark:hover:text-brand"
+        className="text-[13px] font-medium text-brand hover:underline"
         href={loginPage()}
       >
         {localize('com_auth_back_to_login')}
@@ -80,67 +86,55 @@ function RequestPasswordReset() {
 
   return (
     <form
-      className="mt-8 space-y-6"
+      className="space-y-3"
       aria-label="Password reset form"
       method="POST"
       onSubmit={handleSubmit(onSubmit)}
     >
-      <div className="space-y-2">
-        <div className="relative">
-          <input
-            type="email"
-            id="email"
-            autoComplete="off"
-            aria-label={localize('com_auth_email')}
-            {...register('email', {
-              required: localize('com_auth_email_required'),
-              minLength: {
-                value: 3,
-                message: localize('com_auth_email_min_length'),
-              },
-              maxLength: {
-                value: 120,
-                message: localize('com_auth_email_max_length'),
-              },
-              pattern: {
-                value: /\S+@\S+\.\S+/,
-                message: localize('com_auth_email_pattern'),
-              },
-            })}
-            aria-invalid={!!errors.email}
-            className="webkit-dark-styles transition-color peer w-full rounded-2xl border border-border-light bg-surface-primary px-3.5 pb-2.5 pt-3 text-text-primary duration-200 focus:border-green-500 focus:outline-none"
-            placeholder=" "
-          />
-          <label
-            htmlFor="email"
-            className="absolute -top-2 left-2 z-10 bg-white px-2 text-sm text-text-secondary transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-base peer-placeholder-shown:text-text-tertiary peer-focus:-top-2 peer-focus:text-sm peer-focus:text-brand dark:bg-surface-primary dark:text-text-tertiary dark:peer-focus:text-brand"
-          >
-            {localize('com_auth_email_address')}
-          </label>
-        </div>
+      <div>
+        <label htmlFor="email" className="field-label">
+          {localize('com_auth_email_address')}
+        </label>
+        <input
+          type="email"
+          id="email"
+          autoComplete="off"
+          placeholder="voce@email.com"
+          aria-label={localize('com_auth_email')}
+          aria-invalid={!!errors.email}
+          className="inp focus:border-brand focus:outline-none"
+          {...register('email', {
+            required: localize('com_auth_email_required'),
+            minLength: { value: 3, message: localize('com_auth_email_min_length') },
+            maxLength: { value: 120, message: localize('com_auth_email_max_length') },
+            pattern: {
+              value: /\S+@\S+\.\S+/,
+              message: localize('com_auth_email_pattern'),
+            },
+          })}
+        />
         {errors.email && (
-          <p role="alert" className="text-sm font-medium text-red-600 dark:text-red-400">
+          <span role="alert" className="mt-1 block text-[11.5px] text-text-destructive">
             {errors.email.message}
-          </p>
+          </span>
         )}
       </div>
-      <div className="space-y-4">
-        <Button
-          aria-label="Continue with password reset"
-          type="submit"
-          disabled={!!errors.email || isLoading}
-          variant="brand"
-          className="h-12 w-full rounded-2xl"
-        >
-          {isLoading ? <Spinner /> : localize('com_auth_continue')}
-        </Button>
-        <a
-          href={loginPage()}
-          className="block text-center text-sm font-medium text-brand transition-colors hover:opacity-80 dark:text-brand dark:hover:text-brand"
-        >
-          {localize('com_auth_back_to_login')}
-        </a>
-      </div>
+
+      <button
+        type="submit"
+        aria-label="Continue with password reset"
+        disabled={!!errors.email || isLoading}
+        className="flex h-9 w-full items-center justify-center rounded-md bg-brand text-[13.5px] font-medium text-brand-fg transition-opacity hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-brand disabled:opacity-60"
+      >
+        {isLoading ? <Spinner className="size-4" /> : localize('com_auth_continue')}
+      </button>
+
+      <a
+        href={loginPage()}
+        className="block text-center text-[13px] font-medium text-brand hover:underline"
+      >
+        {localize('com_auth_back_to_login')}
+      </a>
     </form>
   );
 }

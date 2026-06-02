@@ -1,7 +1,7 @@
 import { useForm } from 'react-hook-form';
 import React, { useContext, useState } from 'react';
 import { Turnstile } from '@marsidev/react-turnstile';
-import { ThemeContext, Spinner, Button, isDark } from '@librechat/client';
+import { ThemeContext, Spinner, isDark } from '@librechat/client';
 import { useNavigate, useOutletContext, useLocation } from 'react-router-dom';
 import { useRegisterUserMutation } from 'librechat-data-provider/react-query';
 import { loginPage } from 'librechat-data-provider';
@@ -10,6 +10,12 @@ import type { TLoginLayoutContext } from '~/common';
 import { useLocalize, TranslationKeys } from '~/hooks';
 import { ErrorMessage } from './ErrorMessage';
 
+/**
+ * [EXT] Phase J.22 Navvia: refatorado pra bater com proto linhas 1625-1640.
+ *
+ * Campos `.inp` + `.field-label` (32px de altura, label acima). Senha e
+ * Confirmação ficam num grid 2 colunas. Botão submit compact `h-9 bg-brand`.
+ */
 const Registration: React.FC = () => {
   const navigate = useNavigate();
   const localize = useLocalize();
@@ -34,7 +40,6 @@ const Registration: React.FC = () => {
   const token = queryParams.get('token');
   const validTheme = isDark(theme) ? 'dark' : 'light';
 
-  // only require captcha if we have a siteKey
   const requireCaptcha = Boolean(startupConfig?.turnstile?.siteKey);
 
   const registerUser = useRegisterUserMutation({
@@ -64,32 +69,32 @@ const Registration: React.FC = () => {
     },
   });
 
-  const renderInput = (id: string, label: TranslationKeys, type: string, validation: object) => (
-    <div className="mb-4">
-      <div className="relative">
-        <input
-          id={id}
-          type={type}
-          autoComplete={id}
-          aria-label={localize(label)}
-          {...register(
-            id as 'name' | 'email' | 'username' | 'password' | 'confirm_password',
-            validation,
-          )}
-          aria-invalid={!!errors[id]}
-          className="webkit-dark-styles transition-color peer w-full rounded-2xl border border-border-light bg-surface-primary px-3.5 pb-2.5 pt-3 text-text-primary duration-200 focus:border-green-500 focus:outline-none"
-          placeholder=" "
-          data-testid={id}
-        />
-        <label
-          htmlFor={id}
-          className="absolute start-3 top-1.5 z-10 origin-[0] -translate-y-4 scale-75 transform bg-surface-primary px-2 text-sm text-text-secondary-alt duration-200 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:scale-100 peer-focus:top-1.5 peer-focus:-translate-y-4 peer-focus:scale-75 peer-focus:px-2 peer-focus:text-brand rtl:peer-focus:left-auto rtl:peer-focus:translate-x-1/4"
-        >
-          {localize(label)}
-        </label>
-      </div>
+  type FieldName = 'name' | 'email' | 'username' | 'password' | 'confirm_password';
+
+  const renderInput = (
+    id: FieldName,
+    label: TranslationKeys,
+    type: string,
+    validation: object,
+    placeholder = '',
+  ) => (
+    <div>
+      <label htmlFor={id} className="field-label">
+        {localize(label)}
+      </label>
+      <input
+        id={id}
+        type={type}
+        autoComplete={id}
+        placeholder={placeholder}
+        aria-label={localize(label)}
+        aria-invalid={!!errors[id]}
+        className="inp focus:border-brand focus:outline-none"
+        data-testid={id}
+        {...register(id, validation)}
+      />
       {errors[id] && (
-        <span role="alert" className="mt-1 text-sm text-red-500">
+        <span role="alert" className="mt-1 block text-[11.5px] text-text-destructive">
           {String(errors[id]?.message) ?? ''}
         </span>
       )}
@@ -105,7 +110,7 @@ const Registration: React.FC = () => {
       )}
       {registerUser.isSuccess && countdown > 0 && (
         <div
-          className="rounded-md border border-green-500 bg-green-500/10 px-3 py-2 text-sm text-text-secondary dark:text-text-primary"
+          className="mb-3 rounded-md border border-green-500 bg-green-500/10 px-3 py-2 text-[12.5px] text-text-secondary dark:text-text-primary"
           role="alert"
         >
           {localize(
@@ -120,67 +125,83 @@ const Registration: React.FC = () => {
       {!startupConfigError && !isFetching && (
         <>
           <form
-            className="mt-6"
+            className="space-y-3"
             aria-label="Registration form"
             method="POST"
             onSubmit={handleSubmit((data: TRegisterUser) =>
               registerUser.mutate({ ...data, token: token ?? undefined }),
             )}
           >
-            {renderInput('name', 'com_auth_full_name', 'text', {
-              required: localize('com_auth_name_required'),
-              minLength: {
-                value: 3,
-                message: localize('com_auth_name_min_length'),
+            {renderInput(
+              'name',
+              'com_auth_full_name',
+              'text',
+              {
+                required: localize('com_auth_name_required'),
+                minLength: { value: 3, message: localize('com_auth_name_min_length') },
+                maxLength: { value: 80, message: localize('com_auth_name_max_length') },
               },
-              maxLength: {
-                value: 80,
-                message: localize('com_auth_name_max_length'),
+              localize('com_auth_full_name'),
+            )}
+            {renderInput(
+              'username',
+              'com_auth_username',
+              'text',
+              {
+                minLength: { value: 2, message: localize('com_auth_username_min_length') },
+                maxLength: { value: 80, message: localize('com_auth_username_max_length') },
               },
-            })}
-            {renderInput('username', 'com_auth_username', 'text', {
-              minLength: {
-                value: 2,
-                message: localize('com_auth_username_min_length'),
+              localize('com_auth_username'),
+            )}
+            {renderInput(
+              'email',
+              'com_auth_email',
+              'email',
+              {
+                required: localize('com_auth_email_required'),
+                minLength: { value: 1, message: localize('com_auth_email_min_length') },
+                maxLength: { value: 120, message: localize('com_auth_email_max_length') },
+                pattern: {
+                  value: /\S+@\S+\.\S+/,
+                  message: localize('com_auth_email_pattern'),
+                },
               },
-              maxLength: {
-                value: 80,
-                message: localize('com_auth_username_max_length'),
-              },
-            })}
-            {renderInput('email', 'com_auth_email', 'email', {
-              required: localize('com_auth_email_required'),
-              minLength: {
-                value: 1,
-                message: localize('com_auth_email_min_length'),
-              },
-              maxLength: {
-                value: 120,
-                message: localize('com_auth_email_max_length'),
-              },
-              pattern: {
-                value: /\S+@\S+\.\S+/,
-                message: localize('com_auth_email_pattern'),
-              },
-            })}
-            {renderInput('password', 'com_auth_password', 'password', {
-              required: localize('com_auth_password_required'),
-              minLength: {
-                value: startupConfig?.minPasswordLength || 8,
-                message: localize('com_auth_password_min_length'),
-              },
-              maxLength: {
-                value: 128,
-                message: localize('com_auth_password_max_length'),
-              },
-            })}
-            {renderInput('confirm_password', 'com_auth_password_confirm', 'password', {
-              validate: (value: string) =>
-                value === password || localize('com_auth_password_not_match'),
-            })}
+              'voce@email.com',
+            )}
+
+            {/* Senha + Confirmação em grid 2 colunas (proto linha 1632) */}
+            <div className="grid grid-cols-2 gap-3">
+              {renderInput(
+                'password',
+                'com_auth_password',
+                'password',
+                {
+                  required: localize('com_auth_password_required'),
+                  minLength: {
+                    value: startupConfig?.minPasswordLength || 8,
+                    message: localize('com_auth_password_min_length'),
+                  },
+                  maxLength: {
+                    value: 128,
+                    message: localize('com_auth_password_max_length'),
+                  },
+                },
+                '••••••••',
+              )}
+              {renderInput(
+                'confirm_password',
+                'com_auth_password_confirm',
+                'password',
+                {
+                  validate: (value: string) =>
+                    value === password || localize('com_auth_password_not_match'),
+                },
+                '••••••••',
+              )}
+            </div>
 
             {startupConfig?.turnstile?.siteKey && (
-              <div className="my-4 flex justify-center">
+              <div className="flex justify-center pt-1">
                 <Turnstile
                   siteKey={startupConfig.turnstile.siteKey}
                   options={{
@@ -194,29 +215,26 @@ const Registration: React.FC = () => {
               </div>
             )}
 
-            <div className="mt-6">
-              <Button
-                disabled={
-                  Object.keys(errors).length > 0 ||
-                  isSubmitting ||
-                  (requireCaptcha && !turnstileToken)
-                }
-                type="submit"
-                aria-label="Submit registration"
-                variant="brand"
-                className="h-12 w-full rounded-2xl"
-              >
-                {isSubmitting ? <Spinner /> : localize('com_auth_continue')}
-              </Button>
-            </div>
+            <button
+              type="submit"
+              aria-label="Submit registration"
+              disabled={
+                Object.keys(errors).length > 0 ||
+                isSubmitting ||
+                (requireCaptcha && !turnstileToken)
+              }
+              className="flex h-9 w-full items-center justify-center rounded-md bg-brand text-[13.5px] font-medium text-brand-fg transition-opacity hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-brand disabled:opacity-60"
+            >
+              {isSubmitting ? <Spinner className="size-4" /> : localize('com_auth_continue')}
+            </button>
           </form>
 
-          <p className="my-4 text-center text-sm font-light text-text-secondary dark:text-white">
+          <p className="mt-6 text-center text-[13px] text-text-secondary">
             {localize('com_auth_already_have_account')}{' '}
             <a
               href={loginPage()}
               aria-label="Login"
-              className="inline-flex p-1 text-sm font-medium text-brand transition-colors hover:opacity-80 dark:text-brand dark:hover:text-brand"
+              className="font-medium text-brand hover:underline"
             >
               {localize('com_auth_login')}
             </a>
