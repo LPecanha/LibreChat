@@ -8,6 +8,10 @@ import { useGetEndpointsQuery, useGetAgentCategoriesQuery, useGetStartupConfig }
 import MarketplaceAdminSettings from './MarketplaceAdminSettings';
 import OpenSidebar from '~/components/Chat/Menus/OpenSidebar';
 import { SidePanelGroup } from '~/components/SidePanel';
+import AgentPanelSwitch from '~/components/SidePanel/Agents/AgentPanelSwitch';
+import { ChatFormProvider } from '~/Providers';
+import { useForm } from 'react-hook-form';
+import type { ChatFormValues } from '~/common';
 import CategoryTabs from './CategoryTabs';
 import SearchBar from './SearchBar';
 import AgentGrid from './AgentGrid';
@@ -27,13 +31,14 @@ interface AgentMarketplaceProps {
 const AgentMarketplace: React.FC<AgentMarketplaceProps> = ({ className = '' }) => {
   const localize = useLocalize();
   const navigate = useNavigate();
-  /* [EXT] Phase J.13 Navvia: "Criar agente" navega para /c/new?createAgent=1.
-   * O ChatRoute lê esse query param e seta o preset com endpoint=agents + agent_id=ephemeral
-   * ANTES do defaultModelSpec do tenant sobrescrever — única ordem que funciona dado que
-   * o ChatRoute remonta a conversa toda em useEffect quando recebe /c/new. */
-  const startCreateAgent = useCallback(() => {
-    navigate('/c/new?createAgent=1');
-  }, [navigate]);
+  /* [EXT] Phase J.13 Navvia: "Criar agente" abre o builder NA MESMA PÁGINA como aside
+   * direito 400px (design/ui-preview.html linha 1026 + openBuilder() linha 1787).
+   * Antes navegava para /c/new — quebrava o fluxo upstream do prototipo onde o user
+   * fica em /agents enquanto monta o agente. */
+  const [builderOpen, setBuilderOpen] = useState(false);
+  const startCreateAgent = useCallback(() => setBuilderOpen(true), []);
+  /* AgentPanel internamente requer um <ChatFormProvider> ancestral. */
+  const builderFormMethods = useForm<ChatFormValues>({ defaultValues: { text: '' } });
   const { category } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -215,11 +220,11 @@ const AgentMarketplace: React.FC<AgentMarketplaceProps> = ({ className = '' }) =
   return (
     <div className={`relative flex w-full grow overflow-hidden bg-presentation ${className}`}>
       <SidePanelGroup>
-        <main className="flex h-full flex-col overflow-hidden" role="main">
-          {/* Scrollable container */}
+        <main className="flex h-full flex-row overflow-hidden" role="main">
+          {/* Scrollable container (flex-1 quando aside aberto deixa o aside ocupar 400px direita) */}
           <div
             ref={scrollContainerRef}
-            className="scrollbar-gutter-stable relative flex h-full flex-col overflow-y-auto overflow-x-hidden"
+            className="scrollbar-gutter-stable relative flex h-full min-w-0 flex-1 flex-col overflow-y-auto overflow-x-hidden"
           >
             {/* [EXT] Navvia Phase J.11: layout final do protótipo (max-w-5xl, py-10).
              * Row 1 header + Criar agente · Row 2 sub-tabs (underline) + search inline
@@ -408,6 +413,20 @@ const AgentMarketplace: React.FC<AgentMarketplaceProps> = ({ className = '' }) =
             </div>
             </div>
           </div>
+
+          {/* [EXT] Phase J.13 Navvia: Agent Builder aside direito (400px).
+           * Bate com design/ui-preview.html linha 1026 — aberto via setBuilderOpen(true)
+           * em vez de navegar pra /c/new. Mantém o user em /agents. */}
+          {builderOpen && (
+            <aside
+              className="hidden w-[400px] shrink-0 flex-col overflow-hidden border-l border-border-light bg-surface-secondary md:flex"
+              aria-label={localize('com_ui_create_agent')}
+            >
+              <ChatFormProvider {...builderFormMethods}>
+                <AgentPanelSwitch />
+              </ChatFormProvider>
+            </aside>
+          )}
         </main>
       </SidePanelGroup>
     </div>
