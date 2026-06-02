@@ -102,7 +102,7 @@ const CategorySelector: React.FC<CategorySelectorProps> = ({
           isOpen={isOpen}
           setIsOpen={setIsOpen}
           menuId="category-selector-menu"
-          className="mt-2"
+          className="z-[150] mt-2"
           portal={true}
         />
       )}
@@ -114,7 +114,7 @@ const CategorySelector: React.FC<CategorySelectorProps> = ({
       isOpen={isOpen}
       setIsOpen={setIsOpen}
       menuId="category-selector-menu"
-      className="mt-2"
+      className="z-[150] mt-2"
       portal={true}
     />
   );
