@@ -150,12 +150,15 @@ const CategoryTabs: React.FC<CategoryTabsProps> = ({
             id={`category-tab-${category.value}`}
             onClick={() => onChange(category.value)}
             onKeyDown={(e) => handleKeyDown(e, category.value)}
+            /* [EXT] Phase J.12 Navvia: estilo .chip do protótipo (ui-preview.html linha 139-141).
+             *  padding: 6px 11px, font-size 12.5px font-weight 500, border-light + bg-surface-secondary.
+             *  Active: bg-brand SÓLIDO + text-brand-fg (branco) + border-brand — NÃO bg-brand-soft. */
             className={cn(
-              'cursor-pointer select-none whitespace-nowrap rounded-full border px-3 py-1 text-[12.5px] transition-colors',
+              'inline-flex cursor-pointer select-none items-center gap-1.5 whitespace-nowrap rounded-full border px-[11px] py-[6px] text-[12.5px] font-medium transition-colors',
               isSmallScreen ? 'shrink-0' : '',
               activeTab === category.value
-                ? 'border-brand bg-brand-soft text-brand'
-                : 'border-border-light bg-surface-primary text-text-secondary hover:border-border-medium hover:text-text-primary',
+                ? 'border-brand bg-brand text-brand-fg'
+                : 'border-border-light bg-surface-secondary text-text-secondary hover:bg-surface-hover hover:text-text-primary',
             )}
             role="tab"
             aria-selected={activeTab === category.value}

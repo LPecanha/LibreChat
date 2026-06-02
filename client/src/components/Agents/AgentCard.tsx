@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
-import { Label, OGDialog, OGDialogTrigger } from '@librechat/client';
+import { Star } from 'lucide-react';
+import { OGDialog, OGDialogTrigger } from '@librechat/client';
 import type t from 'librechat-data-provider';
 import { useLocalize, TranslationKeys, useAgentCategories } from '~/hooks';
 import { cn, renderAgentAvatar, getContactDisplayName } from '~/utils';
@@ -12,7 +13,16 @@ interface AgentCardProps {
 }
 
 /**
- * Card component to display agent information with integrated detail dialog
+ * [EXT] Phase J.12 Navvia: AgentCard vertical alinhado com .agent-card do protótipo
+ * (design/ui-preview.html linha 451 + estrutura linha 737-751):
+ *
+ *   .agent-card { flex-direction: column; gap: 10px; padding: 14px; }
+ *
+ * Top row: agent-ico + (name + category pill + author) + favorite star
+ * Middle: description (text-[12.5px] text-text-secondary line-clamp-2)
+ * Footer (mt-auto): model badge + rating · "Usar" button
+ *
+ * Sem altura fixa (proto deixa conteúdo ditar). Sem !flex-row.
  */
 const AgentCard: React.FC<AgentCardProps> = ({ agent, onSelect, className = '' }) => {
   const localize = useLocalize();
@@ -21,7 +31,6 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, onSelect, className = '' }
 
   const categoryLabel = useMemo(() => {
     if (!agent.category) return '';
-
     const category = categories.find((cat) => cat.value === agent.category);
     if (category) {
       if (category.label && category.label.startsWith('com_')) {
@@ -29,7 +38,6 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, onSelect, className = '' }
       }
       return category.label;
     }
-
     return agent.category.charAt(0).toUpperCase() + agent.category.slice(1);
   }, [agent.category, categories, localize]);
 
@@ -46,17 +54,7 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, onSelect, className = '' }
     <OGDialog open={isOpen} onOpenChange={handleOpenChange}>
       <OGDialogTrigger asChild>
         <div
-          /* [EXT] Phase F Navvia: usar .agent-card do protótipo
-           * (border-radius var(--radius)+4, border light, bg surface-secondary,
-           * hover border-medium + translateY(-3px) + shadow-overlay). Mantém
-           * altura+padding+gap atual p/ não quebrar layout do grid. */
-          className={cn(
-            'agent-card group relative h-32 gap-5 overflow-hidden',
-            'cursor-pointer select-none px-6 py-4 !flex-row',
-            'md:h-36 lg:h-40',
-            '[&_*]:cursor-pointer',
-            className,
-          )}
+          className={cn('agent-card group', className)}
           aria-label={localize('com_agents_agent_card_label', {
             name: agent.name,
             description: agent.description ?? '',
@@ -71,48 +69,61 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, onSelect, className = '' }
             }
           }}
         >
-          {/* Category badge - top right */}
-          {categoryLabel && (
-            <span className="absolute right-4 top-3 rounded-md bg-surface-hover px-2 py-0.5 text-xs text-text-secondary">
-              {categoryLabel}
-            </span>
-          )}
-
-          {/* Avatar */}
-          <div className="flex-shrink-0 self-center">
-            <div className="overflow-hidden rounded-full shadow-[0_0_15px_rgba(0,0,0,0.3)] dark:shadow-[0_0_15px_rgba(0,0,0,0.5)]">
+          {/* Top row: avatar + identity + favorite */}
+          <div className="flex items-start gap-3">
+            <div className="agent-ico shrink-0">
               {renderAgentAvatar(agent, { size: 'sm', showBorder: false })}
             </div>
+            <div className="min-w-0 flex-1">
+              <div className="truncate font-medium text-text-primary">{agent.name}</div>
+              <div className="mt-0.5 flex items-center gap-1.5 text-[11px] text-text-tertiary">
+                {categoryLabel && (
+                  <span className="rounded bg-surface-active px-1.5 py-0.5 font-medium">
+                    {categoryLabel}
+                  </span>
+                )}
+                {displayName && (
+                  <span className="truncate">
+                    {localize('com_ui_by_author', { 0: displayName })}
+                  </span>
+                )}
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={(e) => e.stopPropagation()}
+              className="fav grid h-7 w-7 place-items-center rounded text-text-tertiary hover:bg-surface-hover"
+              aria-label="Favorite"
+            >
+              <Star className="h-[15px] w-[15px]" strokeWidth={1.5} />
+            </button>
           </div>
 
-          {/* Content */}
-          <div className="flex min-w-0 flex-1 flex-col justify-center overflow-hidden">
-            {/* Agent name */}
-            <Label className="line-clamp-2 text-base font-semibold text-text-primary md:text-lg">
-              {agent.name}
-            </Label>
+          {/* Description */}
+          {agent.description && (
+            <p
+              id={`agent-${agent.id}-description`}
+              className="line-clamp-2 text-[12.5px] leading-snug text-text-secondary"
+            >
+              {agent.description}
+            </p>
+          )}
 
-            {/* Agent description */}
-            {agent.description && (
-              <p
-                id={`agent-${agent.id}-description`}
-                className="mt-0.5 line-clamp-2 text-sm leading-snug text-text-secondary md:line-clamp-5"
-                aria-label={localize('com_agents_description_card', {
-                  description: agent.description,
-                })}
-              >
-                {agent.description}
-              </p>
-            )}
-
-            {/* Author */}
-            {displayName && (
-              <div className="mt-1 text-xs text-text-tertiary">
-                <span className="truncate">
-                  {localize('com_ui_by_author', { 0: displayName || '' })}
-                </span>
-              </div>
-            )}
+          {/* Footer: model badge + Usar button */}
+          <div className="mt-auto flex items-center justify-between gap-2 border-t border-border-light pt-2.5">
+            <div className="flex items-center gap-2.5 text-[11px] text-text-tertiary">
+              {/* Model badge — vazio por enquanto, sem dado upstream */}
+            </div>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsOpen(true);
+              }}
+              className="rounded-md bg-surface-active px-3 py-1 text-[12px] font-medium hover:bg-surface-hover"
+            >
+              {localize('com_ui_use')}
+            </button>
           </div>
         </div>
       </OGDialogTrigger>

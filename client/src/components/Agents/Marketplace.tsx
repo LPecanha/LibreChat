@@ -231,7 +231,9 @@ const AgentMarketplace: React.FC<AgentMarketplaceProps> = ({ className = '' }) =
                   <button
                     type="button"
                     onClick={() => navigate('/c/new?createAgent=1')}
-                    className="ml-auto flex items-center gap-1.5 rounded-md bg-brand px-3 py-1.5 text-[13px] font-medium text-brand-fg transition-opacity hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-brand"
+                    /* [EXT] Phase J.12 Navvia: proto usa .ctrl que tem height: var(--row-h) (32px)
+                     * sem padding vertical. Usar h-8 + px-3 deixa idêntico. */
+                    className="ml-auto flex h-8 items-center gap-1.5 rounded-md bg-brand px-3 text-[13px] font-medium text-brand-fg transition-opacity hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-brand"
                   >
                     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M12 5v14M5 12h14" />

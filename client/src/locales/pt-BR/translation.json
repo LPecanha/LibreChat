@@ -959,6 +959,7 @@
   "com_ui_branch_error": "Falha ao criar branch",
   "com_ui_branch_message": "Criar branch a partir desta resposta",
   "com_ui_by_author": "por {{0}}",
+  "com_ui_use": "Usar",
   "com_ui_callback_url": "URL de retorno de chamada",
   "com_ui_cancel": "Cancelar",
   "com_ui_cancelled": "Cancelado",
