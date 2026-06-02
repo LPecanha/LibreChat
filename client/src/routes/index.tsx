@@ -157,8 +157,11 @@ export const router = createBrowserRouter(
               lazy: loadInlinePromptsView,
             },
             {
+              /* [EXT] Phase J.18 Navvia: /skills agora lista skills no estilo
+               * proto #view-skills (lista expansível com árvore de arquivos
+               * inline). Detalhe/edit continuam em SkillsView upstream. */
               path: 'skills',
-              lazy: loadSkillsView,
+              lazy: () => import('~/components/Library').then((m) => ({ Component: m.SkillsPage })),
             },
             {
               path: 'skills/:skillId',

@@ -3,3 +3,4 @@ export { default as FilesPage } from './FilesPage';
 export { default as BookmarksPage } from './BookmarksPage';
 export { default as MCPPage } from './MCPPage';
 export { default as PromptsPage } from './PromptsPage';
+export { default as SkillsPage } from './SkillsPage';
