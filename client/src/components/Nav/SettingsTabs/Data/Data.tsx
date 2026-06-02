@@ -7,9 +7,11 @@ import { DeleteCache } from './DeleteCache';
 import { RevokeKeys } from './RevokeKeys';
 import { ClearChats } from './ClearChats';
 import SharedLinks from './SharedLinks';
-import { useHasAccess } from '~/hooks';
+import { SectionHeader } from '../components';
+import { useHasAccess, useLocalize } from '~/hooks';
 
 function Data() {
+  const localize = useLocalize();
   const dataTabRef = useRef(null);
   const [confirmClearConvos, setConfirmClearConvos] = useState(false);
   useOnClickOutside(dataTabRef, () => confirmClearConvos && setConfirmClearConvos(false), []);
@@ -19,26 +21,29 @@ function Data() {
   });
 
   return (
-    <div className="flex flex-col gap-3 p-1 text-sm text-text-primary">
-      <div className="pb-3">
-        <ImportConversations />
-      </div>
-      <div className="pb-3">
-        <SharedLinks />
-      </div>
-      {hasAccessToApiKeys && (
-        <div className="pb-3">
-          <AgentApiKeys />
+    <div className="flex flex-col gap-3 text-[13px] text-text-primary" ref={dataTabRef}>
+      <SectionHeader>{localize('com_nav_setting_data')}</SectionHeader>
+      <div className="flex flex-col gap-2.5">
+        <div className="border-b border-border-light pb-2.5">
+          <ImportConversations />
         </div>
-      )}
-      <div className="pb-3">
-        <RevokeKeys />
-      </div>
-      <div className="pb-3">
-        <DeleteCache />
-      </div>
-      <div className="pb-3">
-        <ClearChats />
+        <div className="border-b border-border-light pb-2.5">
+          <SharedLinks />
+        </div>
+        {hasAccessToApiKeys && (
+          <div className="border-b border-border-light pb-2.5">
+            <AgentApiKeys />
+          </div>
+        )}
+        <div className="border-b border-border-light pb-2.5">
+          <RevokeKeys />
+        </div>
+        <div className="border-b border-border-light pb-2.5">
+          <DeleteCache />
+        </div>
+        <div className="border-b border-border-light pb-2.5">
+          <ClearChats />
+        </div>
       </div>
     </div>
   );

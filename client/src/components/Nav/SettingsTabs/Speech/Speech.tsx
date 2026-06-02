@@ -1,8 +1,6 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { useRecoilState } from 'recoil';
-import * as Tabs from '@radix-ui/react-tabs';
-import { Lightbulb, Cog } from 'lucide-react';
-import { useOnClickOutside, useMediaQuery } from '@librechat/client';
+import { useOnClickOutside } from '@librechat/client';
 import { useGetCustomConfigSpeechQuery } from 'librechat-data-provider/react-query';
 import {
   CloudBrowserVoicesSwitch,
@@ -22,8 +20,8 @@ import {
   DecibelSelector,
 } from './STT';
 import ConversationModeSwitch from './ConversationModeSwitch';
+import { SectionHeader, SectionLabel, Segment } from '../components';
 import { useLocalize } from '~/hooks';
-import { cn } from '~/utils';
 import store from '~/store';
 
 function Speech() {
@@ -31,7 +29,6 @@ function Speech() {
 
   const [confirmClear, setConfirmClear] = useState(false);
   const { data } = useGetCustomConfigSpeechQuery();
-  const isSmallScreen = useMediaQuery('(max-width: 767px)');
 
   const [sttExternal, setSttExternal] = useState(false);
   const [ttsExternal, setTtsExternal] = useState(false);
@@ -150,96 +147,87 @@ function Speech() {
   useOnClickOutside(contentRef, () => confirmClear && setConfirmClear(false), []);
 
   return (
-    <Tabs.Root
-      defaultValue={'simple'}
-      orientation="horizontal"
-      value={advancedMode ? 'advanced' : 'simple'}
-    >
-      {/* [EXT] Phase G.3 Navvia: header dos sub-tabs usa surface tokens */}
-      <div className="sticky -top-1 z-50 mb-4 bg-background">
-        <Tabs.List className="flex justify-center bg-background">
-          <Tabs.Trigger
-            onClick={() => setAdvancedMode(false)}
-            /* [EXT] Phase G.3 Navvia: tab simple/advanced ativa usa brand-soft + text-brand */
-            className={cn(
-              'group m-1 flex w-full items-center justify-center gap-2 bg-transparent px-4 py-2 text-sm text-text-secondary transition-all duration-200 ease-in-out hover:bg-surface-hover',
-              'radix-state-active:bg-brand-soft radix-state-active:text-brand radix-state-active:shadow-sm',
-              isSmallScreen ? 'flex-row rounded-lg' : 'rounded-xl',
-            )}
-            value="simple"
-            style={{ userSelect: 'none' }}
-          >
-            <Lightbulb aria-hidden="true" />
-            {localize('com_ui_simple')}
-          </Tabs.Trigger>
-          <Tabs.Trigger
-            onClick={() => setAdvancedMode(true)}
-            /* [EXT] Phase G.3 Navvia: tab simple/advanced ativa usa brand-soft + text-brand */
-            className={cn(
-              'group m-1 flex w-full items-center justify-center gap-2 bg-transparent px-4 py-2 text-sm text-text-secondary transition-all duration-200 ease-in-out hover:bg-surface-hover',
-              'radix-state-active:bg-brand-soft radix-state-active:text-brand radix-state-active:shadow-sm',
-              isSmallScreen ? 'flex-row rounded-lg' : 'rounded-xl',
-            )}
-            value="advanced"
-            style={{ userSelect: 'none' }}
-          >
-            <Cog aria-hidden="true" />
-            {localize('com_ui_advanced')}
-          </Tabs.Trigger>
-        </Tabs.List>
+    /* [EXT] Phase J.9 Navvia: layout dense do protótipo (ui-preview.html#tab-voz).
+     * Header com Simples/Avançado em segment + seções STT/TTS. */
+    <div className="flex flex-col gap-4 text-[13px] text-text-primary">
+      <div className="flex items-center justify-between">
+        <SectionHeader>{localize('com_nav_setting_speech')}</SectionHeader>
+        <Segment
+          value={advancedMode ? 'advanced' : 'simple'}
+          onChange={(v) => setAdvancedMode(v === 'advanced')}
+          options={[
+            { value: 'simple', label: localize('com_ui_simple') },
+            { value: 'advanced', label: localize('com_ui_advanced') },
+          ]}
+          ariaLabel="speech-mode"
+        />
       </div>
 
-      <Tabs.Content value={'simple'} tabIndex={-1}>
-        <div className="flex flex-col gap-3 text-sm text-text-primary">
-          <SpeechToTextSwitch />
-          <EngineSTTDropdown external={sttExternal} />
-          <LanguageSTTDropdown />
-          <div className="h-px bg-border-medium" role="none" />
-          <TextToSpeechSwitch />
-          <EngineTTSDropdown external={ttsExternal} />
-          <VoiceDropdown />
-        </div>
-      </Tabs.Content>
-
-      <Tabs.Content value={'advanced'} tabIndex={-1}>
-        <div className="flex flex-col gap-3 text-sm text-text-primary">
+      {advancedMode && (
+        <div className="border-b border-border-light pb-2.5">
           <ConversationModeSwitch />
-          <div className="mt-2 h-px bg-border-medium" role="none" />
-          <SpeechToTextSwitch />
-
-          <EngineSTTDropdown external={sttExternal} />
-
-          <LanguageSTTDropdown />
-          <div className="pb-2">
-            <AutoTranscribeAudioSwitch />
-          </div>
-          {autoTranscribeAudio && (
-            <div className="pb-2">
-              <DecibelSelector />
-            </div>
-          )}
-          <div className="pb-2">
-            <AutoSendTextSelector />
-          </div>
-          <div className="h-px bg-border-medium" role="none" />
-          <div className="pb-3">
-            <TextToSpeechSwitch />
-          </div>
-          <AutomaticPlaybackSwitch />
-          <EngineTTSDropdown external={ttsExternal} />
-          <VoiceDropdown />
-          {engineTTS === 'browser' && (
-            <div className="pb-2">
-              <CloudBrowserVoicesSwitch />
-            </div>
-          )}
-          <div className="pb-2">
-            <PlaybackRate />
-          </div>
-          <CacheTTSSwitch />
         </div>
-      </Tabs.Content>
-    </Tabs.Root>
+      )}
+
+      <SectionLabel>{localize('com_nav_section_stt')}</SectionLabel>
+      <div className="flex flex-col gap-2.5">
+        <div className="border-b border-border-light pb-2.5">
+          <SpeechToTextSwitch />
+        </div>
+        <div className="border-b border-border-light pb-2.5">
+          <EngineSTTDropdown external={sttExternal} />
+        </div>
+        <div className="border-b border-border-light pb-2.5">
+          <LanguageSTTDropdown />
+        </div>
+        {advancedMode && (
+          <>
+            <div className="border-b border-border-light pb-2.5">
+              <AutoTranscribeAudioSwitch />
+            </div>
+            {autoTranscribeAudio && (
+              <div className="border-b border-border-light pb-2.5">
+                <DecibelSelector />
+              </div>
+            )}
+            <div className="border-b border-border-light pb-2.5">
+              <AutoSendTextSelector />
+            </div>
+          </>
+        )}
+      </div>
+
+      <SectionLabel>{localize('com_nav_section_tts')}</SectionLabel>
+      <div className="flex flex-col gap-2.5">
+        <div className="border-b border-border-light pb-2.5">
+          <TextToSpeechSwitch />
+        </div>
+        <div className="border-b border-border-light pb-2.5">
+          <EngineTTSDropdown external={ttsExternal} />
+        </div>
+        <div className="border-b border-border-light pb-2.5">
+          <VoiceDropdown />
+        </div>
+        {advancedMode && (
+          <>
+            <div className="border-b border-border-light pb-2.5">
+              <AutomaticPlaybackSwitch />
+            </div>
+            {engineTTS === 'browser' && (
+              <div className="border-b border-border-light pb-2.5">
+                <CloudBrowserVoicesSwitch />
+              </div>
+            )}
+            <div className="border-b border-border-light pb-2.5">
+              <PlaybackRate />
+            </div>
+            <div className="border-b border-border-light pb-2.5">
+              <CacheTTSSwitch />
+            </div>
+          </>
+        )}
+      </div>
+    </div>
   );
 }
 

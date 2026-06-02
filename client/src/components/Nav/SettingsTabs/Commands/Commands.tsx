@@ -1,8 +1,8 @@
 import { memo } from 'react';
-import { InfoHoverCard, ESide } from '@librechat/client';
 import { PermissionTypes, Permissions } from 'librechat-data-provider';
 import { useLocalize, useHasAccess } from '~/hooks';
 import ToggleSwitch from '../ToggleSwitch';
+import { SectionHeader } from '../components';
 import store from '~/store';
 
 const commandSwitchConfigs = [
@@ -56,16 +56,14 @@ function Commands() {
   };
 
   return (
-    <div className="space-y-4 p-1">
-      <div className="flex items-center gap-2">
-        <h3 className="text-lg font-medium text-text-primary">
-          {localize('com_nav_chat_commands')}
-        </h3>
-        <InfoHoverCard side={ESide.Bottom} text={localize('com_nav_chat_commands_info')} />
-      </div>
-      <div className="flex flex-col gap-3 text-sm text-text-primary">
+    <div className="flex flex-col gap-3 text-[13px] text-text-primary">
+      <SectionHeader>{localize('com_nav_chat_commands')}</SectionHeader>
+      <p className="-mt-1 text-[11.5px] text-text-tertiary">
+        {localize('com_nav_chat_commands_info')}
+      </p>
+      <div className="flex flex-col gap-2.5">
         {commandSwitchConfigs.map((config) => (
-          <div key={config.key} className="pb-3">
+          <div key={config.key} className="border-b border-border-light pb-2.5">
             <ToggleSwitch
               stateAtom={config.stateAtom}
               localizationKey={config.localizationKey}
