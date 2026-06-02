@@ -353,8 +353,8 @@ function HomeView() {
            * pra preservar a vibe "siri" (gradient visível por trás) sem
            * matar a leitura. Branco semi-transparente (bg-white/70 dark/40)
            * + blur dá um efeito glass legível em cima dos blobs animados. */}
-          <div className="siri-border siri-hero mt-7 w-full max-w-3xl rounded-2xl border border-border-light bg-surface-primary text-left shadow-lg">
-            <div className="relative z-10 rounded-[inherit] bg-white/70 backdrop-blur-md dark:bg-surface-primary/60">
+          <div className="siri-border siri-hero mt-7 w-full max-w-3xl rounded-2xl border border-border-light text-left shadow-lg">
+            <div className="relative z-10 rounded-[inherit] bg-white/40 backdrop-blur-xl dark:bg-surface-primary/30">
             <textarea
               value={composer}
               onChange={(e) => setComposer(e.target.value)}
