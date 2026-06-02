@@ -6,6 +6,63 @@ import { useLocalize, TranslationKeys, useAgentCategories } from '~/hooks';
 import { cn, renderAgentAvatar, getContactDisplayName } from '~/utils';
 import AgentDetailContent from './AgentDetailContent';
 
+/**
+ * [EXT] Phase J.18 Navvia: helpers para o modelbadge do AgentCard (linha 746
+ * do proto). Provider colorido + nome do modelo curto, tipo "AI Opus 4.7",
+ * "G5 GPT-5.5", "GE Gemini 3 Pro".
+ */
+const PROVIDER_LABEL_MAP: Record<string, { initials: string; brand: boolean }> = {
+  anthropic: { initials: 'AI', brand: true },
+  openai: { initials: 'G5', brand: false },
+  azureopenai: { initials: 'AZ', brand: false },
+  google: { initials: 'GE', brand: false },
+  groq: { initials: 'GQ', brand: false },
+  mistral: { initials: 'MS', brand: false },
+  ollama: { initials: 'OL', brand: false },
+  bedrock: { initials: 'AW', brand: false },
+  xai: { initials: 'XA', brand: false },
+  deepseek: { initials: 'DS', brand: false },
+};
+
+function getProviderBadge(provider?: string | null) {
+  if (!provider) return { initials: '??', brand: false };
+  return PROVIDER_LABEL_MAP[provider.toLowerCase()] ?? {
+    initials: provider.slice(0, 2).toUpperCase(),
+    brand: false,
+  };
+}
+
+function formatModelLabel(model?: string | null): string {
+  if (!model) return '';
+  /* Strip vendor prefixes comuns pra caber no badge. claude-3-5-sonnet →
+   * "3-5-sonnet" → "3.5 Sonnet" fica longo; prefere "Sonnet" cru.
+   * Heurística simples: pega o token mais "descritivo" (não-numérico) e o
+   * primeiro número que vier depois. Para casos não-mapeados, mostra
+   * truncado em 16 chars. */
+  const lower = model.toLowerCase();
+  /* casos conhecidos */
+  if (lower.includes('opus')) return capitalize(extractVersion(lower, 'opus'));
+  if (lower.includes('sonnet')) return capitalize(extractVersion(lower, 'sonnet'));
+  if (lower.includes('haiku')) return capitalize(extractVersion(lower, 'haiku'));
+  if (lower.startsWith('gpt-') || lower.startsWith('gpt'))
+    return model.replace(/^gpt-?/i, 'GPT-').toUpperCase().replace('GPT--', 'GPT-');
+  if (lower.includes('gemini')) return capitalize(extractVersion(lower, 'gemini'));
+  /* fallback: trunca em 16 chars */
+  return model.length > 16 ? `${model.slice(0, 15)}…` : model;
+}
+
+function extractVersion(lower: string, keyword: string): string {
+  const idx = lower.indexOf(keyword);
+  if (idx === -1) return keyword;
+  const after = lower.slice(idx + keyword.length).replace(/^[-_]?/, '');
+  const ver = after.match(/^(\d+([-.]\d+)*)/)?.[1]?.replace(/-/g, '.');
+  return ver ? `${keyword} ${ver}` : keyword;
+}
+
+function capitalize(s: string): string {
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
 interface AgentCardProps {
   agent: t.Agent;
   onSelect?: (agent: t.Agent) => void;
@@ -42,6 +99,8 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, onSelect, className = '' }
   }, [agent.category, categories, localize]);
 
   const displayName = getContactDisplayName(agent);
+  const providerBadge = useMemo(() => getProviderBadge(agent.provider), [agent.provider]);
+  const modelLabel = useMemo(() => formatModelLabel(agent.model), [agent.model]);
 
   const handleOpenChange = (open: boolean) => {
     setIsOpen(open);
@@ -111,8 +170,23 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, onSelect, className = '' }
 
           {/* Footer: model badge + Usar button */}
           <div className="mt-auto flex items-center justify-between gap-2 border-t border-border-light pt-2.5">
-            <div className="flex items-center gap-2.5 text-[11px] text-text-tertiary">
-              {/* Model badge — vazio por enquanto, sem dado upstream */}
+            <div className="flex min-w-0 items-center gap-2.5 text-[11px] text-text-tertiary">
+              {agent.model && (
+                <span className="inline-flex min-w-0 items-center gap-1.5 truncate">
+                  <span
+                    className={cn(
+                      'grid h-4 w-4 shrink-0 place-items-center rounded text-[9px] font-bold',
+                      providerBadge.brand
+                        ? 'bg-brand-soft text-brand'
+                        : 'bg-surface-active text-text-secondary',
+                    )}
+                    aria-hidden="true"
+                  >
+                    {providerBadge.initials}
+                  </span>
+                  <span className="truncate font-medium text-text-secondary">{modelLabel}</span>
+                </span>
+              )}
             </div>
             <button
               type="button"
@@ -120,7 +194,7 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, onSelect, className = '' }
                 e.stopPropagation();
                 setIsOpen(true);
               }}
-              className="rounded-md bg-surface-active px-3 py-1 text-[12px] font-medium hover:bg-surface-hover"
+              className="shrink-0 rounded-md bg-surface-active px-3 py-1 text-[12px] font-medium hover:bg-surface-hover"
             >
               {localize('com_ui_use')}
             </button>

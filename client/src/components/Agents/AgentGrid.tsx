@@ -212,10 +212,11 @@ const AgentGrid: React.FC<AgentGridProps> = ({
             })}
           </div>
 
-          {/* Agent grid - 2 per row with proper semantic structure */}
+          {/* [EXT] Phase J.18 Navvia: grid 1/2/3 cols (proto linha 735) + tile dashed
+           * "+ Criar novo agente" no fim da lista (proto linha 772). */}
           {currentAgents && currentAgents.length > 0 && (
             <div
-              className="mx-4 grid grid-cols-1 gap-6 md:grid-cols-2"
+              className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3"
               role="grid"
               aria-label={localize('com_agents_grid_announcement', {
                 count: currentAgents.length,
@@ -227,6 +228,29 @@ const AgentGrid: React.FC<AgentGridProps> = ({
                   <AgentCard agent={agent} onSelect={onSelectAgent} />
                 </div>
               ))}
+              {onCreateAgent && !hasNextPage && (
+                <div role="gridcell">
+                  <button
+                    type="button"
+                    onClick={onCreateAgent}
+                    className="agent-card h-full w-full border-dashed text-center"
+                    style={{ alignItems: 'center', justifyContent: 'center' }}
+                    aria-label={localize('com_ui_create_agent')}
+                  >
+                    <div
+                      className="agent-ico"
+                      style={{ background: 'var(--brand-soft)', color: 'var(--brand)' }}
+                      aria-hidden="true"
+                    >
+                      <Plus className="h-5 w-5" strokeWidth={2} />
+                    </div>
+                    <div className="font-medium">{localize('com_ui_create_agent')}</div>
+                    <div className="text-[12px] leading-snug text-text-tertiary">
+                      {localize('com_agents_create_subtitle')}
+                    </div>
+                  </button>
+                </div>
+              )}
             </div>
           )}
 
