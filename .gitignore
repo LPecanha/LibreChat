@@ -182,8 +182,6 @@ CLAUDE.md
 # Overlay — arquivos temporários locais
 librechat-admin-panel-main/
 librechat-admin-panel-main.zip
-navvia_whitelabel.sh
-replace_librechat.sh
 docker-compose.whitelabel-test.yml
 
 # Permite os librechat.yaml dentro do deploy (são templates versionados)

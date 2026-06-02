@@ -9,7 +9,7 @@
 ### Restrições intocáveis (do `OVERLAY.md` e memória do projeto)
 
 1. **Overlay sobre upstream LibreChat:** o repo `LPecanha/LibreChat` (origin) é um fork que **faz merge regular** com `upstream/danny-avila/LibreChat`. Tocar arquivo do upstream = aumentar superfície de conflito a cada merge.
-2. **Estratégia: merge, não rebase.** Rebase forçaria `git push --force`, quebrando `./deploy.sh` (que faz `git pull`) em todos os servidores. Toda mudança nossa vira merge commit limpo.
+2. **Estratégia: merge, não rebase.** Rebase forçaria `git push --force`, quebrando `./deploy/navvia.sh` (que faz `git pull`) em todos os servidores. Toda mudança nossa vira merge commit limpo.
 3. **`[EXT]` markers obrigatórios** em qualquer linha tocada de arquivo upstream. Inventário em `OVERLAY.md`.
 4. **Tokens vivem em DUAS fontes que precisam sincronizar:** `client/src/style.css` (CSS vars estáticas) e `packages/client/src/theme/themes/{default,dark}.ts` (RGB strings aplicadas em runtime). Drift entre os dois = bugs. **Resolver na Fase 0.**
 5. **Overlay de billing já toca arquivos upstream** (`AccountSettings.tsx`, `Balance.tsx`, `AgentPanel.tsx`, `ModelPanel.tsx`, `ExpandedPanel.tsx`, `Root.tsx`, `api/server/index.js`, etc) — o refactor **deve preservar** todos os `[EXT]` markers existentes e os componentes `<ExtBalance*/>`, `<CreditNavButton/>`, `<PaymentToast/>`.
@@ -50,7 +50,7 @@ A plataforma é **configurável em runtime** via `startupConfig`. O refactor **n
 ```
 upstream/main   ──●──●──●──●──●──   (LibreChat oficial — nunca commitamos)
                               ↑ merge periódico
-origin/main     ──────────────●──   (estável, deploy puxa daqui via ./deploy.sh)
+origin/main     ──────────────●──   (estável, deploy puxa daqui via ./deploy/navvia.sh)
                               ↑ merge quando fase validada
 origin/dev      ──────●──●──●─    (refactor em andamento — commits por fase)
 ```

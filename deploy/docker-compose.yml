@@ -1,0 +1,162 @@
+# [EXT] Phase J.20 Navvia: docker-compose unificado (single-tenant).
+# Substitui deploy/navvia/docker-compose.yml + deploy/admin/docker-compose.yml.
+#
+# Pressupõe MongoDB EXTERNO já rodando na rede `4leads_network` (não gerenciado
+# por este compose). Os serviços que precisam do Mongo (api, admin-ext) entram
+# nessa rede via alias `mongo_external`.
+#
+# Fluxo: ./deploy/navvia.sh update
+#
+# Para rodar manualmente:
+#   docker compose -f deploy/docker-compose.yml --env-file deploy/.env up -d
+
+services:
+  # ── LibreChat API (Navvia branded) ────────────────────────────────────────
+  api:
+    container_name: librechat-navvia
+    build:
+      context: ..
+      dockerfile: Dockerfile.overlay
+      args:
+        WHITELABEL_CLIENT: navvia
+    image: librechat-navvia:latest
+    restart: always
+    ports:
+      - "${PORT:-3090}:3080"
+    depends_on:
+      - rag_api
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      - HOST=0.0.0.0
+      - MONGO_URI=${MONGO_URI}
+      - MEILI_HOST=http://meilisearch:7700
+      - RAG_PORT=${RAG_PORT:-8000}
+      - RAG_API_URL=http://rag_api:${RAG_PORT:-8000}
+    volumes:
+      - ./.env:/app/.env:ro
+      - ./librechat.yaml:/app/librechat.yaml:ro
+      - ./data/uploads:/app/uploads
+      - ./data/images:/app/client/public/images
+      - ./data/logs:/app/api/logs
+    networks:
+      - navvia_internal
+      - mongo_external
+    labels:
+      - "stack=navvia"
+
+  # ── Admin Extension (backend) ─────────────────────────────────────────────
+  admin-ext:
+    container_name: librechat-admin-ext
+    build:
+      context: ../admin-ext
+      dockerfile: Dockerfile
+    image: librechat-admin-ext:latest
+    restart: always
+    ports:
+      - "${ADMIN_EXT_PORT:-3092}:3092"
+    environment:
+      - EXT_PORT=3092
+      - CORS_ORIGINS=${CORS_ORIGINS}
+      - MONGO_URI=${MONGO_URI}
+      - JWT_SECRET=${JWT_SECRET}
+      - LIBRECHAT_URL=${LIBRECHAT_URL}
+      - LIBRECHAT_INTERNAL_URL=${LIBRECHAT_INTERNAL_URL:-http://api:3080}
+      - ASAAS_API_KEY=${ASAAS_API_KEY:-}
+      - ASAAS_SANDBOX=${ASAAS_SANDBOX:-false}
+      - ASAAS_WEBHOOK_TOKEN=${ASAAS_WEBHOOK_TOKEN:-}
+      - CREDIT_SCHEDULER_CRON=${CREDIT_SCHEDULER_CRON:-0 * * * *}
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3092/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    networks:
+      - navvia_internal
+      - mongo_external
+
+  # ── Admin Panel (Vite + nginx) ────────────────────────────────────────────
+  admin-panel:
+    container_name: librechat-admin-panel
+    build:
+      context: ../admin-panel
+      dockerfile: Dockerfile
+      args:
+        VITE_EXT_URL: ${VITE_EXT_URL}
+        VITE_LIBRECHAT_URL: ${VITE_LIBRECHAT_URL:-${LIBRECHAT_URL}}
+        VITE_BRAND_NAME: ${VITE_BRAND_NAME:-Navvia}
+        VITE_BRAND_COLOR: ${VITE_BRAND_COLOR:-#2469E2}
+    image: librechat-admin-panel:latest
+    restart: always
+    ports:
+      - "${ADMIN_PANEL_PORT:-3091}:3091"
+    depends_on:
+      admin-ext:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost:3091"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 20s
+    networks:
+      - navvia_internal
+
+  # ── Meilisearch ────────────────────────────────────────────────────────────
+  meilisearch:
+    container_name: meilisearch-navvia
+    image: getmeili/meilisearch:v1.35.1
+    restart: always
+    user: "${UID:-1000}:${GID:-1000}"
+    environment:
+      - MEILI_HOST=http://meilisearch:7700
+      - MEILI_NO_ANALYTICS=true
+      - MEILI_MASTER_KEY=${MEILI_MASTER_KEY}
+    volumes:
+      - ./data/meili_data:/meili_data
+    networks:
+      - navvia_internal
+
+  # ── Postgres + pgvector (RAG storage) ──────────────────────────────────────
+  vectordb:
+    container_name: vectordb-navvia
+    image: pgvector/pgvector:0.8.0-pg15-trixie
+    restart: always
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-mydatabase}
+      POSTGRES_USER: ${POSTGRES_USER:-myuser}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-mypassword}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - navvia_internal
+
+  # ── RAG API ────────────────────────────────────────────────────────────────
+  rag_api:
+    container_name: rag-navvia
+    image: ghcr.io/danny-avila/librechat-rag-api-dev-lite:latest
+    restart: always
+    depends_on:
+      - vectordb
+    environment:
+      - DB_HOST=vectordb
+      - RAG_PORT=${RAG_PORT:-8000}
+    env_file:
+      - .env
+    networks:
+      - navvia_internal
+
+volumes:
+  pgdata:
+
+networks:
+  # Rede interna do stack Navvia (api + admin-ext + admin-panel + meili + rag + vectordb)
+  navvia_internal:
+    driver: bridge
+
+  # Rede externa (MongoDB centralizado, gerenciado fora deste compose).
+  # Criar uma vez: `docker network create 4leads_network`
+  mongo_external:
+    external: true
+    name: 4leads_network
