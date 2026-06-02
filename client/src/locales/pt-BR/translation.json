@@ -287,6 +287,8 @@
   "com_endpoint_max_output_tokens": "Máximo de Tokens de Saída",
   "com_endpoint_message": "Mensagem",
   "com_endpoint_message_new": "Pergunte qualquer coisa…  ( / comandos, @ agentes )",
+  "com_ui_context_window": "Contexto do modelo",
+  "com_ui_context_window_label": "{{0}} contexto",
   "com_endpoint_message_not_appendable": "Edite sua mensagem ou Regenerar.",
   "com_endpoint_my_preset": "Meu Preset",
   "com_endpoint_no_presets": "Ainda não há presets, use o botão de configurações para criar um",
