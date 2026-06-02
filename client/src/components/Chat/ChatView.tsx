@@ -3,13 +3,14 @@ import { useRecoilValue } from 'recoil';
 import { useForm } from 'react-hook-form';
 import { Spinner } from '@librechat/client';
 import { useParams } from 'react-router-dom';
-import { Constants, buildTree } from 'librechat-data-provider';
+import { Constants, buildTree, isAgentsEndpoint } from 'librechat-data-provider';
 import type { TMessage } from 'librechat-data-provider';
 import type { ChatFormValues } from '~/common';
 import { ChatContext, AddedChatContext, ChatFormProvider, useFileMapContext } from '~/Providers';
 import { useAddedResponse, useResumeOnLoad, useAdaptiveSSE, useChatHelpers } from '~/hooks';
 import ConversationStarters from './Input/ConversationStarters';
 import { useGetMessagesByConvoId } from '~/data-provider';
+import AgentPanelSwitch from '~/components/SidePanel/Agents/AgentPanelSwitch';
 import MessagesView from './Messages/MessagesView';
 import Presentation from './Presentation';
 import ChatForm from './Input/ChatForm';
@@ -54,6 +55,12 @@ function ChatView({ index = 0 }: { index?: number }) {
   const chatHelpers = useChatHelpers(index, conversationId);
   const addedChatHelpers = useAddedResponse();
 
+  /* [EXT] Phase J.13 Navvia: Agent Builder como aside direito quando endpoint=agents.
+   * Bate com design/ui-preview.html linha 1026: <aside id="builder" w-[400px] border-l>.
+   * Não há equivalente upstream nesta UI — o LibreChat original usa UnifiedSidebar's
+   * SidePanelNav (que substituímos por NavviaSidebar). */
+  const isAgentsConvo = isAgentsEndpoint(chatHelpers.conversation?.endpoint);
+
   useAdaptiveSSE(rootSubmission, chatHelpers, false, index);
 
   // Auto-resume if navigating back to conversation with active job
@@ -80,33 +87,43 @@ function ChatView({ index = 0 }: { index?: number }) {
     <ChatFormProvider {...methods}>
       <ChatContext.Provider value={chatHelpers}>
         <AddedChatContext.Provider value={addedChatHelpers}>
-          <Presentation>
-            <div className="relative flex h-full w-full flex-col">
-              <Header />
-              <>
-                <div
-                  className={cn(
-                    'flex flex-col',
-                    isLandingPage
-                      ? 'flex-1 items-center justify-end sm:justify-center'
-                      : 'h-full overflow-y-auto',
-                  )}
-                >
-                  {content}
+          <div className="flex h-full w-full">
+            <Presentation>
+              <div className="relative flex h-full w-full flex-col">
+                <Header />
+                <>
                   <div
                     className={cn(
-                      'w-full',
-                      isLandingPage && 'max-w-3xl transition-all duration-200 xl:max-w-4xl',
+                      'flex flex-col',
+                      isLandingPage
+                        ? 'flex-1 items-center justify-end sm:justify-center'
+                        : 'h-full overflow-y-auto',
                     )}
                   >
-                    <ChatForm index={index} />
-                    {isLandingPage ? <ConversationStarters /> : <Footer />}
+                    {content}
+                    <div
+                      className={cn(
+                        'w-full',
+                        isLandingPage && 'max-w-3xl transition-all duration-200 xl:max-w-4xl',
+                      )}
+                    >
+                      <ChatForm index={index} />
+                      {isLandingPage ? <ConversationStarters /> : <Footer />}
+                    </div>
                   </div>
-                </div>
-                {isLandingPage && <Footer />}
-              </>
-            </div>
-          </Presentation>
+                  {isLandingPage && <Footer />}
+                </>
+              </div>
+            </Presentation>
+            {isAgentsConvo && (
+              <aside
+                className="hidden w-[400px] shrink-0 flex-col overflow-hidden border-l border-border-light bg-surface-secondary md:flex"
+                aria-label="Agent Builder"
+              >
+                <AgentPanelSwitch />
+              </aside>
+            )}
+          </div>
         </AddedChatContext.Provider>
       </ChatContext.Provider>
     </ChatFormProvider>
