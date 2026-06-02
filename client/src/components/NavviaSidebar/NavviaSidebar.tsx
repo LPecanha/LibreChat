@@ -27,11 +27,6 @@ import { useAuthContext, useLocalize } from '~/hooks';
 import { groupConversationsByDate } from '~/utils/convos';
 import { useGetStartupConfig } from '~/data-provider';
 import Settings from '~/components/Nav/Settings';
-import { MyFilesModal } from '~/components/Chat/Input/Files/MyFilesModal';
-import { MemoryPanel } from '~/components/SidePanel/Memories';
-import BookmarkPanel from '~/components/SidePanel/Bookmarks/BookmarkPanel';
-import MCPBuilderPanel from '~/components/SidePanel/MCPBuilder/MCPBuilderPanel';
-import PanelDialog from './PanelDialog';
 import { formatUsdBalance } from '~/components/Nav/BuyCredits/ExtBalanceDisplay';
 import { cn } from '~/utils';
 import store from '~/store';
@@ -80,11 +75,6 @@ function NavviaSidebar() {
    * uma rota. Antes navegávamos para /d/settings (rota inexistente) e o
    * Outlet caía em fallback. */
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [filesOpen, setFilesOpen] = useState(false);
-  /* [EXT] Phase J.14: lib-items que não têm rota top-level abrem como modal. */
-  const [memoriesOpen, setMemoriesOpen] = useState(false);
-  const [bookmarksOpen, setBookmarksOpen] = useState(false);
-  const [mcpOpen, setMcpOpen] = useState(false);
 
   const conversationsParams = useMemo(
     () => ({ isArchived: false, sortBy: 'updatedAt' as const, sortDirection: 'desc' as const }),
@@ -279,25 +269,25 @@ function NavviaSidebar() {
           </span>
           {localize('com_ui_skills')}
         </button>
-        <button onClick={() => setFilesOpen(true)} className="lib-item">
+        <button onClick={() => navigate('/files')} className="lib-item">
           <span className="lib-ic" style={{ background: 'rgba(124,132,232,0.16)', color: '#7c84e8' }}>
             <FolderOpen className="h-[13px] w-[13px]" strokeWidth={1.9} />
           </span>
           {localize('com_nav_my_files')}
         </button>
-        <button onClick={() => setMemoriesOpen(true)} className="lib-item">
+        <button onClick={() => navigate('/memories')} className="lib-item">
           <span className="lib-ic" style={{ background: 'rgba(236,72,153,0.15)', color: '#ec4899' }}>
             <Brain className="h-[13px] w-[13px]" strokeWidth={1.9} />
           </span>
           {localize('com_ui_memories')}
         </button>
-        <button onClick={() => setBookmarksOpen(true)} className="lib-item">
+        <button onClick={() => navigate('/bookmarks')} className="lib-item">
           <span className="lib-ic" style={{ background: 'rgba(0,180,216,0.15)', color: '#00b4d8' }}>
             <BookmarkIcon className="h-[13px] w-[13px]" />
           </span>
           {localize('com_ui_bookmarks')}
         </button>
-        <button onClick={() => setMcpOpen(true)} className="lib-item">
+        <button onClick={() => navigate('/mcp')} className="lib-item">
           <span className="lib-ic" style={{ background: 'rgba(168,85,247,0.15)', color: '#a855f7' }}>
             <Server className="h-[13px] w-[13px]" strokeWidth={1.9} />
           </span>
@@ -420,16 +410,6 @@ function NavviaSidebar() {
           role="presentation"
         />
         <Settings open={settingsOpen} onOpenChange={setSettingsOpen} />
-        <MyFilesModal open={filesOpen} onOpenChange={setFilesOpen} />
-        <PanelDialog open={memoriesOpen} onOpenChange={setMemoriesOpen} title={localize('com_ui_memories')}>
-          <MemoryPanel />
-        </PanelDialog>
-        <PanelDialog open={bookmarksOpen} onOpenChange={setBookmarksOpen} title={localize('com_ui_bookmarks')}>
-          <BookmarkPanel />
-        </PanelDialog>
-        <PanelDialog open={mcpOpen} onOpenChange={setMcpOpen} title={localize('com_nav_servers_mcp')}>
-          <MCPBuilderPanel />
-        </PanelDialog>
       </>
     );
   }
@@ -452,16 +432,6 @@ function NavviaSidebar() {
         {Inner}
       </aside>
       <Settings open={settingsOpen} onOpenChange={setSettingsOpen} />
-      <MyFilesModal open={filesOpen} onOpenChange={setFilesOpen} />
-      <PanelDialog open={memoriesOpen} onOpenChange={setMemoriesOpen} title={localize('com_ui_memories')}>
-        <MemoryPanel />
-      </PanelDialog>
-      <PanelDialog open={bookmarksOpen} onOpenChange={setBookmarksOpen} title={localize('com_ui_bookmarks')}>
-        <BookmarkPanel />
-      </PanelDialog>
-      <PanelDialog open={mcpOpen} onOpenChange={setMcpOpen} title={localize('com_nav_servers_mcp')}>
-        <MCPBuilderPanel />
-      </PanelDialog>
     </>
   );
 }

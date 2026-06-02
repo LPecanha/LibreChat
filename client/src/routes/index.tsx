@@ -182,6 +182,24 @@ export const router = createBrowserRouter(
                 </MarketplaceProvider>
               ),
             },
+            /* [EXT] Phase J.14 Navvia: rotas dedicadas Biblioteca (proto views:
+             * #view-memories #view-files #view-bookmarks #view-mcp). */
+            {
+              path: 'memories',
+              lazy: () => import('~/components/Library').then((m) => ({ Component: m.MemoriesPage })),
+            },
+            {
+              path: 'files',
+              lazy: () => import('~/components/Library').then((m) => ({ Component: m.FilesPage })),
+            },
+            {
+              path: 'bookmarks',
+              lazy: () => import('~/components/Library').then((m) => ({ Component: m.BookmarksPage })),
+            },
+            {
+              path: 'mcp',
+              lazy: () => import('~/components/Library').then((m) => ({ Component: m.MCPPage })),
+            },
           ],
         },
       ],
