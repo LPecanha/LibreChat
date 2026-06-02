@@ -1,5 +1,5 @@
-import { useEffect } from 'react';
-import { FileText, FileSignature, SquareSlash } from 'lucide-react';
+import { useEffect, useMemo } from 'react';
+import { FileText, FileSignature, SquareSlash, Variable, ChevronRight, Sparkles } from 'lucide-react';
 import { useForm, FormProvider, Controller } from 'react-hook-form';
 import {
   Button,
@@ -9,13 +9,12 @@ import {
   OGDialogContent,
   TextareaAutosize,
 } from '@librechat/client';
-import { Constants, LocalStorageKeys } from 'librechat-data-provider';
+import { Constants, LocalStorageKeys, specialVariables } from 'librechat-data-provider';
 import { useCreatePrompt } from '~/data-provider';
 import { useLocalize } from '~/hooks';
 import CategorySelector from '../fields/CategorySelector';
 import VariablesDropdown from '../editor/VariablesDropdown';
-import PromptVariables from '../display/PromptVariables';
-import { cn } from '~/utils';
+import { extractUniqueVariables, cn } from '~/utils';
 
 /**
  * [EXT] Phase J.18 Navvia — modal de criação de prompt.
@@ -34,6 +33,82 @@ import { cn } from '~/utils';
 
 const FIELD_INPUT_CLASS =
   'h-10 w-full rounded-xl border border-border-medium bg-transparent px-3 py-2 text-sm text-text-primary placeholder:text-text-tertiary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring-primary disabled:cursor-not-allowed disabled:opacity-50';
+
+/**
+ * Linha compacta de chips de variáveis detectadas no prompt — pareada com o
+ * estilo do proto (chips text-[10px] bg-surface-active text-tertiary).
+ *
+ * - Especiais (current_date, current_user, etc.): bg-brand-soft + sparkle
+ * - Dropdown ({{tom:formal|casual}}): chip + badge com nº de opções
+ * - Simples ({{nome}}): chip mono
+ */
+function VariableChips({ promptText }: { promptText: string }) {
+  const localize = useLocalize();
+  const variables = useMemo(() => extractUniqueVariables(promptText), [promptText]);
+
+  if (variables.length === 0) return null;
+
+  return (
+    <div className="flex flex-wrap items-center gap-1.5 rounded-lg border border-dashed border-border-medium bg-surface-secondary px-2.5 py-2">
+      <div className="flex shrink-0 items-center gap-1 text-[11px] font-medium text-text-tertiary">
+        <Variable className="size-3" aria-hidden="true" />
+        {localize('com_ui_variables')}
+        <span className="ml-0.5 rounded-full bg-surface-active px-1.5 text-[10px] tabular-nums">
+          {variables.length}
+        </span>
+      </div>
+      {variables.map((raw) => {
+        const lower = raw.toLowerCase();
+        const isSpecial = specialVariables[lower] != null;
+        const colon = raw.indexOf(':');
+        const isDropdown = !isSpecial && colon > 0;
+        const name = isSpecial ? lower : isDropdown ? raw.substring(0, colon) : raw;
+        const options = isDropdown
+          ? raw
+              .substring(colon + 1)
+              .split('|')
+              .filter(Boolean)
+          : [];
+
+        if (isSpecial) {
+          return (
+            <span
+              key={raw}
+              className="inline-flex items-center gap-1 rounded-md bg-brand-soft px-1.5 py-0.5 font-mono text-[11px] font-medium text-brand"
+              title={localize('com_ui_special_variables')}
+            >
+              <Sparkles className="size-2.5" aria-hidden="true" />
+              {name}
+            </span>
+          );
+        }
+        if (isDropdown) {
+          return (
+            <span
+              key={raw}
+              className="inline-flex items-center gap-1 rounded-md bg-surface-active px-1.5 py-0.5 font-mono text-[11px] font-medium text-text-primary"
+              title={options.join(' / ')}
+            >
+              <ChevronRight className="size-2.5 text-text-tertiary" aria-hidden="true" />
+              {name}
+              <span className="rounded-full bg-surface-tertiary px-1 text-[9px] text-text-tertiary">
+                {options.length}
+              </span>
+            </span>
+          );
+        }
+        return (
+          <span
+            key={raw}
+            className="inline-flex items-center rounded-md bg-surface-active px-1.5 py-0.5 font-mono text-[11px] font-medium text-text-primary"
+          >
+            {name}
+          </span>
+        );
+      })}
+    </div>
+  );
+}
 
 interface CreatePromptFormValues {
   name: string;
@@ -223,8 +298,8 @@ export default function CreatePromptDialog({
                   )}
                 </div>
 
-                {/* Variables preview (auto-hides when nenhuma var) */}
-                <PromptVariables promptText={promptText} />
+                {/* Variables chips inline (auto-hide quando não há vars) */}
+                <VariableChips promptText={promptText} />
 
                 {/* Oneliner + Command */}
                 <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
