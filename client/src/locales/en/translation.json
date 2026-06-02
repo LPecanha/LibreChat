@@ -1027,6 +1027,7 @@
   "com_ui_copy_to_clipboard": "Copy to clipboard",
   "com_ui_copy_url_to_clipboard": "Copy URL to clipboard",
   "com_ui_create": "Create",
+  "com_ui_create_agent": "Create agent",
   "com_ui_create_api_key": "Create API Key",
   "com_ui_create_assistant": "Create Assistant",
   "com_ui_create_link": "Create link",

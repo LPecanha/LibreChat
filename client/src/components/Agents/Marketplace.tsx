@@ -204,18 +204,31 @@ const AgentMarketplace: React.FC<AgentMarketplaceProps> = ({ className = '' }) =
             ref={scrollContainerRef}
             className="scrollbar-gutter-stable relative flex h-full flex-col overflow-y-auto overflow-x-hidden"
           >
-            {/* [EXT] Navvia Phase J.8: layout dense alinhado com protótipo.
-             *  - h1 small (24px) alinhado à esquerda (vs hero 48px centered)
-             *  - max-w-[1600px] (vs 4xl ~896px)
-             *  - search inline com header (vs bloco separado abaixo) */}
+            {/* [EXT] Navvia Phase J.10: header com h1 + subtitle + botão "+ Criar agente"
+             * inline (ui-preview.html#view-agents linhas 722-724). O botão navega
+             * para /c/new com o sidepanel Agents aberto — fluxo upstream de criação. */}
             {!isSmallScreen && (
               <div className="container mx-auto max-w-[1600px] px-8 pt-6 lg:px-12">
-                <h1 className="font-display text-[24px] font-bold tracking-tight text-text-primary">
-                  {localize('com_agents_marketplace')}
-                </h1>
-                <p className="mt-1 text-[13px] text-text-secondary">
-                  {localize('com_agents_marketplace_subtitle')}
-                </p>
+                <div className="flex items-center gap-3">
+                  <div>
+                    <h1 className="font-display text-[24px] font-bold tracking-tight text-text-primary">
+                      {localize('com_ui_agents')}
+                    </h1>
+                    <p className="mt-0.5 text-[13px] text-text-secondary">
+                      {localize('com_agents_marketplace_subtitle')}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => navigate('/c/new?createAgent=1')}
+                    className="ml-auto flex items-center gap-1.5 rounded-md bg-brand px-3 py-1.5 text-[13px] font-medium text-brand-fg transition-opacity hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-brand"
+                  >
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M12 5v14M5 12h14" />
+                    </svg>
+                    {localize('com_ui_create_agent')}
+                  </button>
+                </div>
               </div>
             )}
             {/* Sticky wrapper for search bar and categories */}
@@ -258,50 +271,22 @@ const AgentMarketplace: React.FC<AgentMarketplaceProps> = ({ className = '' }) =
                   )}
                   key={`pane-current-${displayCategory}`}
                 >
-                  {/* Category header - only show when not searching */}
-                  {!searchQuery && (
-                    <div className="mb-6 mt-6">
+                  {/* [EXT] Phase J.10 Navvia: subheader "Todos os Agentes" só aparece
+                   * quando é uma categoria específica (não 'all' nem 'promoted'). O
+                   * protótipo vai direto pros cards sem repetir o título da seção. */}
+                  {!searchQuery && displayCategory !== 'all' && displayCategory !== 'promoted' && (
+                    <div className="mb-4 mt-4">
                       {(() => {
-                        // Get category data for display
-                        const getCategoryData = () => {
-                          if (displayCategory === 'promoted') {
-                            return {
-                              name: localize('com_agents_top_picks'),
-                              description: localize('com_agents_recommended'),
-                            };
-                          }
-                          if (displayCategory === 'all') {
-                            return {
-                              name: localize('com_agents_all'),
-                              description: localize('com_agents_all_description'),
-                            };
-                          }
-
-                          // Find the category in the API data
-                          const categoryData = categoriesQuery.data?.find(
-                            (cat) => cat.value === displayCategory,
-                          );
-                          if (categoryData) {
-                            return {
-                              name: categoryData.label?.startsWith('com_')
-                                ? localize(categoryData.label as TranslationKeys)
-                                : categoryData.label,
-                              description: categoryData.description?.startsWith('com_')
-                                ? localize(categoryData.description as TranslationKeys)
-                                : categoryData.description || '',
-                            };
-                          }
-
-                          // Fallback for unknown categories
-                          return {
-                            name:
-                              displayCategory.charAt(0).toUpperCase() + displayCategory.slice(1),
-                            description: '',
-                          };
-                        };
-
-                        const { name, description } = getCategoryData();
-
+                        const categoryData = categoriesQuery.data?.find(
+                          (cat) => cat.value === displayCategory,
+                        );
+                        if (!categoryData) return null;
+                        const name = categoryData.label?.startsWith('com_')
+                          ? localize(categoryData.label as TranslationKeys)
+                          : categoryData.label;
+                        const description = categoryData.description?.startsWith('com_')
+                          ? localize(categoryData.description as TranslationKeys)
+                          : categoryData.description || '';
                         return (
                           <div className="text-left">
                             <h2 className="font-display text-[15px] font-semibold text-text-primary">{name}</h2>
@@ -335,58 +320,25 @@ const AgentMarketplace: React.FC<AgentMarketplaceProps> = ({ className = '' }) =
                     )}
                     key={`pane-next-${nextCategory}-${animationDirection}`}
                   >
-                    {/* Category header - only show when not searching */}
-                    {!searchQuery && (
-                      <div className="mb-6 mt-6">
+                    {/* [EXT] Phase J.10: subheader só p/ categorias específicas (não 'all' nem 'promoted') */}
+                    {!searchQuery && nextCategory !== 'all' && nextCategory !== 'promoted' && (
+                      <div className="mb-4 mt-4">
                         {(() => {
-                          // Get category data for display
-                          const getCategoryData = () => {
-                            if (nextCategory === 'promoted') {
-                              return {
-                                name: localize('com_agents_top_picks'),
-                                description: localize('com_agents_recommended'),
-                              };
-                            }
-                            if (nextCategory === 'all') {
-                              return {
-                                name: localize('com_agents_all'),
-                                description: localize('com_agents_all_description'),
-                              };
-                            }
-
-                            // Find the category in the API data
-                            const categoryData = categoriesQuery.data?.find(
-                              (cat) => cat.value === nextCategory,
-                            );
-                            if (categoryData) {
-                              return {
-                                name: categoryData.label?.startsWith('com_')
-                                  ? localize(categoryData.label as TranslationKeys)
-                                  : categoryData.label,
-                                description: categoryData.description?.startsWith('com_')
-                                  ? localize(
-                                      categoryData.description as Parameters<typeof localize>[0],
-                                    )
-                                  : categoryData.description || '',
-                              };
-                            }
-
-                            // Fallback for unknown categories
-                            return {
-                              name:
-                                (nextCategory || '').charAt(0).toUpperCase() +
-                                (nextCategory || '').slice(1),
-                              description: '',
-                            };
-                          };
-
-                          const { name, description } = getCategoryData();
-
+                          const categoryData = categoriesQuery.data?.find(
+                            (cat) => cat.value === nextCategory,
+                          );
+                          if (!categoryData) return null;
+                          const name = categoryData.label?.startsWith('com_')
+                            ? localize(categoryData.label as TranslationKeys)
+                            : categoryData.label;
+                          const description = categoryData.description?.startsWith('com_')
+                            ? localize(categoryData.description as Parameters<typeof localize>[0])
+                            : categoryData.description || '';
                           return (
                             <div className="text-left">
-                              <h2 className="text-2xl font-bold font-display text-text-primary">{name}</h2>
+                              <h2 className="font-display text-[15px] font-semibold text-text-primary">{name}</h2>
                               {description && (
-                                <p className="mt-2 text-text-secondary">{description}</p>
+                                <p className="mt-0.5 text-[12.5px] text-text-tertiary">{description}</p>
                               )}
                             </div>
                           );

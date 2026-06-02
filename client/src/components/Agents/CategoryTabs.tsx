@@ -121,15 +121,15 @@ const CategoryTabs: React.FC<CategoryTabsProps> = ({
     );
   }
 
-  // Main tabs content
+  // [EXT] Navvia Phase J.10: chips inline densos (vs tabs largas).
+  // Bate com ui-preview.html linha 730+: rounded-full + border + padding curto.
   const tabsContent = (
-    <div className="w-full pb-2">
+    <div className="w-full">
       <div
         className={cn(
-          'px-4',
           isSmallScreen
-            ? 'scrollbar-hide flex gap-2 overflow-x-auto scroll-smooth'
-            : 'flex flex-wrap justify-center gap-1.5',
+            ? 'scrollbar-hide flex gap-1.5 overflow-x-auto scroll-smooth'
+            : 'flex flex-wrap items-center gap-1.5',
         )}
         role="tablist"
         aria-label={localize('com_agents_category_tabs_label')}
@@ -151,11 +151,11 @@ const CategoryTabs: React.FC<CategoryTabsProps> = ({
             onClick={() => onChange(category.value)}
             onKeyDown={(e) => handleKeyDown(e, category.value)}
             className={cn(
-              'relative cursor-pointer select-none whitespace-nowrap px-3 py-2 transition-all duration-200',
-              isSmallScreen ? 'min-w-fit flex-shrink-0' : '',
+              'cursor-pointer select-none whitespace-nowrap rounded-full border px-3 py-1 text-[12.5px] transition-colors',
+              isSmallScreen ? 'shrink-0' : '',
               activeTab === category.value
-                ? 'rounded-t-lg bg-surface-hover text-text-primary'
-                : 'rounded-lg bg-surface-secondary text-text-secondary hover:bg-surface-hover hover:text-text-primary active:scale-95',
+                ? 'border-brand bg-brand-soft text-brand'
+                : 'border-border-light bg-surface-primary text-text-secondary hover:border-border-medium hover:text-text-primary',
             )}
             role="tab"
             aria-selected={activeTab === category.value}
@@ -168,13 +168,6 @@ const CategoryTabs: React.FC<CategoryTabsProps> = ({
             })}
           >
             {getCategoryDisplayName(category)}
-            {/* Underline for active tab */}
-            {activeTab === category.value && (
-              <div
-                className="absolute bottom-0 left-0 right-0 h-0.5 bg-text-primary"
-                aria-hidden="true"
-              />
-            )}
           </button>
         ))}
       </div>
