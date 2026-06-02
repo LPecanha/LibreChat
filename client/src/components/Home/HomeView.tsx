@@ -28,6 +28,7 @@ import { useConversationsInfiniteQuery, useGetAllPromptGroups } from '~/data-pro
 import { useGetStartupConfig } from '~/data-provider';
 import { useAgentsMapContext, useBadgeRowContext } from '~/Providers';
 import { formatUsdBalance } from '~/components/Nav/BuyCredits/ExtBalanceDisplay';
+import ToolDialogs from '~/components/Chat/Input/ToolDialogs';
 import { icons } from '~/hooks/Endpoint/Icons';
 import { cn } from '~/utils';
 import type { TConversation, TPromptGroup } from 'librechat-data-provider';
@@ -778,6 +779,11 @@ function HomeView() {
           </div>
         </div>
       </div>
+
+      {/* [EXT] Phase J.25 Navvia: dialog de API key do Web Search.
+       * Sem isso, o toggle de busca web chama `setIsDialogOpen(true)` no
+       * useToolToggle mas nao renderiza nada — clique silencioso. */}
+      <ToolDialogs />
     </section>
   );
 }
