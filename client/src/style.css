@@ -4871,10 +4871,11 @@ aside:hover .sidebar-collapse {
 kbd {
   font-family: 'JetBrains Mono', monospace;
   font-size: 10px;
-  border: 1px solid var(--border-light);
+  border: 1px solid var(--border-medium);
   border-radius: 4px;
   padding: 1px 4px;
-  color: var(--text-tertiary);
+  color: var(--text-secondary);
+  background: var(--surface-primary);
 }
 .hover-actions {
   opacity: 0;

@@ -414,7 +414,7 @@ function HomeView() {
                     setModelOpen(false);
                     setToolsOpen(false);
                   }}
-                  className="ctrl focus-ring grid w-8 place-items-center rounded-md text-text-secondary hover:bg-surface-hover"
+                  className="ctrl focus-ring grid w-8 place-items-center rounded-md text-text-primary hover:bg-surface-hover"
                   title={localize('com_nav_home_attach_label')}
                 >
                   <Paperclip className="h-[17px] w-[17px]" strokeWidth={1.8} />
@@ -441,7 +441,7 @@ function HomeView() {
                     setModelOpen(false);
                     setAttachOpen(false);
                   }}
-                  className="ctrl focus-ring flex items-center gap-1.5 rounded-md px-2 text-[12.5px] font-medium text-text-secondary hover:bg-surface-hover"
+                  className="ctrl focus-ring flex items-center gap-1.5 rounded-md px-2 text-[12.5px] font-medium text-text-primary hover:bg-surface-hover"
                   title={localize('com_nav_home_tools_label')}
                 >
                   <Wrench className="h-[15px] w-[15px]" strokeWidth={1.8} />
