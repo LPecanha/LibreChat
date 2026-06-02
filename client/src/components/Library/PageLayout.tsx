@@ -30,7 +30,8 @@ export default function LibraryPageLayout({
   children,
 }: {
   title: string;
-  subtitle: string;
+  /** Aceita ReactNode pra permitir composição inline (ex: <span class="font-mono">/</span>). */
+  subtitle: ReactNode;
   action?: ReactNode;
   maxWidth?: 'max-w-3xl' | 'max-w-4xl' | 'max-w-5xl';
   children: ReactNode;

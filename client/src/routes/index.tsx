@@ -143,8 +143,10 @@ export const router = createBrowserRouter(
               element: <Search />,
             },
             {
+              /* [EXT] Phase J.17 Navvia: /prompts agora lista todos os prompts
+               * (PromptsPage style proto), em vez de redirecionar para o form. */
               path: 'prompts',
-              element: <Navigate to="/prompts/new" replace={true} />,
+              lazy: () => import('~/components/Library').then((m) => ({ Component: m.PromptsPage })),
             },
             {
               path: 'prompts/new',
