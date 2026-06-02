@@ -3316,6 +3316,16 @@ aside:hover .sidebar-collapse {
   background: var(--surface-hover);
   color: var(--text-primary);
 }
+/* [EXT] Phase J.18 Navvia: estado ativo do lib-item — mesma vibe do
+ * .navitem.active mas sem a barra esquerda (lib-items são "sub" nav). */
+.lib-item.active {
+  background: var(--surface-active);
+  color: var(--text-primary);
+  font-weight: 500;
+}
+.dark .lib-item.active {
+  background: var(--surface-active);
+}
 .lib-ic {
   display: grid;
   place-items: center;

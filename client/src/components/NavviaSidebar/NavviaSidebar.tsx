@@ -19,6 +19,7 @@ import {
   Settings as SettingsIcon,
   LogOut,
   HelpCircle,
+  X,
 } from 'lucide-react';
 import type { TConversation } from 'librechat-data-provider';
 import { useConversationsInfiniteQuery } from '~/data-provider';
@@ -107,11 +108,27 @@ function NavviaSidebar() {
   const newChat = useCallback(() => {
     setAccountOpen(false);
     navigate(`/c/${Constants.NEW_CONVO}`);
-  }, [navigate]);
+    if (isSmallScreen) handleCollapse();
+  }, [navigate, isSmallScreen, handleCollapse]);
 
   const openConvo = useCallback(
     (id: string) => {
       navigate(`/c/${id}`);
+      if (isSmallScreen) handleCollapse();
+    },
+    [navigate, isSmallScreen, handleCollapse],
+  );
+
+  /**
+   * [EXT] Phase J.18 Navvia: navega para uma rota e fecha o drawer em
+   * mobile. Reusado pelos nav-items (Início, Agentes) e pelos lib-items
+   * coloridos (Prompts, Skills, Arquivos, Memórias, Bookmarks, MCP).
+   * Sem isso o user em mobile clicava em "Prompts" e ficava com o drawer
+   * aberto cobrindo a página.
+   */
+  const navTo = useCallback(
+    (path: string) => {
+      navigate(path);
       if (isSmallScreen) handleCollapse();
     },
     [navigate, isSmallScreen, handleCollapse],
@@ -154,15 +171,32 @@ function NavviaSidebar() {
   /** Sidebar inner content — reusado em desktop aside + mobile drawer. */
   const Inner = (
     <>
-      {/* Brand header — Navvia wordmark à esquerda */}
-      <div className="sidebar-brand">
+      {/* Brand header — Navvia wordmark à esquerda + close X mobile */}
+      <div className="sidebar-brand flex items-center justify-between">
         <button
-          onClick={() => navigate('/home')}
+          onClick={() => {
+            navigate('/home');
+            if (isSmallScreen) handleCollapse();
+          }}
           className="inline-flex items-center focus-ring rounded"
           aria-label="Navvia — Home"
         >
           <NavviaLogo size="md" />
         </button>
+        {/* [EXT] Phase J.18 Navvia: botão X visível no header só em mobile.
+         * Antes só dava pra fechar clicando no backdrop, o que era pouco
+         * descobrível. O ChevronLeft desktop (sidebar-collapse) fica fora
+         * do flow do header — esse aqui é discreto e in-place. */}
+        {isSmallScreen && (
+          <button
+            onClick={handleCollapse}
+            className="grid h-8 w-8 place-items-center rounded-md text-text-tertiary transition-colors hover:bg-surface-hover hover:text-text-primary"
+            aria-label={localize('com_nav_close_sidebar')}
+            title={localize('com_nav_close_sidebar')}
+          >
+            <X className="h-[15px] w-[15px]" strokeWidth={2} aria-hidden="true" />
+          </button>
+        )}
       </div>
 
       {/* CTA + search */}
@@ -189,14 +223,14 @@ function NavviaSidebar() {
       {/* Nav primário — Início + Agentes */}
       <nav className="px-3 pt-3">
         <button
-          onClick={() => navigate('/home')}
+          onClick={() => navTo('/home')}
           className={cn('navitem', isActiveRoute('/home') && 'active')}
         >
           <House className="h-[15px] w-[15px] shrink-0" strokeWidth={1.8} />
           {localize('com_nav_home_init')}
         </button>
         <button
-          onClick={() => navigate('/agents')}
+          onClick={() => navTo('/agents')}
           className={cn('navitem', isActiveRoute('/agents') && 'active')}
         >
           <Bot className="h-[15px] w-[15px] shrink-0" strokeWidth={1.8} />
@@ -245,49 +279,74 @@ function NavviaSidebar() {
           ))
         )}
 
-        {/* Biblioteca — 6 ícones coloridos */}
+        {/* Biblioteca — 6 ícones coloridos. Bate com proto linhas 586-593:
+         *   Agentes  -> bg-brand          / Bot
+         *   Prompts  -> #11b38d           / Sparkles
+         *   Skills   -> #f59e0b           / Wand2
+         *   Arquivos -> #7c84e8           / FolderOpen
+         *   Memórias -> #ec4899           / Brain
+         *   Bookmarks-> #00b4d8           / BookmarkIcon
+         *   MCP      -> #a855f7           / Server
+         */}
         <div className="sec-label mt-6">{localize('com_nav_library')}</div>
-        <button onClick={() => navigate('/agents')} className="lib-item">
+        <button
+          onClick={() => navTo('/agents')}
+          className={cn('lib-item', isActiveRoute('/agents') && 'active')}
+        >
           <span className="lib-ic" style={{ background: 'rgba(36,105,226,0.13)', color: '#2469e2' }}>
             <Bot className="h-[13px] w-[13px]" strokeWidth={1.9} />
           </span>
           {localize('com_nav_agents')}
         </button>
-        {/* [EXT] Phase J.7 Navvia: Prompts vai pra /prompts (rota real upstream).
-         * Skills adicionado (faltava) — ícone laranja consistente c/ protótipo.
-         * Arquivos/Memórias/Bookmarks/MCP ainda placeholder até rotas existirem
-         * upstream (atualmente caem em /c/new por dashboard.tsx default). */}
-        <button onClick={() => navigate('/prompts')} className="lib-item">
+        <button
+          onClick={() => navTo('/prompts')}
+          className={cn('lib-item', isActiveRoute('/prompts') && 'active')}
+        >
           <span className="lib-ic" style={{ background: 'rgba(17,179,141,0.15)', color: '#11b38d' }}>
             <Sparkles className="h-[13px] w-[13px]" strokeWidth={1.9} />
           </span>
           {localize('com_ui_prompts')}
         </button>
-        <button onClick={() => navigate('/skills')} className="lib-item">
+        <button
+          onClick={() => navTo('/skills')}
+          className={cn('lib-item', isActiveRoute('/skills') && 'active')}
+        >
           <span className="lib-ic" style={{ background: 'rgba(245,158,11,0.16)', color: '#f59e0b' }}>
             <Wand2 className="h-[13px] w-[13px]" strokeWidth={1.9} />
           </span>
           {localize('com_ui_skills')}
         </button>
-        <button onClick={() => navigate('/files')} className="lib-item">
+        <button
+          onClick={() => navTo('/files')}
+          className={cn('lib-item', isActiveRoute('/files') && 'active')}
+        >
           <span className="lib-ic" style={{ background: 'rgba(124,132,232,0.16)', color: '#7c84e8' }}>
             <FolderOpen className="h-[13px] w-[13px]" strokeWidth={1.9} />
           </span>
           {localize('com_nav_my_files')}
         </button>
-        <button onClick={() => navigate('/memories')} className="lib-item">
+        <button
+          onClick={() => navTo('/memories')}
+          className={cn('lib-item', isActiveRoute('/memories') && 'active')}
+        >
           <span className="lib-ic" style={{ background: 'rgba(236,72,153,0.15)', color: '#ec4899' }}>
             <Brain className="h-[13px] w-[13px]" strokeWidth={1.9} />
           </span>
           {localize('com_ui_memories')}
         </button>
-        <button onClick={() => navigate('/bookmarks')} className="lib-item">
+        <button
+          onClick={() => navTo('/bookmarks')}
+          className={cn('lib-item', isActiveRoute('/bookmarks') && 'active')}
+        >
           <span className="lib-ic" style={{ background: 'rgba(0,180,216,0.15)', color: '#00b4d8' }}>
             <BookmarkIcon className="h-[13px] w-[13px]" />
           </span>
           {localize('com_ui_bookmarks')}
         </button>
-        <button onClick={() => navigate('/mcp')} className="lib-item">
+        <button
+          onClick={() => navTo('/mcp')}
+          className={cn('lib-item', isActiveRoute('/mcp') && 'active')}
+        >
           <span className="lib-ic" style={{ background: 'rgba(168,85,247,0.15)', color: '#a855f7' }}>
             <Server className="h-[13px] w-[13px]" strokeWidth={1.9} />
           </span>
@@ -339,7 +398,7 @@ function NavviaSidebar() {
               <button
                 onClick={() => {
                   setAccountOpen(false);
-                  setFilesOpen(true);
+                  navigate('/files');
                 }}
                 className="menu-item"
               >
