@@ -202,7 +202,7 @@ const AgentCard: React.FC<AgentCardProps> = ({ agent, onSelect, className = '' }
         </div>
       </OGDialogTrigger>
 
-      <AgentDetailContent agent={agent} />
+      <AgentDetailContent agent={agent} onClose={() => setIsOpen(false)} />
     </OGDialog>
   );
 };
