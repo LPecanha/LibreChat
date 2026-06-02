@@ -180,10 +180,5 @@ hive-mind-prompt-*.txt
 CLAUDE.md
 .gsd
 
-# Overlay — arquivos temporários locais
-librechat-admin-panel-main/
-librechat-admin-panel-main.zip
-docker-compose.whitelabel-test.yml
-
 # Permite os librechat.yaml dentro do deploy (são templates versionados)
 !deploy/**/librechat.yaml
