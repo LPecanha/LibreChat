@@ -1,5 +1,4 @@
 import React, { useMemo, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Spinner } from '@librechat/client';
 import { Plus } from 'lucide-react';
 import { PermissionBits } from 'librechat-data-provider';
@@ -15,6 +14,9 @@ interface AgentGridProps {
   category: string;
   searchQuery: string;
   onSelectAgent: (agent: t.Agent) => void;
+  /** [EXT] Phase J.13 Navvia: callback do tile "+ Criar agente" no empty state.
+   *  Marketplace passa startCreateAgent (que abre newConversation com endpoint=agents). */
+  onCreateAgent?: () => void;
   scrollElementRef?: React.RefObject<HTMLElement>;
 }
 
@@ -25,10 +27,10 @@ const AgentGrid: React.FC<AgentGridProps> = ({
   category,
   searchQuery,
   onSelectAgent,
+  onCreateAgent,
   scrollElementRef,
 }) => {
   const localize = useLocalize();
-  const navigate = useNavigate();
 
   // Get category data from API
   const { categories } = useAgentCategories();
@@ -181,7 +183,7 @@ const AgentGrid: React.FC<AgentGridProps> = ({
           <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
             <button
               type="button"
-              onClick={() => navigate('/c/new?createAgent=1')}
+              onClick={onCreateAgent}
               className="agent-card border-dashed text-center"
               style={{ alignItems: 'center', justifyContent: 'center' }}
               aria-label={localize('com_ui_create_agent')}

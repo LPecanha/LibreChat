@@ -91,6 +91,16 @@ export default function ChatRoute() {
     const isNewConvo = conversationId === Constants.NEW_CONVO;
 
     const getNewConvoPreset = () => {
+      /* [EXT] Phase J.13 Navvia: ?createAgent=1 vem do "+ Criar agente" do marketplace.
+       * Força preset endpoint=agents + agent_id=ephemeral antes que o defaultModelSpec
+       * (que aponta para o primeiro modelo do tenant) sobrescreva o template. */
+      if (searchParams.get('createAgent') === '1') {
+        return {
+          endpoint: EModelEndpoint.agents,
+          agent_id: Constants.EPHEMERAL_AGENT_ID as string,
+        } as TPreset;
+      }
+
       const result = getDefaultModelSpec(startupConfig);
       const spec = result?.default ?? result?.last;
       const specPreset = spec ? getModelSpecPreset(spec) : undefined;

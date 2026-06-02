@@ -27,6 +27,13 @@ interface AgentMarketplaceProps {
 const AgentMarketplace: React.FC<AgentMarketplaceProps> = ({ className = '' }) => {
   const localize = useLocalize();
   const navigate = useNavigate();
+  /* [EXT] Phase J.13 Navvia: "Criar agente" navega para /c/new?createAgent=1.
+   * O ChatRoute lê esse query param e seta o preset com endpoint=agents + agent_id=ephemeral
+   * ANTES do defaultModelSpec do tenant sobrescrever — única ordem que funciona dado que
+   * o ChatRoute remonta a conversa toda em useEffect quando recebe /c/new. */
+  const startCreateAgent = useCallback(() => {
+    navigate('/c/new?createAgent=1');
+  }, [navigate]);
   const { category } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
 
@@ -230,7 +237,7 @@ const AgentMarketplace: React.FC<AgentMarketplaceProps> = ({ className = '' }) =
                   </div>
                   <button
                     type="button"
-                    onClick={() => navigate('/c/new?createAgent=1')}
+                    onClick={startCreateAgent}
                     /* [EXT] Phase J.12 Navvia: proto usa .ctrl que tem height: var(--row-h) (32px)
                      * sem padding vertical. Usar h-8 + px-3 deixa idêntico. */
                     className="ml-auto flex h-8 items-center gap-1.5 rounded-md bg-brand px-3 text-[13px] font-medium text-brand-fg transition-opacity hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-brand"
@@ -342,6 +349,7 @@ const AgentMarketplace: React.FC<AgentMarketplaceProps> = ({ className = '' }) =
                     category={displayCategory}
                     searchQuery={searchQuery}
                     onSelectAgent={handleAgentSelect}
+                    onCreateAgent={startCreateAgent}
                     scrollElementRef={scrollContainerRef}
                   />
                 </div>
@@ -389,6 +397,7 @@ const AgentMarketplace: React.FC<AgentMarketplaceProps> = ({ className = '' }) =
                       category={nextCategory}
                       searchQuery={searchQuery}
                       onSelectAgent={handleAgentSelect}
+                      onCreateAgent={startCreateAgent}
                       scrollElementRef={scrollContainerRef}
                     />
                   </div>
