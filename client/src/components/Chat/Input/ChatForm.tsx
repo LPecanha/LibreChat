@@ -299,21 +299,18 @@ const ChatForm = memo(function ChatForm({
            * modal, manual skills pending chips, auto-save, multi-conv header. */}
           <div
             onClick={handleContainerClick}
+            /* [EXT] Phase J.16 Navvia: alinhado com design/ui-preview.html linha 826:
+             *   <div class="siri rounded-xl border border-border-light bg-surface-secondary shadow-sm">
+             *
+             * No #view-chat o glow é DISCRETO (linha 171-174 do proto: opacity 0.1
+             * idle / 0.5 focus). siri-hero é só pra HomeView. Removido o branch
+             * que aplicava siri-hero quando centerFormOnLanding=true. */
             className={cn(
-              'relative flex w-full flex-grow flex-col overflow-hidden border text-text-primary transition-all duration-200',
-              /* radius do protótipo (não rounded-3xl) — usa --radius do CSS Phase A */
-              'rounded-t-[14px] sm:rounded-[14px]',
-              isTextAreaFocused ? 'shadow-lg' : 'shadow-sm',
+              'relative flex w-full flex-grow flex-col overflow-hidden rounded-xl border shadow-sm text-text-primary transition-all duration-200',
               isTemporary
                 ? 'border-violet-800/60 bg-violet-950/10'
                 : 'border-border-light bg-surface-secondary',
-              /* siri-border do protótipo: idle 0.12 / focus 0.55 / generating 1.0 */
               'siri-border',
-              centerFormOnLanding &&
-                (conversationId == null || conversationId === Constants.NEW_CONVO) &&
-                conversation?.messages?.length === 0 &&
-                !isSubmitting &&
-                'siri-hero',
               isSubmitting && 'generating',
             )}
           >
