@@ -893,6 +893,7 @@
   "com_ui_archive": "Arquivar",
   "com_ui_archive_delete_error": "Falha ao deletar conversa arquivada",
   "com_ui_archive_error": "Falha ao arquivar conversa",
+  "com_ui_archive_success": "Conversa arquivada",
   "com_ui_artifact_click": "Clique para abrir",
   "com_ui_artifact_preview_pending": "_Pré-visualização não disponível ainda — clique em **Baixar** para ver o arquivo._",
   "com_ui_artifacts": "Artefatos",

@@ -22,6 +22,7 @@ import {
   X,
 } from 'lucide-react';
 import type { TConversation } from 'librechat-data-provider';
+import NavviaConvoRow from './NavviaConvoRow';
 import { useConversationsInfiniteQuery } from '~/data-provider';
 import { useGetUserBalance } from '~/data-provider/Misc/queries';
 import { useAuthContext, useLocalize } from '~/hooks';
@@ -255,24 +256,12 @@ function NavviaSidebar() {
               {convs.slice(0, 8).map((c) => {
                 const isActive = location.pathname === `/c/${c.conversationId}`;
                 return (
-                  <button
+                  <NavviaConvoRow
                     key={c.conversationId}
-                    onClick={() => openConvo(c.conversationId!)}
-                    className={cn('navitem group flex items-center gap-2', isActive && 'convo-active')}
-                  >
-                    <span
-                      className={cn(
-                        'shrink-0 h-1.5 w-1.5 rounded-full',
-                        isActive ? '' : 'bg-text-tertiary',
-                      )}
-                      style={
-                        isActive
-                          ? { background: 'linear-gradient(135deg,#2469e2,#11b38d)' }
-                          : undefined
-                      }
-                    />
-                    <span className="truncate flex-1 text-left">{c.title || 'Nova conversa'}</span>
-                  </button>
+                    conversation={c}
+                    isActive={isActive}
+                    onOpen={() => openConvo(c.conversationId!)}
+                  />
                 );
               })}
             </div>
