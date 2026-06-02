@@ -88,13 +88,16 @@ const OGDialogTemplate = forwardRef((props: DialogTemplateProps, ref: Ref<HTMLDi
 
   let selectionContent = null;
   if (isLegacySelection) {
+    /* [EXT] Phase J.26 Navvia: padroniza botões de modal com proto style
+     * (h-9 rounded-md text-[13.5px] font-medium). Antes era h-10 rounded-lg
+     * text-sm — destoava dos demais CTAs do app. */
     selectionContent = (
       <OGDialogClose
         onClick={selectHandler}
         disabled={isLoading}
         className={`${
           selectClasses ?? defaultSelect
-        } flex h-10 items-center justify-center rounded-lg border-none px-4 py-2 text-sm disabled:opacity-80 max-sm:order-first max-sm:w-full sm:order-none`}
+        } flex h-9 items-center justify-center rounded-md border-none px-3 text-[13.5px] font-medium disabled:opacity-80 max-sm:order-first max-sm:w-full sm:order-none`}
       >
         {isLoading === true ? (
           <Spinner className="size-4 text-text-primary" />
@@ -130,7 +133,13 @@ const OGDialogTemplate = forwardRef((props: DialogTemplateProps, ref: Ref<HTMLDi
         ) : null}
         {showCancelButton && (
           <OGDialogClose asChild>
-            <Button variant="outline" aria-label={localize('com_ui_cancel')}>
+            {/* [EXT] Phase J.26 Navvia: Cancel proto-style — h-9 rounded-md
+             * text-[13.5px] pra emparelhar com o botao select. */}
+            <Button
+              variant="outline"
+              aria-label={localize('com_ui_cancel')}
+              className="!h-9 !rounded-md !text-[13.5px] !font-medium"
+            >
               {localize('com_ui_cancel')}
             </Button>
           </OGDialogClose>
