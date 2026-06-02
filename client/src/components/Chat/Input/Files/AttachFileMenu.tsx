@@ -277,9 +277,11 @@ const AttachFileMenu = ({
           disabled={isUploadDisabled}
           id="attach-file-menu-button"
           aria-label="Attach File Options"
+          /* [EXT] Phase J.15 Navvia: trigger alinhado com design/ui-preview.html
+           * linha 832. Estilo dense pra encaixar no toolbar h-8. */
           className={cn(
-            'flex size-9 items-center justify-center rounded-full p-1 hover:bg-surface-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-opacity-50',
-            isPopoverActive && 'bg-surface-hover',
+            'grid h-8 w-8 place-items-center rounded-md text-text-secondary transition-colors hover:bg-surface-hover hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand',
+            isPopoverActive && 'bg-surface-hover text-text-primary',
           )}
         >
           <div className="flex w-full items-center justify-center gap-2">

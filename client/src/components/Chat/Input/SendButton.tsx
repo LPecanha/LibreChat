@@ -1,7 +1,7 @@
 import React, { forwardRef } from 'react';
 import { useWatch } from 'react-hook-form';
 import type { Control } from 'react-hook-form';
-import { SendIcon, TooltipAnchor } from '@librechat/client';
+import { TooltipAnchor } from '@librechat/client';
 import { useLocalize } from '~/hooks';
 import { cn } from '~/utils';
 
@@ -22,17 +22,32 @@ const SubmitButton = React.memo(
             aria-label={localize('com_nav_send_message')}
             id="send-button"
             disabled={props.disabled}
+            /* [EXT] Phase J.15 Navvia: send button alinhado com
+             * design/ui-preview.html linha 837:
+             *   <button class="send-btn ctrl grid w-8 place-items-center rounded-md
+             *                  bg-brand text-brand-fg hover:opacity-90">
+             *     <svg arrow-up w=16 h=16 />
+             *   </button>
+             * Era rounded-full + paper-plane size 24. */
             className={cn(
-              /* [EXT] Navvia: send button vira azul de marca + lift sutil no hover/active.
-               * Mantém disabled muted (opacity-10) p/ não competir com glow do composer. */
-              'rounded-full bg-brand p-1.5 text-brand-fg shadow-sm outline-offset-4 transition-all duration-200 hover:-translate-y-px hover:shadow-md active:translate-y-0 disabled:cursor-not-allowed disabled:bg-text-primary disabled:text-text-secondary disabled:opacity-10 disabled:shadow-none disabled:hover:translate-y-0',
+              'grid h-8 w-8 place-items-center rounded-md bg-brand text-brand-fg transition-opacity hover:opacity-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand disabled:cursor-not-allowed disabled:bg-surface-active disabled:text-text-tertiary disabled:opacity-50',
             )}
             data-testid="send-button"
             type="submit"
           >
-            <span className="" data-state="closed">
-              <SendIcon size={24} />
-            </span>
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M12 19V5M5 12l7-7 7 7" />
+            </svg>
           </button>
         }
       />

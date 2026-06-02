@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import * as Ariakit from '@ariakit/react';
 import { TooltipAnchor, DropdownPopup, PinIcon, VectorIcon } from '@librechat/client';
-import { Globe, ScrollText, Settings, Settings2, TerminalSquareIcon } from 'lucide-react';
+import { Globe, ScrollText, Settings, Wrench, TerminalSquareIcon } from 'lucide-react';
 import type { MenuItemProps } from '~/common';
 import {
   AuthType,
@@ -316,21 +316,27 @@ const ToolsDropdown = ({ disabled }: ToolsDropdownProps) => {
     return null;
   }
 
+  /* [EXT] Phase J.15 Navvia: trigger alinhado com design/ui-preview.html linha 833.
+   * Proto: <button class="ctrl flex items-center gap-1.5 rounded-md px-2 text-[12.5px]
+   *                font-medium text-text-secondary hover:bg-surface-hover">
+   *          <svg wrench w=15 h=15 /> Ferramentas
+   *        </button>
+   * Era Settings2 (sliders) em rounded-full size-9 sem texto — agora Wrench
+   * em rounded-md h-8 px-2 com label "Ferramentas". */
   const menuTrigger = (
     <TooltipAnchor
       render={
         <Ariakit.MenuButton
           disabled={isDisabled}
           id="tools-dropdown-button"
-          aria-label="Tools Options"
+          aria-label={localize('com_ui_tools')}
           className={cn(
-            'flex size-9 items-center justify-center rounded-full p-1 hover:bg-surface-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-opacity-50',
-            isPopoverActive && 'bg-surface-hover',
+            'flex h-8 items-center gap-1.5 rounded-md px-2 text-[12.5px] font-medium text-text-secondary transition-colors hover:bg-surface-hover hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand',
+            isPopoverActive && 'bg-surface-hover text-text-primary',
           )}
         >
-          <div className="flex w-full items-center justify-center gap-2">
-            <Settings2 className="size-5" aria-hidden="true" />
-          </div>
+          <Wrench className="h-[15px] w-[15px]" strokeWidth={1.8} aria-hidden="true" />
+          {localize('com_ui_tools')}
         </Ariakit.MenuButton>
       }
       id="tools-dropdown-button"

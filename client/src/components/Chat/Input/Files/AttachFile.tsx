@@ -40,8 +40,11 @@ const AttachFile = ({
             type="button"
             aria-label={localize('com_sidepanel_attach_files')}
             disabled={isUploadDisabled}
+            /* [EXT] Phase J.15 Navvia: trigger alinhado com design/ui-preview.html
+             * linha 832: h-8 w-8 rounded-md (vs size-9 rounded-full upstream).
+             * Cor secondary-on-hover-primary. */
             className={cn(
-              'flex size-9 items-center justify-center rounded-full p-1 transition-colors hover:bg-surface-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-opacity-50',
+              'grid h-8 w-8 place-items-center rounded-md text-text-secondary transition-colors hover:bg-surface-hover hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand',
             )}
             onKeyDownCapture={(e) => {
               if (!inputRef.current) {
