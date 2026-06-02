@@ -68,7 +68,9 @@ function AuthLayout({
   return (
     <div className="relative flex min-h-screen bg-surface-primary">
       <Banner />
-      <div className="absolute bottom-0 left-0 z-20 m-4">
+      {/* [EXT] Phase J.22 Navvia: ThemeSelector no TOP-RIGHT pra não colidir nem
+       * com o copyright do hero (bottom-left) nem com o Footer (bottom-center). */}
+      <div className="absolute right-0 top-0 z-20 m-4">
         <ThemeSelector />
       </div>
 
