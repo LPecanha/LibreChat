@@ -26,7 +26,7 @@ import { useAuthContext, useLocalize } from '~/hooks';
 import { useGetUserBalance } from '~/data-provider/Misc/queries';
 import { useConversationsInfiniteQuery, useGetAllPromptGroups } from '~/data-provider';
 import { useGetStartupConfig } from '~/data-provider';
-import { useAgentsMapContext } from '~/Providers';
+import { useAgentsMapContext, useBadgeRowContext } from '~/Providers';
 import { formatUsdBalance } from '~/components/Nav/BuyCredits/ExtBalanceDisplay';
 import { icons } from '~/hooks/Endpoint/Icons';
 import { cn } from '~/utils';
@@ -212,6 +212,10 @@ function HomeView() {
   const { data: startupConfig } = useGetStartupConfig();
   const { data: balanceData } = useGetUserBalance({ enabled: !!startupConfig?.balance?.enabled });
   const agentsMap = useAgentsMapContext();
+  /* [EXT] Phase J.25 Navvia: badge context vem do BadgeRowProvider em
+   * routes/Home.tsx. Sem conversationId, é uma "preview" — toggles
+   * gravam em localStorage e o chat criado pelo Send pega os defaults. */
+  const badgeCtx = useBadgeRowContext();
   const { data: convosData } = useConversationsInfiniteQuery({
     isArchived: false,
     sortBy: 'updatedAt',
@@ -449,28 +453,55 @@ function HomeView() {
                 </button>
                 <div className="pop bottom-10 left-0 w-64 rounded-lg border border-border-light bg-surface-overlay p-1">
                   <div className="menu-label">{localize('com_nav_home_tools_label')}</div>
-                  <label className="menu-item">
-                    {localize('com_nav_home_chip_search')}
-                    <span className="toggle-proto on ml-auto">
-                      <span className="knob" />
-                    </span>
-                  </label>
-                  <label className="menu-item">
-                    {localize('com_nav_home_tile_code_label')}
-                    <span className="toggle-proto off ml-auto">
-                      <span className="knob" />
-                    </span>
-                  </label>
-                  <label className="menu-item">
-                    File search
-                    <span className="toggle-proto off ml-auto">
-                      <span className="knob" />
-                    </span>
-                  </label>
-                  <button className="menu-item">
-                    Artifacts
-                    <ChevronRight className="ml-auto h-[13px] w-[13px] text-text-tertiary" strokeWidth={1.9} />
-                  </button>
+                  {/* [EXT] Phase J.25 Navvia: cada toggle agora aciona o
+                   * useToolToggle correspondente via BadgeRowContext.
+                   * `debouncedChange({ value })` persiste em localStorage —
+                   * o chat criado pelo Send vai mountar com esses defaults. */}
+                  {[
+                    {
+                      key: 'webSearch' as const,
+                      label: localize('com_nav_home_chip_search'),
+                      toggle: badgeCtx?.webSearch,
+                    },
+                    {
+                      key: 'codeInterpreter' as const,
+                      label: localize('com_nav_home_tile_code_label'),
+                      toggle: badgeCtx?.codeInterpreter,
+                    },
+                    {
+                      key: 'fileSearch' as const,
+                      label: 'File search',
+                      toggle: badgeCtx?.fileSearch,
+                    },
+                    {
+                      key: 'artifacts' as const,
+                      label: 'Artifacts',
+                      toggle: badgeCtx?.artifacts,
+                    },
+                  ].map((item) => {
+                    const isOn = Boolean(item.toggle?.toggleState);
+                    return (
+                      <button
+                        key={item.key}
+                        type="button"
+                        onClick={() =>
+                          item.toggle?.debouncedChange({ value: !isOn })
+                        }
+                        className="menu-item w-full"
+                      >
+                        {item.label}
+                        <span
+                          className={cn(
+                            'toggle-proto ml-auto',
+                            isOn ? 'on' : 'off',
+                          )}
+                          aria-hidden="true"
+                        >
+                          <span className="knob" />
+                        </span>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
 
