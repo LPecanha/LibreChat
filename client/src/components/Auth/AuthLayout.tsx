@@ -74,29 +74,25 @@ function AuthLayout({
         <ThemeSelector />
       </div>
 
-      {/* Hero esquerdo — proto linhas 1582-1595. Visível em lg+.
-       * `items-center` centraliza os 3 blocos (logo / h1+features / copyright)
-       * horizontalmente dentro do hero — sem isso o stretch padrão deixava
-       * tudo grudado no edge esquerdo (só os 48px do p-12 de buffer).
-       * Texto interno dos blocos continua left-aligned pra leitura. */}
-      <aside className="hero relative hidden w-[46%] flex-col items-center justify-between overflow-hidden p-12 lg:flex">
+      {/* Hero esquerdo — proto linhas 1582-1595 (sem alterações).
+       * `flex-col justify-between` padrão: align-items stretch — logo no
+       * top-left, h1+features no middle-left, copyright no bottom-left.
+       * É essa a aparência do protótipo. */}
+      <aside className="hero relative hidden w-[46%] flex-col justify-between overflow-hidden p-12 lg:flex">
         <span className="blob blob-1" aria-hidden="true" />
         <span className="blob blob-2" aria-hidden="true" />
         <span className="blob blob-3" aria-hidden="true" />
         <div className="relative z-10">
           <NavviaLogo size="xl" />
         </div>
-        <div className="relative z-10 flex max-w-sm flex-col items-center text-center">
-          <h1 className="font-display text-[32px] font-extrabold leading-[1.08] tracking-tight">
+        <div className="relative z-10 max-w-md">
+          <h1 className="font-display text-[36px] font-extrabold leading-[1.08] tracking-tight">
             {localize('com_auth_hero_title')}
           </h1>
-          <p className="mt-3 text-[14.5px] text-text-secondary">
+          <p className="mt-3 text-[15px] text-text-secondary">
             {localize('com_auth_hero_subtitle')}
           </p>
-          {/* Features list — `inline-flex` mantém só a largura natural dos
-           * itens (não estica), com bullets+texto à esquerda dentro do bloco
-           * mas o bloco em si centralizado pelo parent flex+items-center. */}
-          <ul className="mt-6 inline-flex flex-col items-start gap-2.5 text-left text-[13.5px] text-text-secondary">
+          <ul className="mt-6 space-y-2.5 text-[13.5px] text-text-secondary">
             <li className="flex items-center gap-2.5">
               <span className="grid h-6 w-6 place-items-center rounded-md bg-brand-soft text-brand">
                 ✦
