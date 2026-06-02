@@ -84,7 +84,11 @@
 }
 html {
   --brand-purple: #ab68ff;
-  --presentation: var(--white);
+  /* [EXT] Navvia: --presentation deve seguir --surface-primary, não ficar
+   * preso a um hex específico. Em dark o upstream usava gray-800 (#212121)
+   * o que destoava da background body (#0f1012) — o protótipo HTML usa
+   * surface-chat (= surface-primary) consistentemente. */
+  --presentation: var(--surface-primary);
   /* [EXT] Navvia: hierarquia text-* tokens do protótipo (mais contraste light).
    * Antes (upstream): primary #212121, secondary #424242, tertiary #595959 — todas
    * muito escuras. Agora: primary #1a1d21 (mais escuro nos headings), secondary
@@ -160,7 +164,8 @@ html {
 }
 .dark {
   --brand-purple: #ab68ff;
-  --presentation: var(--gray-800);
+  /* [EXT] Navvia: ver comentário em html { --presentation }. */
+  --presentation: var(--surface-primary);
   /* [EXT] Navvia: hierarquia text-* tokens em dark do protótipo (mais contraste).
    * Antes (upstream): primary #ececec, secondary #cdcdcd, tertiary #595959 — gap
    * entre secondary e tertiary muito grande. Agora: primary #eceef1 (branco suave

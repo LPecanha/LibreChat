@@ -241,56 +241,59 @@ const AgentMarketplace: React.FC<AgentMarketplaceProps> = ({ className = '' }) =
                 </div>
               )}
 
-              {/* Row 2: sub-tabs + search inline (sticky) */}
-              <div className="sticky top-0 z-10 mt-5 bg-presentation">
-                <div className="mx-auto mb-3 flex items-center justify-between gap-2 md:hidden">
-                  <OpenSidebar />
-                  <MarketplaceAdminSettings compact />
-                </div>
-                <div className="flex items-center gap-2 border-b border-border-light">
-                  {([
-                    { id: 'promoted' as const, key: 'com_agents_tab_featured' as const },
-                    { id: 'mine' as const, key: 'com_agents_tab_mine' as const },
-                    { id: 'org' as const, key: 'com_agents_tab_org' as const },
-                  ]).map((sub) => (
-                    <button
-                      key={sub.id}
-                      type="button"
-                      onClick={() => {
-                        setAgentView(sub.id);
-                        const target = sub.id === 'promoted' ? 'promoted' : 'all';
-                        if (target !== displayCategory) handleTabChange(target);
-                      }}
-                      className={cn(
-                        '-mb-px border-b-2 px-1 pb-2.5 text-[13px] transition-colors',
-                        agentView === sub.id
-                          ? 'border-brand font-semibold text-text-primary'
-                          : 'border-transparent font-medium text-text-tertiary hover:text-text-primary',
-                      )}
-                    >
-                      {localize(sub.key)}
-                    </button>
-                  ))}
-                  <div className="ml-auto mb-1.5 flex w-56 shrink-0 items-center gap-2">
-                    <SearchBar value={searchQuery} onSearch={handleSearch} />
-                    <div className="hidden md:block">
-                      <MarketplaceAdminSettings />
-                    </div>
+              {/* [EXT] Phase J.12 Navvia: proto NÃO usa sticky no header.
+               * Removido sticky+bg-presentation que estava criando barra sobreposta
+               * com cor diferente do canvas. Layout flui natural com o scroll. */}
+              <div className="mx-auto mb-3 flex items-center justify-between gap-2 md:hidden">
+                <OpenSidebar />
+                <MarketplaceAdminSettings compact />
+              </div>
+
+              {/* Row 2: sub-tabs + search inline */}
+              <div className="mt-5 flex items-center gap-2 border-b border-border-light">
+                {([
+                  { id: 'promoted' as const, key: 'com_agents_tab_featured' as const },
+                  { id: 'mine' as const, key: 'com_agents_tab_mine' as const },
+                  { id: 'org' as const, key: 'com_agents_tab_org' as const },
+                ]).map((sub) => (
+                  <button
+                    key={sub.id}
+                    type="button"
+                    onClick={() => {
+                      setAgentView(sub.id);
+                      const target = sub.id === 'promoted' ? 'promoted' : 'all';
+                      if (target !== displayCategory) handleTabChange(target);
+                    }}
+                    className={cn(
+                      '-mb-px border-b-2 px-1 pb-2.5 text-[13px] transition-colors',
+                      agentView === sub.id
+                        ? 'border-brand font-semibold text-text-primary'
+                        : 'border-transparent font-medium text-text-tertiary hover:text-text-primary',
+                    )}
+                  >
+                    {localize(sub.key)}
+                  </button>
+                ))}
+                <div className="ml-auto mb-1.5 flex w-56 shrink-0 items-center gap-2">
+                  <SearchBar value={searchQuery} onSearch={handleSearch} />
+                  <div className="hidden md:block">
+                    <MarketplaceAdminSettings />
                   </div>
                 </div>
-
-                {/* Row 3: category chips */}
-                <div className="mt-4 pb-4">
-                  <CategoryTabs
-                    categories={categoriesQuery.data || []}
-                    activeTab={displayCategory}
-                    isLoading={categoriesQuery.isLoading}
-                    onChange={handleTabChange}
-                  />
-                </div>
               </div>
-            {/* Scrollable content area */}
-            <div className="pb-8">
+
+              {/* Row 3: category chips */}
+              <div className="mt-4">
+                <CategoryTabs
+                  categories={categoriesQuery.data || []}
+                  activeTab={displayCategory}
+                  isLoading={categoriesQuery.isLoading}
+                  onChange={handleTabChange}
+                />
+              </div>
+
+              {/* Row 4: grid */}
+              <div className="mt-5">
               {/* Two-pane animated container wrapping category header + grid */}
               <div className="relative overflow-hidden">
                 {/* Current content pane */}
