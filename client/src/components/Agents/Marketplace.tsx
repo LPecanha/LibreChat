@@ -419,7 +419,10 @@ const AgentMarketplace: React.FC<AgentMarketplaceProps> = ({ className = '' }) =
            * em vez de navegar pra /c/new. Mantém o user em /agents. */}
           {builderOpen && (
             <aside
-              className="hidden w-[400px] shrink-0 flex-col overflow-hidden border-l border-border-light bg-surface-secondary md:flex"
+              /* [EXT] Phase J.16 Navvia: overflow-y-auto pro form do builder caber e
+               * o usuário conseguir scroll até o botão Criar (era overflow-hidden — o
+               * footer com Criar/Avançado ficava cortado fora da viewport). */
+              className="hidden w-[400px] shrink-0 flex-col overflow-y-auto border-l border-border-light bg-surface-secondary md:flex"
               aria-label={localize('com_ui_create_agent')}
             >
               <ChatFormProvider {...builderFormMethods}>
