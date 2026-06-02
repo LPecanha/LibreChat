@@ -164,9 +164,17 @@ function tagFor(endpoint?: string): { initials: string; brand: boolean } {
 function ProviderIcon({ endpoint }: { endpoint: string }) {
   const Icon = endpoint ? icons[endpoint] : null;
   if (Icon) {
+    /* [EXT] Phase J.24 Navvia: força cor via text-text-primary com `!`
+     * pra sobrescrever `text-black` hardcoded em alguns icones (notavel
+     * caso do AnthropicIcon). Sem isso o preto puro contrasta demais com
+     * o resto do menu e nao adapta pro dark mode. */
     return (
       <span className="grid h-5 w-5 shrink-0 place-items-center overflow-hidden rounded bg-surface-active">
-        <Icon size={14} className="h-[14px] w-[14px]" endpoint={endpoint} />
+        <Icon
+          size={14}
+          className="h-[14px] w-[14px] !text-text-primary"
+          endpoint={endpoint}
+        />
       </span>
     );
   }
@@ -341,14 +349,12 @@ function HomeView() {
           </p>
 
           {/* COMPOSER siri-hero
-           * [EXT] Phase J.24 Navvia: o `.siri-border::before` (conic gradient
-           * mascarado pra mostrar só a borda) sangra a cor pro interior em
-           * alguns engines, fazendo o conteúdo parecer translúcido contra os
-           * blobs animados. Forçar `bg-surface-primary` num inner wrapper +
-           * `relative z-10` no conteúdo garante que o conteúdo sobrepõe o
-           * ::before. */}
+           * [EXT] Phase J.24 Navvia: composer translúcido com backdrop-blur
+           * pra preservar a vibe "siri" (gradient visível por trás) sem
+           * matar a leitura. Branco semi-transparente (bg-white/70 dark/40)
+           * + blur dá um efeito glass legível em cima dos blobs animados. */}
           <div className="siri-border siri-hero mt-7 w-full max-w-3xl rounded-2xl border border-border-light bg-surface-primary text-left shadow-lg">
-            <div className="relative z-10 rounded-[inherit] bg-surface-primary">
+            <div className="relative z-10 rounded-[inherit] bg-white/70 backdrop-blur-md dark:bg-surface-primary/60">
             <textarea
               value={composer}
               onChange={(e) => setComposer(e.target.value)}
