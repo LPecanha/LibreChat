@@ -952,7 +952,7 @@
   "com_ui_bookmarks_description": "Descrição",
   "com_ui_bookmarks_edit": "Editar marcadores",
   "com_ui_bookmarks_filter": "Filtrar favoritos...",
-  "com_ui_bookmarks_new": "Novo Favorito",
+  "com_ui_bookmarks_new": "Nova tag",
   "com_ui_bookmarks_tag_exists": "Já existe um favorito com este título",
   "com_ui_bookmarks_title": "Título",
   "com_ui_bookmarks_update_error": "Houve um erro ao atualizar o favorito",
