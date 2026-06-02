@@ -172,19 +172,6 @@ function NavviaSidebar() {
   /** Sidebar inner content — reusado em desktop aside + mobile drawer. */
   const Inner = (
     <>
-      {/* [EXT] Phase J.23 Navvia: defs SVG globais usados pelo CSS
-       * (`.cta-new svg { stroke: url(#navviaGrad) }`). Sem isso o ícone do
-       * Plus do "Nova conversa" fica invisível (stroke aponta pra gradiente
-       * inexistente). Hidden, não afeta layout. */}
-      <svg width="0" height="0" style={{ position: 'absolute' }} aria-hidden="true">
-        <defs>
-          <linearGradient id="navviaGrad" x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0" stopColor="#2469e2" />
-            <stop offset="1" stopColor="#11b38d" />
-          </linearGradient>
-        </defs>
-      </svg>
-
       {/* Brand header — Navvia wordmark à esquerda + close X mobile */}
       <div className="sidebar-brand flex items-center justify-between">
         <button

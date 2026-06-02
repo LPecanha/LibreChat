@@ -3257,8 +3257,14 @@ aside:hover .sidebar-collapse {
 .cta-new:hover > span {
   background: var(--surface-hover);
 }
+/* [EXT] Phase J.23 Navvia: usar `stroke: var(--brand)` direto.
+ * O proto tinha `stroke: url(#navviaGrad)` mas gradient SVG aplicado a
+ * stroke de paths thin (Plus icon 15px) renderiza inconsistente entre
+ * engines — Chromium calcula objectBoundingBox como 0 quando o path nao
+ * tem fill, deixando o gradient invisivel. Cor solida brand (azul) é
+ * robusta e mantem alinhamento visual com a marca. */
 .cta-new svg {
-  stroke: url(#navviaGrad);
+  stroke: var(--brand);
 }
 .navitem {
   display: flex;
