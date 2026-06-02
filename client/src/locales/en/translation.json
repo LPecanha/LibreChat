@@ -274,6 +274,7 @@
   "com_endpoint_context_tokens": "Max Context Tokens",
   "com_endpoint_custom_name": "Custom Name",
   "com_endpoint_default": "default",
+  "com_nav_home_models_label": "Models",
   "com_endpoint_default_blank": "default: blank",
   "com_endpoint_default_with_num": "default: {{0}}",
   "com_endpoint_disable_streaming": "Disable streaming responses and receive the complete response at once. Useful for models like o3 that require organization verification for streaming",

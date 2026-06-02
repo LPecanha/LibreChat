@@ -274,6 +274,7 @@
   "com_endpoint_context_tokens": "Máximo de Tokens de Contexto",
   "com_endpoint_custom_name": "Nome Personalizado",
   "com_endpoint_default": "padrão",
+  "com_nav_home_models_label": "Modelos",
   "com_endpoint_default_blank": "padrão: em branco",
   "com_endpoint_default_with_num": "padrão: {{0}}",
   "com_endpoint_disable_streaming": "Desativar o streaming de respostas e receber a resposta de uma vez. Útil para modelos como o GPT-o3 que precisam de verificação da organização para streaming",

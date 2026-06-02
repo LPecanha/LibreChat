@@ -24,11 +24,12 @@ import {
 } from 'lucide-react';
 import { useAuthContext, useLocalize } from '~/hooks';
 import { useGetUserBalance } from '~/data-provider/Misc/queries';
-import { useConversationsInfiniteQuery } from '~/data-provider';
+import { useConversationsInfiniteQuery, useGetAllPromptGroups } from '~/data-provider';
 import { useGetStartupConfig } from '~/data-provider';
 import { useAgentsMapContext } from '~/Providers';
 import { formatUsdBalance } from '~/components/Nav/BuyCredits/ExtBalanceDisplay';
-import type { TConversation } from 'librechat-data-provider';
+import { cn } from '~/utils';
+import type { TConversation, TPromptGroup } from 'librechat-data-provider';
 
 /**
  * [EXT] Home — port literal de design/ui-preview.html linhas 618-717.
@@ -114,11 +115,44 @@ const TOOLS_TILES = [
   },
 ];
 
-const PROMPT_HIGHLIGHTS = [
+/* [EXT] Phase J.23 Navvia: fallback se o user nao tem prompts criados.
+ * Os 3 cards a baixo so renderizam quando useGetAllPromptGroups retorna []. */
+const PROMPT_HIGHLIGHTS_FALLBACK = [
   { emoji: '⚡', titleKey: 'com_nav_home_prompt_meeting_title' as const, descKey: 'com_nav_home_prompt_meeting_desc' as const },
   { emoji: '📧', titleKey: 'com_nav_home_prompt_email_title' as const, descKey: 'com_nav_home_prompt_email_desc' as const },
   { emoji: '🐛', titleKey: 'com_nav_home_prompt_debug_title' as const, descKey: 'com_nav_home_prompt_debug_desc' as const },
 ];
+
+/* Emoji por categoria — usado quando exibimos prompts reais que so trazem
+ * `category` string e nao um icone. Falls back pra ✨ default. */
+const CATEGORY_EMOJI: Record<string, string> = {
+  writing: '✍️',
+  code: '💻',
+  marketing: '📣',
+  productivity: '⚡',
+  research: '🔍',
+  data: '📊',
+  general: '✨',
+};
+
+/* Mapeamento endpoint -> tag visual no model picker.
+ * (Mesmo padrão que admin-panel usa em AgentCard.) */
+const ENDPOINT_TAG: Record<string, { initials: string; brand: boolean }> = {
+  anthropic: { initials: 'AI', brand: true },
+  openAI: { initials: 'G5', brand: false },
+  openai: { initials: 'G5', brand: false },
+  azureOpenAI: { initials: 'AZ', brand: false },
+  azureopenai: { initials: 'AZ', brand: false },
+  google: { initials: 'GE', brand: false },
+  groq: { initials: 'GQ', brand: false },
+  mistral: { initials: 'MS', brand: false },
+  custom: { initials: '??', brand: false },
+};
+
+function tagFor(endpoint?: string): { initials: string; brand: boolean } {
+  if (!endpoint) return { initials: '??', brand: false };
+  return ENDPOINT_TAG[endpoint] ?? { initials: endpoint.slice(0, 2).toUpperCase(), brand: false };
+}
 
 function relativeTime(updatedAt?: string): string {
   if (!updatedAt) return '';
@@ -149,7 +183,16 @@ function HomeView() {
 
   const firstName = (user?.name ?? user?.username ?? '').split(' ')[0] ?? '';
   const [composer, setComposer] = useState('');
-  const [activeModel, setActiveModel] = useState('GPT-5.5');
+  /* [EXT] Phase J.23 Navvia: modelo default vem de startupConfig.modelSpecs
+   * (configurado em librechat.yaml). Antes era hardcoded 'GPT-5.5'. */
+  const defaultModelLabel = useMemo(() => {
+    const list = startupConfig?.modelSpecs?.list ?? [];
+    return list.find((s) => s.default)?.label ?? list[0]?.label ?? '—';
+  }, [startupConfig?.modelSpecs]);
+  const [activeModel, setActiveModel] = useState(defaultModelLabel);
+  useEffect(() => {
+    if (defaultModelLabel && activeModel === '—') setActiveModel(defaultModelLabel);
+  }, [defaultModelLabel, activeModel]);
   const [modelOpen, setModelOpen] = useState(false);
   const [attachOpen, setAttachOpen] = useState(false);
   const [toolsOpen, setToolsOpen] = useState(false);
@@ -210,6 +253,30 @@ function HomeView() {
 
   const agentsCount = useMemo(() => Object.keys(agentsMap ?? {}).length, [agentsMap]);
 
+  /* [EXT] Phase J.23 Navvia: items do model picker derivados de
+   * startupConfig.modelSpecs.list. Antes a lista era hardcoded com
+   * 3 modelos ficticios. Limita a 6 pra caber bem no popover. */
+  const modelPickerItems = useMemo(() => {
+    const list = startupConfig?.modelSpecs?.list ?? [];
+    return list.slice(0, 6).map((s) => {
+      const tag = tagFor(s.preset?.endpoint as string | undefined);
+      return {
+        id: s.label,
+        tag: tag.initials,
+        brand: tag.brand,
+        hint: s.description ?? '',
+      };
+    });
+  }, [startupConfig?.modelSpecs]);
+
+  /* [EXT] Phase J.23 Navvia: prompts em destaque vêm de useGetAllPromptGroups.
+   * Pega os 3 primeiros (em ordem de criação reversa = mais recentes).
+   * Fallback pros PROMPT_HIGHLIGHTS_FALLBACK quando o user não tem prompts. */
+  const { data: promptGroups = [] } = useGetAllPromptGroups();
+  const featuredPrompts = useMemo(() => {
+    return (promptGroups as TPromptGroup[]).slice(0, 3);
+  }, [promptGroups]);
+
   return (
     <section className="view home-amb fade-in flex h-full w-full flex-col overflow-y-auto">
       {/* ===== BANNER full-bleed com 3 blobs ===== */}
@@ -267,12 +334,8 @@ function HomeView() {
                   <ChevronDown className="h-[13px] w-[13px] text-text-tertiary" strokeWidth={1.8} />
                 </button>
                 <div className="pop bottom-12 left-0 w-[300px] rounded-lg border border-border-light bg-surface-overlay p-1">
-                  <div className="menu-label">Modelos</div>
-                  {[
-                    { id: 'Claude Opus 4.7', tag: 'AI', tagBg: 'bg-brand-soft', tagFg: 'text-brand', hint: 'Raciocínio' },
-                    { id: 'GPT-5.5', tag: 'G5', tagBg: 'bg-surface-active', tagFg: '', hint: 'Versátil' },
-                    { id: 'Gemini 3 Pro', tag: 'GE', tagBg: 'bg-surface-active', tagFg: '', hint: 'Contexto longo' },
-                  ].map((m) => (
+                  <div className="menu-label">{localize('com_nav_home_models_label')}</div>
+                  {modelPickerItems.map((m) => (
                     <button
                       key={m.id}
                       onClick={() => {
@@ -281,11 +344,18 @@ function HomeView() {
                       }}
                       className="menu-item"
                     >
-                      <span className={`grid h-5 w-5 place-items-center rounded ${m.tagBg} text-[9px] font-bold ${m.tagFg}`}>
+                      <span
+                        className={cn(
+                          'grid h-5 w-5 place-items-center rounded text-[9px] font-bold',
+                          m.brand ? 'bg-brand-soft text-brand' : 'bg-surface-active',
+                        )}
+                      >
                         {m.tag}
                       </span>
                       {m.id}
-                      <span className="ml-auto text-[11px] text-text-tertiary">{m.hint}</span>
+                      {m.hint && (
+                        <span className="ml-auto text-[11px] text-text-tertiary">{m.hint}</span>
+                      )}
                     </button>
                   ))}
                 </div>
@@ -588,26 +658,49 @@ function HomeView() {
               </button>
             </div>
             <div className="space-y-2">
-              {PROMPT_HIGHLIGHTS.map((p) => {
-                const title = localize(p.titleKey);
-                return (
-                  <button
-                    key={p.titleKey}
-                    onClick={() => startConversation(title)}
-                    className="flex w-full items-start gap-3 rounded-lg border border-border-light bg-surface-secondary px-3.5 py-2.5 text-left hover:border-border-medium"
-                  >
-                    <span className="grid h-8 w-8 shrink-0 place-items-center rounded-md bg-surface-active">
-                      {p.emoji}
-                    </span>
-                    <div className="min-w-0">
-                      <div className="truncate text-[13px] font-medium">{title}</div>
-                      <div className="truncate text-[11.5px] text-text-tertiary">
-                        {localize(p.descKey)}
-                      </div>
-                    </div>
-                  </button>
-                );
-              })}
+              {featuredPrompts.length > 0
+                ? featuredPrompts.map((p) => {
+                    const emoji = CATEGORY_EMOJI[p.category ?? 'general'] ?? '✨';
+                    const desc =
+                      p.oneliner ||
+                      p.productionPrompt?.prompt ||
+                      localize('com_ui_no_description');
+                    return (
+                      <button
+                        key={p._id}
+                        onClick={() => navigate(`/prompts/${p._id}`)}
+                        className="flex w-full items-start gap-3 rounded-lg border border-border-light bg-surface-secondary px-3.5 py-2.5 text-left hover:border-border-medium"
+                      >
+                        <span className="grid h-8 w-8 shrink-0 place-items-center rounded-md bg-surface-active">
+                          {emoji}
+                        </span>
+                        <div className="min-w-0">
+                          <div className="truncate text-[13px] font-medium">{p.name}</div>
+                          <div className="truncate text-[11.5px] text-text-tertiary">{desc}</div>
+                        </div>
+                      </button>
+                    );
+                  })
+                : PROMPT_HIGHLIGHTS_FALLBACK.map((p) => {
+                    const title = localize(p.titleKey);
+                    return (
+                      <button
+                        key={p.titleKey}
+                        onClick={() => startConversation(title)}
+                        className="flex w-full items-start gap-3 rounded-lg border border-border-light bg-surface-secondary px-3.5 py-2.5 text-left hover:border-border-medium"
+                      >
+                        <span className="grid h-8 w-8 shrink-0 place-items-center rounded-md bg-surface-active">
+                          {p.emoji}
+                        </span>
+                        <div className="min-w-0">
+                          <div className="truncate text-[13px] font-medium">{title}</div>
+                          <div className="truncate text-[11.5px] text-text-tertiary">
+                            {localize(p.descKey)}
+                          </div>
+                        </div>
+                      </button>
+                    );
+                  })}
             </div>
           </div>
         </div>
