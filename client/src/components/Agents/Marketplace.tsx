@@ -276,7 +276,7 @@ const AgentMarketplace: React.FC<AgentMarketplaceProps> = ({ className = '' }) =
                     {localize(sub.key)}
                   </button>
                 ))}
-                <div className="ml-auto mb-1.5 flex w-56 shrink-0 items-center gap-2">
+                <div className="ml-auto mb-1.5 flex shrink-0 items-center gap-2">
                   <SearchBar value={searchQuery} onSearch={handleSearch} />
                   <div className="hidden md:block">
                     <MarketplaceAdminSettings />
