@@ -5,6 +5,7 @@ import { BirthdayIcon, TooltipAnchor, SplitText } from '@librechat/client';
 import { useChatContext, useAgentsMapContext, useAssistantsMapContext } from '~/Providers';
 import { useGetEndpointsQuery, useGetStartupConfig } from '~/data-provider';
 import ConvoIcon from '~/components/Endpoints/ConvoIcon';
+import ConversationStarters from './Input/ConversationStarters';
 import { useLocalize, useAuthContext } from '~/hooks';
 import { getIconEndpoint, getEntity } from '~/utils';
 
@@ -149,8 +150,13 @@ export default function Landing({ centerFormOnLanding }: { centerFormOnLanding: 
     : 'Escolha um modelo e comece a digitar, ou explore os agentes especializados.';
 
   return (
+    /* [EXT] Phase J.15 Navvia: estrutura espelha #chatLanding do protótipo:
+     *   <div id="chatLanding" class="flex h-full flex-col items-center
+     *                                 justify-center px-4 py-10 text-center">
+     * Sem pb-16 — composer agora é sibling externo, então landing pode
+     * realmente ocupar 100% do scroll area sem precisar reservar espaço. */
     <div
-      className={`fade-in flex h-full transform-gpu flex-col items-center justify-center pb-16 transition-all duration-200 ${centerFormOnLanding ? 'max-h-full sm:max-h-0' : 'max-h-full'} ${getDynamicMargin}`}
+      className={`fade-in flex h-full transform-gpu flex-col items-center justify-center px-4 py-10 text-center transition-all duration-200`}
     >
       <div ref={contentRef} className="flex flex-col items-center gap-0 px-4 text-center">
         {/* [EXT] Avatar 64x64 — agentes/assistants mostram ConvoIcon, landing genérica mostra emoji */}
@@ -211,6 +217,12 @@ export default function Landing({ centerFormOnLanding }: { centerFormOnLanding: 
         ) : subtitle ? (
           <p className="mt-1.5 max-w-md text-[14px] text-text-secondary">{subtitle}</p>
         ) : null}
+
+        {/* [EXT] Phase J.15 Navvia: ConversationStarters embedded no landing —
+         * ui-preview.html linha 812: <div id="landingStarters" class="mt-6 grid w-full
+         * max-w-xl grid-cols-1 gap-2 sm:grid-cols-2"></div>. Antes estava abaixo do
+         * composer (fora do landing). Agora fica entre o avatar/título e o composer. */}
+        <ConversationStarters />
       </div>
     </div>
   );

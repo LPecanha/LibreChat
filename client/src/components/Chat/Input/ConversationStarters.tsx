@@ -78,10 +78,10 @@ const ConversationStarters = () => {
   }
 
   return (
-    /* [EXT] Phase J.8 Navvia: grid 2 colunas (vs flex wrap) com starters
-     * mais largos. Bate com ui-preview.html#view-chat: cada starter tem
-     * <span class="text-brand">✦</span> + texto, e o grid é 2×2. */
-    <div className="mx-auto mt-8 grid w-full max-w-2xl grid-cols-1 gap-2.5 px-4 sm:grid-cols-2">
+    /* [EXT] Phase J.15 Navvia: mt-6 max-w-xl gap-2 (alinhado com proto linha 812:
+     * <div id="landingStarters" class="mt-6 grid w-full max-w-xl grid-cols-1
+     *                                     gap-2 sm:grid-cols-2">). */
+    <div className="mx-auto mt-6 grid w-full max-w-xl grid-cols-1 gap-2 sm:grid-cols-2">
       {conversation_starters
         .slice(0, Constants.MAX_CONVO_STARTERS)
         .map((text: string, index: number) => (

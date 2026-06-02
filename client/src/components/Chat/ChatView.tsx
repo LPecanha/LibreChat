@@ -8,7 +8,6 @@ import type { TMessage } from 'librechat-data-provider';
 import type { ChatFormValues } from '~/common';
 import { ChatContext, AddedChatContext, ChatFormProvider, useFileMapContext } from '~/Providers';
 import { useAddedResponse, useResumeOnLoad, useAdaptiveSSE, useChatHelpers } from '~/hooks';
-import ConversationStarters from './Input/ConversationStarters';
 import { useGetMessagesByConvoId } from '~/data-provider';
 import MessagesView from './Messages/MessagesView';
 import Presentation from './Presentation';
@@ -16,7 +15,6 @@ import ChatForm from './Input/ChatForm';
 import Landing from './Landing';
 import Header from './Header';
 import Footer from './Footer';
-import { cn } from '~/utils';
 import store from '~/store';
 
 function LoadingSpinner() {
@@ -77,34 +75,36 @@ function ChatView({ index = 0 }: { index?: number }) {
   }
 
   return (
+    /* [EXT] Phase J.15 Navvia: estrutura espelha design/ui-preview.html linhas 778-843:
+     *
+     *   <section view-chat h-full flex-col>
+     *     <header h-12 ...>
+     *     <div id="chatScroll" class="flex-1 overflow-y-auto">
+     *       <chatLanding | chatThread />     <-- landing OU mensagens
+     *     </div>
+     *     <div class="px-4 pb-4">           <-- composer fixo no fundo
+     *       <div class="mx-auto max-w-3xl">
+     *         <ChatForm />
+     *       </div>
+     *     </div>
+     *   </section>
+     *
+     * Antes o composer ficava DENTRO do scrollable e centralizado verticalmente
+     * (justify-end sm:justify-center). Agora composer é sibling do chatScroll
+     * e fica fixo no rodapé. */
     <ChatFormProvider {...methods}>
       <ChatContext.Provider value={chatHelpers}>
         <AddedChatContext.Provider value={addedChatHelpers}>
           <Presentation>
             <div className="relative flex h-full w-full flex-col">
               <Header />
-              <>
-                <div
-                  className={cn(
-                    'flex flex-col',
-                    isLandingPage
-                      ? 'flex-1 items-center justify-end sm:justify-center'
-                      : 'h-full overflow-y-auto',
-                  )}
-                >
-                  {content}
-                  <div
-                    className={cn(
-                      'w-full',
-                      isLandingPage && 'max-w-3xl transition-all duration-200 xl:max-w-4xl',
-                    )}
-                  >
-                    <ChatForm index={index} />
-                    {isLandingPage ? <ConversationStarters /> : <Footer />}
-                  </div>
+              <div className="flex-1 overflow-y-auto">{content}</div>
+              <div className="px-4 pb-4">
+                <div className="mx-auto w-full max-w-3xl">
+                  <ChatForm index={index} />
+                  {!isLandingPage && <Footer />}
                 </div>
-                {isLandingPage && <Footer />}
-              </>
+              </div>
             </div>
           </Presentation>
         </AddedChatContext.Provider>
