@@ -348,13 +348,9 @@ function HomeView() {
             {localize('com_nav_home_composer_hint')}
           </p>
 
-          {/* COMPOSER siri-hero
-           * [EXT] Phase J.24 Navvia: composer translúcido com backdrop-blur
-           * pra preservar a vibe "siri" (gradient visível por trás) sem
-           * matar a leitura. Branco semi-transparente (bg-white/70 dark/40)
-           * + blur dá um efeito glass legível em cima dos blobs animados. */}
-          <div className="siri-border siri-hero mt-7 w-full max-w-3xl rounded-2xl border border-border-light text-left shadow-lg">
-            <div className="relative z-10 rounded-[inherit] bg-white/40 backdrop-blur-xl dark:bg-surface-primary/30">
+          {/* COMPOSER siri-hero — proto linha 628: bg-surface-primary opaco
+           * com o siri-border (conic gradient + glow) por fora. */}
+          <div className="siri-border siri-hero mt-7 w-full max-w-3xl rounded-2xl border border-border-light bg-surface-primary text-left shadow-lg">
             <textarea
               value={composer}
               onChange={(e) => setComposer(e.target.value)}
@@ -478,8 +474,9 @@ function HomeView() {
                 </div>
               </div>
 
-              {/* Atalho de kbd */}
-              <span className="ml-auto hidden items-center gap-1.5 text-[11px] text-text-secondary sm:flex">
+              {/* Atalho de kbd — bump de contraste: text-secondary +
+               * font-medium pra ler bem em cima do composer. */}
+              <span className="ml-auto hidden items-center gap-1.5 text-[11px] font-medium text-text-secondary sm:flex">
                 <kbd>/</kbd>{localize('com_nav_home_kbd_commands')}
                 <span className="opacity-60">·</span>
                 <kbd>@</kbd>{localize('com_nav_home_kbd_agents')}
@@ -495,7 +492,6 @@ function HomeView() {
               >
                 <Send className="h-[17px] w-[17px]" strokeWidth={2} />
               </button>
-            </div>
             </div>
           </div>
 
