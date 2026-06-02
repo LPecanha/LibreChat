@@ -1,0 +1,23 @@
+import { chromium } from 'playwright';
+const b = await chromium.launch();
+const p = await (await b.newContext({viewport:{width:1440,height:900},locale:'pt-BR'})).newPage();
+await p.goto('http://localhost:3090/login');
+await p.evaluate(()=>localStorage.setItem('i18nextLng','pt-BR'));
+await p.reload();
+await p.waitForSelector('input[name="email"]');
+await p.fill('input[name="email"]','teste@navvia.com.br');
+await p.fill('input[name="password"]','NavviaTest2026!');
+await p.click('button[type="submit"]');
+await p.waitForURL(/\/home/);
+await p.waitForTimeout(1500);
+await p.goto('http://localhost:3090/memories');
+await p.waitForTimeout(2500);
+await p.screenshot({path:'/tmp/memories-prod-light.png', fullPage:false});
+
+const proto = await (await b.newContext({viewport:{width:1440,height:900},locale:'pt-BR'})).newPage();
+await proto.goto('http://localhost:8765/ui-preview.html');
+await proto.evaluate(()=>window.showView?.('memories'));
+await proto.waitForTimeout(600);
+await proto.screenshot({path:'/tmp/memories-proto-light.png', fullPage:false});
+await b.close();
+console.log('done');
