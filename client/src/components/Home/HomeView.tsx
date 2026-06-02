@@ -28,6 +28,7 @@ import { useConversationsInfiniteQuery, useGetAllPromptGroups } from '~/data-pro
 import { useGetStartupConfig } from '~/data-provider';
 import { useAgentsMapContext } from '~/Providers';
 import { formatUsdBalance } from '~/components/Nav/BuyCredits/ExtBalanceDisplay';
+import { icons } from '~/hooks/Endpoint/Icons';
 import { cn } from '~/utils';
 import type { TConversation, TPromptGroup } from 'librechat-data-provider';
 
@@ -154,6 +155,34 @@ function tagFor(endpoint?: string): { initials: string; brand: boolean } {
   return ENDPOINT_TAG[endpoint] ?? { initials: endpoint.slice(0, 2).toUpperCase(), brand: false };
 }
 
+/**
+ * [EXT] Phase J.24 Navvia: ícone real do provider, com fallback pra tag de
+ * 2 letras quando o endpoint não tem ícone mapeado em ~/hooks/Endpoint/Icons.
+ * Usado no model picker (trigger + items) pra refletir Anthropic/OpenAI/
+ * Google/etc em vez de tags genéricas.
+ */
+function ProviderIcon({ endpoint }: { endpoint: string }) {
+  const Icon = endpoint ? icons[endpoint] : null;
+  if (Icon) {
+    return (
+      <span className="grid h-5 w-5 shrink-0 place-items-center overflow-hidden rounded bg-surface-active">
+        <Icon size={14} className="h-[14px] w-[14px]" endpoint={endpoint} />
+      </span>
+    );
+  }
+  const tag = tagFor(endpoint);
+  return (
+    <span
+      className={cn(
+        'grid h-5 w-5 shrink-0 place-items-center rounded text-[9px] font-bold',
+        tag.brand ? 'bg-brand-soft text-brand' : 'bg-surface-active',
+      )}
+    >
+      {tag.initials}
+    </span>
+  );
+}
+
 function relativeTime(updatedAt?: string): string {
   if (!updatedAt) return '';
   const ms = Date.now() - new Date(updatedAt).getTime();
@@ -255,19 +284,30 @@ function HomeView() {
 
   /* [EXT] Phase J.23 Navvia: items do model picker derivados de
    * startupConfig.modelSpecs.list. Antes a lista era hardcoded com
-   * 3 modelos ficticios. Limita a 6 pra caber bem no popover. */
+   * 3 modelos ficticios. Limita a 6 pra caber bem no popover.
+   * Cada item carrega o endpoint pra resolver o icone do provider via
+   * `icons` (~/hooks/Endpoint/Icons). */
   const modelPickerItems = useMemo(() => {
     const list = startupConfig?.modelSpecs?.list ?? [];
     return list.slice(0, 6).map((s) => {
-      const tag = tagFor(s.preset?.endpoint as string | undefined);
+      const endpoint = (s.preset?.endpoint as string | undefined) ?? '';
+      const tag = tagFor(endpoint);
       return {
         id: s.label,
+        endpoint,
         tag: tag.initials,
         brand: tag.brand,
         hint: s.description ?? '',
       };
     });
   }, [startupConfig?.modelSpecs]);
+
+  /* Endpoint do modelo atualmente ativo — usado pra escolher o icone no
+   * botão trigger do picker. */
+  const activeEndpoint = useMemo(() => {
+    const list = startupConfig?.modelSpecs?.list ?? [];
+    return (list.find((s) => s.label === activeModel)?.preset?.endpoint as string | undefined) ?? '';
+  }, [activeModel, startupConfig?.modelSpecs]);
 
   /* [EXT] Phase J.23 Navvia: prompts em destaque vêm de useGetAllPromptGroups.
    * Pega os 3 primeiros (em ordem de criação reversa = mais recentes).
@@ -300,8 +340,15 @@ function HomeView() {
             {localize('com_nav_home_composer_hint')}
           </p>
 
-          {/* COMPOSER siri-hero */}
+          {/* COMPOSER siri-hero
+           * [EXT] Phase J.24 Navvia: o `.siri-border::before` (conic gradient
+           * mascarado pra mostrar só a borda) sangra a cor pro interior em
+           * alguns engines, fazendo o conteúdo parecer translúcido contra os
+           * blobs animados. Forçar `bg-surface-primary` num inner wrapper +
+           * `relative z-10` no conteúdo garante que o conteúdo sobrepõe o
+           * ::before. */}
           <div className="siri-border siri-hero mt-7 w-full max-w-3xl rounded-2xl border border-border-light bg-surface-primary text-left shadow-lg">
+            <div className="relative z-10 rounded-[inherit] bg-surface-primary">
             <textarea
               value={composer}
               onChange={(e) => setComposer(e.target.value)}
@@ -327,9 +374,7 @@ function HomeView() {
                   }}
                   className="ctrl focus-ring flex items-center gap-1.5 rounded-md border border-border-medium bg-surface-secondary px-2.5 text-[12.5px] font-medium hover:bg-surface-hover"
                 >
-                  <span className="grid h-4 w-4 place-items-center rounded bg-brand-soft text-[9px] font-bold text-brand">
-                    AI
-                  </span>
+                  <ProviderIcon endpoint={activeEndpoint} />
                   {activeModel}
                   <ChevronDown className="h-[13px] w-[13px] text-text-tertiary" strokeWidth={1.8} />
                 </button>
@@ -344,14 +389,7 @@ function HomeView() {
                       }}
                       className="menu-item"
                     >
-                      <span
-                        className={cn(
-                          'grid h-5 w-5 place-items-center rounded text-[9px] font-bold',
-                          m.brand ? 'bg-brand-soft text-brand' : 'bg-surface-active',
-                        )}
-                      >
-                        {m.tag}
-                      </span>
+                      <ProviderIcon endpoint={m.endpoint} />
                       {m.id}
                       {m.hint && (
                         <span className="ml-auto text-[11px] text-text-tertiary">{m.hint}</span>
@@ -435,9 +473,9 @@ function HomeView() {
               </div>
 
               {/* Atalho de kbd */}
-              <span className="ml-auto hidden items-center gap-1.5 text-[11px] text-text-tertiary sm:flex">
+              <span className="ml-auto hidden items-center gap-1.5 text-[11px] text-text-secondary sm:flex">
                 <kbd>/</kbd>{localize('com_nav_home_kbd_commands')}
-                <span className="opacity-50">·</span>
+                <span className="opacity-60">·</span>
                 <kbd>@</kbd>{localize('com_nav_home_kbd_agents')}
               </span>
 
@@ -445,12 +483,13 @@ function HomeView() {
               <button
                 onClick={() => startConversation()}
                 disabled={!composer.trim()}
-                className="ctrl focus-ring grid w-9 place-items-center rounded-md bg-brand text-brand-fg transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+                className="ctrl focus-ring grid w-9 place-items-center rounded-md bg-brand text-brand-fg shadow-sm transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
                 title={localize('com_nav_home_send_label')}
                 aria-label={localize('com_nav_home_send_label')}
               >
                 <Send className="h-[17px] w-[17px]" strokeWidth={2} />
               </button>
+            </div>
             </div>
           </div>
 
