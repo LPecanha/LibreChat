@@ -78,7 +78,7 @@ function AuthLayout({
        * `flex-col justify-between` padrão: align-items stretch — logo no
        * top-left, h1+features no middle-left, copyright no bottom-left.
        * É essa a aparência do protótipo. */}
-      <aside className="hero relative hidden w-[46%] flex-col justify-between overflow-hidden p-12 lg:flex">
+      <aside className="hero relative hidden w-[46%] flex-col justify-between overflow-hidden p-12 pl-20 lg:flex">
         <span className="blob blob-1" aria-hidden="true" />
         <span className="blob blob-2" aria-hidden="true" />
         <span className="blob blob-3" aria-hidden="true" />
