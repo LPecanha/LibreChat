@@ -1,12 +1,13 @@
 import { useState, useMemo } from 'react';
+import * as Ariakit from '@ariakit/react';
 import { useNavigate } from 'react-router-dom';
-import { Plus, ChevronDown, Pencil, ExternalLink, Search } from 'lucide-react';
-import { Spinner } from '@librechat/client';
+import { Plus, ChevronDown, Pencil, PenLine, Upload, ExternalLink, Search } from 'lucide-react';
+import { DropdownPopup, Spinner } from '@librechat/client';
 import { PermissionTypes, Permissions } from 'librechat-data-provider';
 import type { TSkillSummary, TSkillFile } from 'librechat-data-provider';
 import { useListSkillsQuery, useListSkillFilesQuery } from '~/data-provider';
 import { useDebounce, useHasAccess, useLocalize } from '~/hooks';
-import { CreateSkillDialog } from '~/components/Skills/dialogs';
+import { CreateSkillDialog, UploadSkillDialog } from '~/components/Skills/dialogs';
 import { cn } from '~/utils';
 import LibraryPageLayout from './PageLayout';
 
@@ -166,11 +167,78 @@ function SkillRow({ skill }: { skill: TSkillSummary }) {
   );
 }
 
+/**
+ * Dropdown que oferece "Escrever instruções" e "Importar" — mantém o caminho
+ * de upload de skills (.zip / .skill) que existe no LibreChat vanilla via
+ * `CreateSkillMenu`. Reusado tanto no botão azul do header quanto no botão
+ * dashed do fim da lista.
+ */
+function CreateSkillButton({
+  variant,
+  onWrite,
+  onUpload,
+}: {
+  variant: 'brand' | 'dashed';
+  onWrite: () => void;
+  onUpload: () => void;
+}) {
+  const localize = useLocalize();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuId = `skills-create-menu-${variant}`;
+
+  const triggerClass =
+    variant === 'brand'
+      ? 'flex h-8 items-center gap-1.5 rounded-md bg-brand px-3 text-[13px] font-medium text-brand-fg transition-opacity hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-brand'
+      : 'flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-border-medium py-3 text-[13px] font-medium text-text-secondary transition-colors hover:bg-surface-hover';
+
+  const label =
+    variant === 'brand'
+      ? localize('com_ui_create_skill')
+      : localize('com_ui_create_new_skill');
+
+  return (
+    <DropdownPopup
+      menuId={menuId}
+      isOpen={menuOpen}
+      setIsOpen={setMenuOpen}
+      portal
+      trigger={
+        <Ariakit.MenuButton aria-label={label} className={triggerClass}>
+          <Plus className="h-[15px] w-[15px]" strokeWidth={2} aria-hidden="true" />
+          {label}
+        </Ariakit.MenuButton>
+      }
+      items={[
+        {
+          id: 'write',
+          label: localize('com_ui_skill_write_instructions'),
+          icon: <PenLine className="size-4 text-text-primary" aria-hidden="true" />,
+          onClick: () => {
+            setMenuOpen(false);
+            onWrite();
+          },
+        },
+        {
+          id: 'upload',
+          label: localize('com_ui_skill_upload'),
+          icon: <Upload className="size-4 text-text-primary" aria-hidden="true" />,
+          onClick: () => {
+            setMenuOpen(false);
+            onUpload();
+          },
+        },
+      ]}
+      className="min-w-[220px]"
+    />
+  );
+}
+
 export default function SkillsPage() {
   const localize = useLocalize();
   const [searchTerm, setSearchTerm] = useState('');
   const debouncedSearch = useDebounce(searchTerm, 250);
-  const [createOpen, setCreateOpen] = useState(false);
+  const [writeOpen, setWriteOpen] = useState(false);
+  const [uploadOpen, setUploadOpen] = useState(false);
 
   const hasUseAccess = useHasAccess({
     permissionType: PermissionTypes.SKILLS,
@@ -189,14 +257,11 @@ export default function SkillsPage() {
   const skills = useMemo(() => listQuery.data?.skills ?? [], [listQuery.data]);
 
   const cta = hasCreateAccess && (
-    <button
-      type="button"
-      onClick={() => setCreateOpen(true)}
-      className="flex h-8 items-center gap-1.5 rounded-md bg-brand px-3 text-[13px] font-medium text-brand-fg transition-opacity hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-brand"
-    >
-      <Plus className="h-[15px] w-[15px]" strokeWidth={2} aria-hidden="true" />
-      {localize('com_ui_create_skill')}
-    </button>
+    <CreateSkillButton
+      variant="brand"
+      onWrite={() => setWriteOpen(true)}
+      onUpload={() => setUploadOpen(true)}
+    />
   );
 
   return (
@@ -225,19 +290,16 @@ export default function SkillsPage() {
           <Spinner className="text-text-tertiary" />
         </div>
       ) : skills.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-border-medium bg-surface-secondary p-10 text-center">
+        <div className="flex flex-col items-center justify-center gap-3 rounded-lg border border-dashed border-border-medium bg-surface-secondary p-10 text-center">
           <p className="text-sm font-medium text-text-primary">
             {localize('com_ui_skills_empty')}
           </p>
           {hasCreateAccess && (
-            <button
-              type="button"
-              onClick={() => setCreateOpen(true)}
-              className="mt-3 inline-flex items-center gap-1.5 rounded-md bg-brand px-3 py-1.5 text-[13px] font-medium text-brand-fg hover:opacity-90"
-            >
-              <Plus className="h-[15px] w-[15px]" strokeWidth={2} aria-hidden="true" />
-              {localize('com_ui_create_skill')}
-            </button>
+            <CreateSkillButton
+              variant="brand"
+              onWrite={() => setWriteOpen(true)}
+              onUpload={() => setUploadOpen(true)}
+            />
           )}
         </div>
       ) : (
@@ -248,19 +310,17 @@ export default function SkillsPage() {
             </div>
           ))}
           {hasCreateAccess && (
-            <button
-              type="button"
-              onClick={() => setCreateOpen(true)}
-              className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-dashed border-border-medium py-3 text-[13px] font-medium text-text-secondary transition-colors hover:bg-surface-hover"
-            >
-              <Plus className="h-[15px] w-[15px]" strokeWidth={2} aria-hidden="true" />
-              {localize('com_ui_create_new_skill')}
-            </button>
+            <CreateSkillButton
+              variant="dashed"
+              onWrite={() => setWriteOpen(true)}
+              onUpload={() => setUploadOpen(true)}
+            />
           )}
         </div>
       )}
 
-      <CreateSkillDialog isOpen={createOpen} setIsOpen={setCreateOpen} />
+      <CreateSkillDialog isOpen={writeOpen} setIsOpen={setWriteOpen} />
+      <UploadSkillDialog isOpen={uploadOpen} setIsOpen={setUploadOpen} />
     </LibraryPageLayout>
   );
 }
