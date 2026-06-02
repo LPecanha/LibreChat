@@ -14,6 +14,13 @@ const headerMap: Record<string, TranslationKeys> = {
   '/login/2fa': 'com_auth_verify_your_identity',
 };
 
+/* [EXT] Phase J.22 Navvia: subtítulos por rota (proto linhas 1605, 1628, etc). */
+const subheaderMap: Record<string, TranslationKeys> = {
+  '/login': 'com_auth_welcome_back_subtitle',
+  '/register': 'com_auth_create_account_subtitle',
+  '/forgot-password': 'com_auth_reset_password_subtitle',
+};
+
 export default function StartupLayout({ isAuthenticated }: { isAuthenticated?: boolean }) {
   const [error, setError] = useState<TranslationKeys | null>(null);
   const [headerText, setHeaderText] = useState<TranslationKeys | null>(null);
@@ -68,6 +75,7 @@ export default function StartupLayout({ isAuthenticated }: { isAuthenticated?: b
   return (
     <AuthLayout
       header={headerText ? localize(headerText) : localize(headerMap[location.pathname])}
+      subheader={subheaderMap[location.pathname] ? localize(subheaderMap[location.pathname]) : undefined}
       isFetching={isFetching}
       startupConfig={startupConfig}
       startupConfigError={startupConfigError}

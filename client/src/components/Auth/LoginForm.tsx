@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useForm } from 'react-hook-form';
 import { Turnstile } from '@marsidev/react-turnstile';
-import { ThemeContext, Spinner, Button, isDark } from '@librechat/client';
+import { ThemeContext, Spinner, isDark } from '@librechat/client';
 import type { TLoginUser, TStartupConfig } from 'librechat-data-provider';
 import type { TAuthContext } from '~/common';
 import { useResendVerificationEmail, useGetStartupConfig } from '~/data-provider';
@@ -15,6 +15,16 @@ type TLoginFormProps = {
   setError: Pick<TAuthContext, 'setError'>['setError'];
 };
 
+/**
+ * [EXT] Phase J.22 Navvia: refatorado pra bater com proto linhas 1602-1622.
+ *
+ * Antes: floating-label gigante (`rounded-2xl` + `pt-3 pb-2.5` ~ 48px de altura),
+ * botão `h-12` (também gigante).
+ *
+ * Agora: estilo `.inp` (32px height, rounded-md, padding lateral 10px) + label
+ * acima (`.field-label` text-[12px] text-secondary). Botão `bg-brand` `h-9`,
+ * texto `text-[13.5px]`. "Esqueci a senha" passa pra linha do checkbox, à direita.
+ */
 const LoginForm: React.FC<TLoginFormProps> = ({ onSubmit, startupConfig, error, setError }) => {
   const localize = useLocalize();
   const { theme } = useContext(ThemeContext);
@@ -52,7 +62,7 @@ const LoginForm: React.FC<TLoginFormProps> = ({ onSubmit, startupConfig, error, 
   const renderError = (fieldName: string) => {
     const errorMessage = errors[fieldName]?.message;
     return errorMessage ? (
-      <span role="alert" className="mt-1 text-sm text-red-600 dark:text-red-500">
+      <span role="alert" className="mt-1 block text-[11.5px] text-text-destructive">
         {String(errorMessage)}
       </span>
     ) : null;
@@ -69,11 +79,11 @@ const LoginForm: React.FC<TLoginFormProps> = ({ onSubmit, startupConfig, error, 
   return (
     <>
       {showResendLink && (
-        <div className="mt-2 rounded-md border border-green-500 bg-green-500/10 px-3 py-2 text-sm text-text-secondary dark:text-text-primary">
+        <div className="mb-3 rounded-md border border-green-500 bg-green-500/10 px-3 py-2 text-[12.5px] text-text-secondary dark:text-text-primary">
           {localize('com_auth_email_verification_resend_prompt')}
           <button
             type="button"
-            className="ml-2 text-brand hover:underline"
+            className="ml-2 font-medium text-brand hover:underline"
             onClick={handleResendEmail}
             disabled={resendLinkMutation.isLoading}
           >
@@ -82,79 +92,73 @@ const LoginForm: React.FC<TLoginFormProps> = ({ onSubmit, startupConfig, error, 
         </div>
       )}
       <form
-        className="mt-6"
+        className="space-y-3"
         aria-label="Login form"
         method="POST"
         onSubmit={handleSubmit((data) => onSubmit(data))}
       >
-        <div className="mb-4">
-          <div className="relative">
-            <input
-              type="text"
-              id="email"
-              autoComplete={useUsernameLogin ? 'username' : 'email'}
-              aria-label={localize('com_auth_email')}
-              {...register('email', {
-                required: localize('com_auth_email_required'),
-                maxLength: { value: 120, message: localize('com_auth_email_max_length') },
-                validate: useUsernameLogin
-                  ? undefined
-                  : (value) => validateEmail(value, localize('com_auth_email_pattern')),
-              })}
-              aria-invalid={!!errors.email}
-              className="webkit-dark-styles transition-color peer w-full rounded-2xl border border-border-light bg-surface-primary px-3.5 pb-2.5 pt-3 text-text-primary duration-200 focus:border-brand focus:outline-none"
-              placeholder=" "
-            />
-            <label
-              htmlFor="email"
-              className="absolute start-3 top-1.5 z-10 origin-[0] -translate-y-4 scale-75 transform bg-surface-primary px-2 text-sm text-text-secondary-alt duration-200 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:scale-100 peer-focus:top-1.5 peer-focus:-translate-y-4 peer-focus:scale-75 peer-focus:px-2 peer-focus:text-brand dark:peer-focus:text-brand rtl:peer-focus:left-auto rtl:peer-focus:translate-x-1/4"
-            >
-              {useUsernameLogin
-                ? localize('com_auth_username').replace(/ \(.*$/, '')
-                : localize('com_auth_email_address')}
-            </label>
-          </div>
+        <div>
+          <label htmlFor="email" className="field-label">
+            {useUsernameLogin
+              ? localize('com_auth_username').replace(/ \(.*$/, '')
+              : localize('com_auth_email_address')}
+          </label>
+          <input
+            type="text"
+            id="email"
+            autoComplete={useUsernameLogin ? 'username' : 'email'}
+            placeholder={useUsernameLogin ? '' : 'voce@email.com'}
+            aria-label={localize('com_auth_email')}
+            aria-invalid={!!errors.email}
+            className="inp focus:border-brand focus:outline-none"
+            {...register('email', {
+              required: localize('com_auth_email_required'),
+              maxLength: { value: 120, message: localize('com_auth_email_max_length') },
+              validate: useUsernameLogin
+                ? undefined
+                : (value) => validateEmail(value, localize('com_auth_email_pattern')),
+            })}
+          />
           {renderError('email')}
         </div>
-        <div className="mb-2">
-          <div className="relative">
-            <input
-              type="password"
-              id="password"
-              autoComplete="current-password"
-              aria-label={localize('com_auth_password')}
-              {...register('password', {
-                required: localize('com_auth_password_required'),
-                minLength: {
-                  value: startupConfig?.minPasswordLength || 8,
-                  message: localize('com_auth_password_min_length'),
-                },
-                maxLength: { value: 128, message: localize('com_auth_password_max_length') },
-              })}
-              aria-invalid={!!errors.password}
-              className="webkit-dark-styles transition-color peer w-full rounded-2xl border border-border-light bg-surface-primary px-3.5 pb-2.5 pt-3 text-text-primary duration-200 focus:border-brand focus:outline-none"
-              placeholder=" "
-            />
-            <label
-              htmlFor="password"
-              className="absolute start-3 top-1.5 z-10 origin-[0] -translate-y-4 scale-75 transform bg-surface-primary px-2 text-sm text-text-secondary-alt duration-200 peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:scale-100 peer-focus:top-1.5 peer-focus:-translate-y-4 peer-focus:scale-75 peer-focus:px-2 peer-focus:text-brand dark:peer-focus:text-brand rtl:peer-focus:left-auto rtl:peer-focus:translate-x-1/4"
-            >
-              {localize('com_auth_password')}
-            </label>
-          </div>
+
+        <div>
+          <label htmlFor="password" className="field-label">
+            {localize('com_auth_password')}
+          </label>
+          <input
+            type="password"
+            id="password"
+            autoComplete="current-password"
+            placeholder="••••••••"
+            aria-label={localize('com_auth_password')}
+            aria-invalid={!!errors.password}
+            className="inp focus:border-brand focus:outline-none"
+            {...register('password', {
+              required: localize('com_auth_password_required'),
+              minLength: {
+                value: startupConfig?.minPasswordLength || 8,
+                message: localize('com_auth_password_min_length'),
+              },
+              maxLength: { value: 128, message: localize('com_auth_password_max_length') },
+            })}
+          />
           {renderError('password')}
         </div>
+
         {startupConfig.passwordResetEnabled && (
-          <a
-            href="/forgot-password"
-            className="inline-flex p-1 text-sm font-medium text-brand underline decoration-transparent transition-all duration-200 hover:opacity-80 hover:decoration-brand focus:opacity-80 focus:decoration-brand"
-          >
-            {localize('com_auth_password_forgot')}
-          </a>
+          <div className="flex justify-end pt-0.5 text-[12.5px]">
+            <a
+              href="/forgot-password"
+              className="font-medium text-brand hover:underline"
+            >
+              {localize('com_auth_password_forgot')}
+            </a>
+          </div>
         )}
 
         {requireCaptcha && (
-          <div className="my-4 flex justify-center">
+          <div className="flex justify-center pt-1">
             <Turnstile
               siteKey={startupConfig.turnstile!.siteKey}
               options={{
@@ -168,19 +172,15 @@ const LoginForm: React.FC<TLoginFormProps> = ({ onSubmit, startupConfig, error, 
           </div>
         )}
 
-        <div className="mt-6">
-          <Button
-            aria-label={localize('com_auth_continue')}
-            data-testid="login-button"
-            type="submit"
-            disabled={(requireCaptcha && !turnstileToken) || isSubmitting}
-            /* [EXT] Phase G Navvia: troca submit (verde upstream) por brand (azul Navvia) */
-            variant="brand"
-            className="h-12 w-full rounded-2xl"
-          >
-            {isSubmitting ? <Spinner /> : localize('com_auth_continue')}
-          </Button>
-        </div>
+        <button
+          type="submit"
+          aria-label={localize('com_auth_continue')}
+          data-testid="login-button"
+          disabled={(requireCaptcha && !turnstileToken) || isSubmitting}
+          className="flex h-9 w-full items-center justify-center rounded-md bg-brand text-[13.5px] font-medium text-brand-fg transition-opacity hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-brand disabled:opacity-60"
+        >
+          {isSubmitting ? <Spinner className="size-4" /> : localize('com_auth_continue')}
+        </button>
       </form>
     </>
   );

@@ -7,9 +7,17 @@ import { BlinkAnimation } from './BlinkAnimation';
 import { Banner } from '../Banners';
 import Footer from './Footer';
 
+/**
+ * [EXT] Phase J.22 Navvia: AuthLayout proto-style (design/ui-preview.html
+ * linhas 1578-1640). Antes era um split simples com logo + tagline; agora
+ * bate com o proto: hero esquerdo com features list, form direito enxuto
+ * (max-w-[380px]) e títulos `text-[24px]` + subtítulo em vez do enorme
+ * `text-[28px]` centralizado.
+ */
 function AuthLayout({
   children,
   header,
+  subheader,
   isFetching,
   startupConfig,
   startupConfigError,
@@ -18,6 +26,7 @@ function AuthLayout({
 }: {
   children: React.ReactNode;
   header: React.ReactNode;
+  subheader?: React.ReactNode;
   isFetching: boolean;
   startupConfig: TStartupConfig | null | undefined;
   startupConfigError: unknown | null | undefined;
@@ -56,9 +65,6 @@ function AuthLayout({
     return null;
   };
 
-  /* [EXT] Phase G Navvia — port do authScreen do protótipo (linha 1578+).
-   * Layout split: hero gradient à esquerda (Navvia identity), form à
-   * direita. Em mobile, hero some e form ocupa viewport. */
   return (
     <div className="relative flex min-h-screen bg-surface-primary">
       <Banner />
@@ -66,41 +72,72 @@ function AuthLayout({
         <ThemeSelector />
       </div>
 
-      {/* Hero gradient esquerda — visível em md+, escondido em mobile */}
-      <aside
-        className="hero relative hidden w-1/2 flex-col items-center justify-center overflow-hidden p-12 md:flex"
-      >
+      {/* Hero esquerdo — proto linhas 1582-1595. Visível em lg+. */}
+      <aside className="hero relative hidden w-[46%] flex-col justify-between overflow-hidden p-12 lg:flex">
         <span className="blob blob-1" aria-hidden="true" />
         <span className="blob blob-2" aria-hidden="true" />
         <span className="blob blob-3" aria-hidden="true" />
-        <div className="relative z-10 flex flex-col items-center text-center">
+        <div className="relative z-10">
           <NavviaLogo size="xl" />
-          <p className="mt-6 max-w-sm text-[15px] text-text-secondary">
-            Sua plataforma multi-IA com agentes, prompts, skills e memória —
-            tudo em um workspace.
+        </div>
+        <div className="relative z-10 max-w-md">
+          <h1 className="font-display text-[36px] font-extrabold leading-[1.08] tracking-tight">
+            {localize('com_auth_hero_title')}
+          </h1>
+          <p className="mt-3 text-[15px] text-text-secondary">
+            {localize('com_auth_hero_subtitle')}
           </p>
+          <ul className="mt-6 space-y-2.5 text-[13.5px] text-text-secondary">
+            <li className="flex items-center gap-2.5">
+              <span className="grid h-6 w-6 place-items-center rounded-md bg-brand-soft text-brand">
+                ✦
+              </span>
+              {localize('com_auth_hero_feature_models')}
+            </li>
+            <li className="flex items-center gap-2.5">
+              <span className="grid h-6 w-6 place-items-center rounded-md bg-brand-soft text-brand">
+                ✦
+              </span>
+              {localize('com_auth_hero_feature_agents')}
+            </li>
+            <li className="flex items-center gap-2.5">
+              <span className="grid h-6 w-6 place-items-center rounded-md bg-brand-soft text-brand">
+                ✦
+              </span>
+              {localize('com_auth_hero_feature_tools')}
+            </li>
+          </ul>
+        </div>
+        <div className="relative z-10 text-[11px] text-text-tertiary">
+          {localize('com_auth_hero_footer')}
         </div>
       </aside>
 
-      {/* Form direita */}
-      <main className="flex w-full flex-col md:w-1/2">
+      {/* Formulário direito */}
+      <main className="flex w-full flex-col lg:w-[54%]">
         <BlinkAnimation active={isFetching}>
-          <div className="mt-6 flex h-10 w-full items-center justify-center md:hidden">
+          <div className="mt-6 flex h-10 w-full items-center justify-center lg:hidden">
             <NavviaLogo size="md" />
           </div>
         </BlinkAnimation>
         <DisplayError />
-        <div className="flex flex-1 items-center justify-center px-6 py-8">
-          <div className="w-full max-w-md">
+        <div className="flex flex-1 items-center justify-center overflow-y-auto px-6 py-8">
+          <div className="w-full max-w-[380px]">
             {!hasStartupConfigError && !isFetching && header && (
-              <h1
-                className="mb-6 text-center font-display text-[28px] font-bold tracking-tight text-text-primary"
-                style={{ userSelect: 'none' }}
-              >
-                {header}
-              </h1>
+              <>
+                <h2
+                  className="font-display text-[24px] font-bold tracking-tight text-text-primary"
+                  style={{ userSelect: 'none' }}
+                >
+                  {header}
+                </h2>
+                {subheader && (
+                  <p className="mt-1 text-[13.5px] text-text-secondary">{subheader}</p>
+                )}
+                <div className="mt-6">{children}</div>
+              </>
             )}
-            {children}
+            {(hasStartupConfigError || isFetching || !header) && children}
             {!pathname.includes('2fa') &&
               (pathname.includes('login') || pathname.includes('register')) && (
                 <SocialLoginRender startupConfig={startupConfig} />

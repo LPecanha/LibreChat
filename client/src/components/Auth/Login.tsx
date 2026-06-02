@@ -110,12 +110,11 @@ function Login() {
         />
       )}
       {startupConfig?.registrationEnabled === true && (
-        <p className="my-4 text-center text-sm font-light text-text-secondary dark:text-white">
-          {' '}
+        <p className="mt-6 text-center text-[13px] text-text-secondary">
           {localize('com_auth_no_account')}{' '}
           <a
             href={registerPage()}
-            className="inline-flex p-1 text-sm font-medium text-brand underline decoration-transparent transition-all duration-200 hover:opacity-80 hover:decoration-brand focus:opacity-80 focus:decoration-brand"
+            className="font-medium text-brand hover:underline"
           >
             {localize('com_auth_sign_up')}
           </a>
