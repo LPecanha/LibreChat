@@ -1,6 +1,7 @@
 import React, { useMemo, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Spinner } from '@librechat/client';
-import { Bot } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { PermissionBits } from 'librechat-data-provider';
 import type t from 'librechat-data-provider';
 import { useMarketplaceAgentsInfiniteQuery } from '~/data-provider/Agents';
@@ -27,6 +28,7 @@ const AgentGrid: React.FC<AgentGridProps> = ({
   scrollElementRef,
 }) => {
   const localize = useLocalize();
+  const navigate = useNavigate();
 
   // Get category data from API
   const { categories } = useAgentCategories();
@@ -163,22 +165,40 @@ const AgentGrid: React.FC<AgentGridProps> = ({
     >
       {/* Handle empty results with enhanced accessibility */}
       {(!currentAgents || currentAgents.length === 0) && !isLoading && !isFetching ? (
-        /* [EXT] Phase I.1 Navvia: usar .empty do protótipo (linhas 295-298) */
-        <div
-          className="empty mx-auto my-8 max-w-md"
-          role="status"
-          aria-live="polite"
-          aria-label={
-            searchQuery
-              ? localize('com_agents_search_empty_heading')
-              : localize('com_agents_empty_state_heading')
-          }
-        >
-          <span className="ic" aria-hidden="true">
-            <Bot className="h-6 w-6" strokeWidth={1.7} />
-          </span>
-          <h3>{localize('com_agents_empty_state_heading')}</h3>
-          {searchQuery && <p>{localize('com_agents_search_empty_heading')}</p>}
+        /* [EXT] Phase J.11 Navvia: empty state = grid com tile "+ Criar novo agente"
+         * (ui-preview.html linha 772) em vez de "Nenhum agente encontrado" centralizado.
+         * Quando há busca, mantém o feedback textual acima do tile. */
+        <div>
+          {searchQuery && (
+            <p
+              className="mt-5 text-center text-[13px] text-text-tertiary"
+              role="status"
+              aria-live="polite"
+            >
+              {localize('com_agents_search_empty_heading')}
+            </p>
+          )}
+          <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+            <button
+              type="button"
+              onClick={() => navigate('/c/new?createAgent=1')}
+              className="agent-card border-dashed text-center"
+              style={{ alignItems: 'center', justifyContent: 'center' }}
+              aria-label={localize('com_ui_create_agent')}
+            >
+              <div
+                className="agent-ico"
+                style={{ background: 'var(--brand-soft)', color: 'var(--brand)' }}
+                aria-hidden="true"
+              >
+                <Plus className="h-5 w-5" strokeWidth={2} />
+              </div>
+              <div className="font-medium">{localize('com_ui_create_agent')}</div>
+              <div className="text-[12px] leading-snug text-text-tertiary">
+                {localize('com_agents_create_subtitle')}
+              </div>
+            </button>
+          </div>
         </div>
       ) : (
         <>

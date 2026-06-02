@@ -80,6 +80,25 @@ if (searchInput) {
   await p.waitForTimeout(300);
 }
 
+/* 2b) SUB-TABS Destaques / Meus agentes / Da organização */
+console.log('\n═══ SUB-TABS ═══');
+for (const label of ['Destaques', 'Meus agentes', 'Da organização']) {
+  const coord = await p.evaluate((l) => {
+    const btn = Array.from(document.querySelectorAll('button')).find((b) => (b.textContent || '').trim() === l);
+    if (!btn) return null;
+    const r = btn.getBoundingClientRect();
+    return { x: Math.round(r.x + r.width / 2), y: Math.round(r.y + r.height / 2) };
+  }, label);
+  if (!coord) { console.log(`  ✗ ${label} not found`); continue; }
+  await p.mouse.click(coord.x, coord.y);
+  await p.waitForTimeout(600);
+  const active = await p.evaluate((l) => {
+    const btn = Array.from(document.querySelectorAll('button')).find((b) => (b.textContent || '').trim() === l);
+    return btn ? btn.className.includes('border-brand') || btn.className.includes('font-semibold') : false;
+  }, label);
+  console.log(`  ${active ? '✓' : '✗'} ${label}  active=${active}`);
+}
+
 /* 3) CREATE BUTTON */
 console.log('\n═══ CREATE AGENT BUTTON ═══');
 const createBtn = await p.evaluate(() => {

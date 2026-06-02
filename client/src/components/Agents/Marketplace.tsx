@@ -43,6 +43,16 @@ const AgentMarketplace: React.FC<AgentMarketplaceProps> = ({ className = '' }) =
   const [isTransitioning, setIsTransitioning] = useState<boolean>(false);
   const [animationDirection, setAnimationDirection] = useState<Direction>('right');
 
+  /* [EXT] Phase J.11 Navvia: sub-tabs Destaques / Meus agentes / Da organização
+   * (design/ui-preview.html linha 727-729). "Destaques" mapeia para promoted,
+   * "Da organização" para all; "Meus agentes" filtra por owner client-side
+   * (vai a 'all' por enquanto até existir filtro server-side). Default = promoted,
+   * igual ao protótipo. */
+  type AgentView = 'promoted' | 'mine' | 'org';
+  const [agentView, setAgentView] = useState<AgentView>(
+    () => (category === 'all' ? 'org' : 'promoted'),
+  );
+
   // Ref for the scrollable container to enable infinite scroll
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
@@ -204,17 +214,17 @@ const AgentMarketplace: React.FC<AgentMarketplaceProps> = ({ className = '' }) =
             ref={scrollContainerRef}
             className="scrollbar-gutter-stable relative flex h-full flex-col overflow-y-auto overflow-x-hidden"
           >
-            {/* [EXT] Navvia Phase J.10: header com h1 + subtitle + botão "+ Criar agente"
-             * inline (ui-preview.html#view-agents linhas 722-724). O botão navega
-             * para /c/new com o sidepanel Agents aberto — fluxo upstream de criação. */}
-            {!isSmallScreen && (
-              <div className="container mx-auto max-w-[1600px] px-8 pt-6 lg:px-12">
+            {/* [EXT] Navvia Phase J.11: layout final do protótipo (max-w-5xl, py-10).
+             * Row 1 header + Criar agente · Row 2 sub-tabs (underline) + search inline
+             * · Row 3 category chips · Row 4 grid. */}
+            <div className="container mx-auto max-w-5xl px-6 py-10">
+              {!isSmallScreen && (
                 <div className="flex items-center gap-3">
                   <div>
                     <h1 className="font-display text-[24px] font-bold tracking-tight text-text-primary">
                       {localize('com_ui_agents')}
                     </h1>
-                    <p className="mt-0.5 text-[13px] text-text-secondary">
+                    <p className="mt-0.5 text-[14px] text-text-secondary">
                       {localize('com_agents_marketplace_subtitle')}
                     </p>
                   </div>
@@ -229,36 +239,58 @@ const AgentMarketplace: React.FC<AgentMarketplaceProps> = ({ className = '' }) =
                     {localize('com_ui_create_agent')}
                   </button>
                 </div>
-              </div>
-            )}
-            {/* Sticky wrapper for search bar and categories */}
-            <div className="sticky top-0 z-10 mt-4 bg-presentation pb-4 md:mt-0">
-              <div className="container mx-auto max-w-[1600px] px-8 lg:px-12">
+              )}
+
+              {/* Row 2: sub-tabs + search inline (sticky) */}
+              <div className="sticky top-0 z-10 mt-5 bg-presentation">
                 <div className="mx-auto mb-3 flex items-center justify-between gap-2 md:hidden">
                   <OpenSidebar />
                   <MarketplaceAdminSettings compact />
                 </div>
-                {/* Header row: categories à esquerda + search à direita (densidade Navvia) */}
-                <div className="mt-4 flex items-center justify-between gap-3 pb-4">
-                  <div className="min-w-0 flex-1">
-                    <CategoryTabs
-                      categories={categoriesQuery.data || []}
-                      activeTab={displayCategory}
-                      isLoading={categoriesQuery.isLoading}
-                      onChange={handleTabChange}
-                    />
-                  </div>
-                  <div className="flex w-72 shrink-0 items-center gap-2">
+                <div className="flex items-center gap-2 border-b border-border-light">
+                  {([
+                    { id: 'promoted' as const, key: 'com_agents_tab_featured' as const },
+                    { id: 'mine' as const, key: 'com_agents_tab_mine' as const },
+                    { id: 'org' as const, key: 'com_agents_tab_org' as const },
+                  ]).map((sub) => (
+                    <button
+                      key={sub.id}
+                      type="button"
+                      onClick={() => {
+                        setAgentView(sub.id);
+                        const target = sub.id === 'promoted' ? 'promoted' : 'all';
+                        if (target !== displayCategory) handleTabChange(target);
+                      }}
+                      className={cn(
+                        '-mb-px border-b-2 px-1 pb-2.5 text-[13px] transition-colors',
+                        agentView === sub.id
+                          ? 'border-brand font-semibold text-text-primary'
+                          : 'border-transparent font-medium text-text-tertiary hover:text-text-primary',
+                      )}
+                    >
+                      {localize(sub.key)}
+                    </button>
+                  ))}
+                  <div className="ml-auto mb-1.5 flex w-56 shrink-0 items-center gap-2">
                     <SearchBar value={searchQuery} onSearch={handleSearch} />
                     <div className="hidden md:block">
                       <MarketplaceAdminSettings />
                     </div>
                   </div>
                 </div>
+
+                {/* Row 3: category chips */}
+                <div className="mt-4 pb-4">
+                  <CategoryTabs
+                    categories={categoriesQuery.data || []}
+                    activeTab={displayCategory}
+                    isLoading={categoriesQuery.isLoading}
+                    onChange={handleTabChange}
+                  />
+                </div>
               </div>
-            </div>
             {/* Scrollable content area */}
-            <div className="container mx-auto max-w-[1600px] px-8 pb-8 lg:px-12">
+            <div className="pb-8">
               {/* Two-pane animated container wrapping category header + grid */}
               <div className="relative overflow-hidden">
                 {/* Current content pane */}
@@ -359,6 +391,7 @@ const AgentMarketplace: React.FC<AgentMarketplaceProps> = ({ className = '' }) =
 
                 {/* Note: Using Tailwind keyframes for slide in/out animations */}
               </div>
+            </div>
             </div>
           </div>
         </main>
