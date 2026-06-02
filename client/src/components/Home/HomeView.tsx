@@ -114,14 +114,6 @@ const TOOLS_TILES = [
   },
 ];
 
-const GALLERY_PLACEHOLDERS = [
-  { labelKey: 'com_nav_home_gallery_logo' as const, bg: 'linear-gradient(135deg,#2469e2,#11b38d)' },
-  { labelKey: 'com_nav_home_gallery_banner' as const, bg: 'linear-gradient(135deg,#0d9488,#00d4ff)' },
-  { labelKey: 'com_nav_home_gallery_icon' as const, bg: 'linear-gradient(135deg,#f59e0b,#ef4444)' },
-  { labelKey: 'com_nav_home_gallery_illustration' as const, bg: 'linear-gradient(135deg,#ec4899,#8b5cf6)' },
-  { labelKey: 'com_nav_home_gallery_mockup' as const, bg: 'linear-gradient(135deg,#11b38d,#2469e2)' },
-];
-
 const PROMPT_HIGHLIGHTS = [
   { emoji: '⚡', titleKey: 'com_nav_home_prompt_meeting_title' as const, descKey: 'com_nav_home_prompt_meeting_desc' as const },
   { emoji: '📧', titleKey: 'com_nav_home_prompt_email_title' as const, descKey: 'com_nav_home_prompt_email_desc' as const },
@@ -548,25 +540,6 @@ function HomeView() {
             </div>
             <div className="text-[12px] font-medium">{localize('com_nav_home_explore_all')}</div>
           </button>
-        </div>
-
-        {/* ===== IMAGENS RECENTES (placeholder visual) ===== */}
-        <div className="rise d4 mt-9 flex items-center justify-between">
-          <h2 className="font-display text-[16px] font-semibold">{localize('com_nav_home_section_recent_images')}</h2>
-          <button className="text-[12px] font-medium text-brand hover:underline">{localize('com_nav_home_section_view_gallery')}</button>
-        </div>
-        <div className="carousel rise d4 mt-3">
-          {GALLERY_PLACEHOLDERS.map((g) => (
-            <div key={g.labelKey} className="gallery-thumb" style={{ background: g.bg }}>
-              <span>{localize(g.labelKey)}</span>
-            </div>
-          ))}
-          <div className="gallery-thumb grid place-items-center" style={{ background: 'var(--surface-secondary)' }}>
-            <span className="!static !text-text-tertiary !shadow-none">
-              <Plus className="mx-auto h-4 w-4 mb-0.5" strokeWidth={1.8} />
-              {localize('com_nav_home_gallery_new')}
-            </span>
-          </div>
         </div>
 
         {/* ===== DUAS COLUNAS ===== */}
