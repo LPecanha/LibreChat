@@ -474,12 +474,13 @@ function HomeView() {
                 </div>
               </div>
 
-              {/* Atalho de kbd — bump de contraste: text-secondary +
-               * font-medium pra ler bem em cima do composer. */}
-              <span className="ml-auto hidden items-center gap-1.5 text-[11px] font-medium text-text-secondary sm:flex">
-                <kbd>/</kbd>{localize('com_nav_home_kbd_commands')}
+              {/* Atalho de kbd — text-primary + font-medium pra contraste maximo. */}
+              <span className="ml-auto hidden items-center gap-1.5 text-[11px] font-medium text-text-primary sm:flex">
+                <kbd className="!text-text-secondary">/</kbd>
+                {localize('com_nav_home_kbd_commands')}
                 <span className="opacity-60">·</span>
-                <kbd>@</kbd>{localize('com_nav_home_kbd_agents')}
+                <kbd className="!text-text-secondary">@</kbd>
+                {localize('com_nav_home_kbd_agents')}
               </span>
 
               {/* Send */}
