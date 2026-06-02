@@ -36,8 +36,8 @@ services:
     volumes:
       - ./.env:/app/.env:ro
       - ./librechat.yaml:/app/librechat.yaml:ro
-      - ./data/uploads:/app/uploads
-      - ./data/images:/app/client/public/images
+      - ${UPLOADS_DIR:-./data/uploads}:/app/uploads
+      - ${IMAGES_DIR:-./data/images}:/app/client/public/images
       - ./data/logs:/app/api/logs
     networks:
       - navvia_internal
@@ -151,8 +151,12 @@ volumes:
   pgdata:
 
 networks:
-  # Rede interna do stack Navvia (api + admin-ext + admin-panel + meili + rag + vectordb)
+  # Rede interna do stack Navvia (api + admin-ext + admin-panel + meili + rag + vectordb).
+  # `name:` explícito é OBRIGATÓRIO para que deploy/docker-compose.beta.yml possa
+  # se anexar a essa rede via `external: true`. Sem isso o compose prefixaria
+  # com o nome do projeto e a beta não acharia.
   navvia_internal:
+    name: navvia_internal
     driver: bridge
 
   # Rede externa (MongoDB centralizado, gerenciado fora deste compose).

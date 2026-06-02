@@ -89,6 +89,15 @@ async function runDistribution(): Promise<void> {
 export function startCreditScheduler(): void {
   const schedule = process.env.CREDIT_SCHEDULER_CRON ?? '0 * * * *';
 
+  /* [EXT] Phase J.20 Navvia: opt-out via CREDIT_SCHEDULER_CRON='' (string vazia).
+   * Necessário pra rodar beta.navvia em paralelo apontando pro mesmo Mongo —
+   * sem isso ambos os schedulers distribuiriam créditos no mesmo plano em
+   * cada ciclo, dobrando o saldo dos usuários. */
+  if (!schedule.trim()) {
+    logger.info('Credit distribution scheduler disabled (CREDIT_SCHEDULER_CRON is empty)');
+    return;
+  }
+
   cron.schedule(schedule, () => {
     runDistribution().catch((err) => {
       logger.error('Scheduler unexpected error', { err });

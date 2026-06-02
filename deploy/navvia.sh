@@ -26,14 +26,39 @@
 #   ./deploy/navvia.sh status          # docker compose ps
 #   ./deploy/navvia.sh shell <svc>     # exec sh num container rodando
 #   ./deploy/navvia.sh help            # esta mensagem
+#
+# Modo BETA (segundo stack rodando em paralelo, sharing infra do principal):
+#   Acrescente --beta a QUALQUER comando para usar docker-compose.beta.yml
+#   e .env (mesmo arquivo, mas com APP_UPLOADS_DIR / BETA_PORT setados).
+#
+#   ./deploy/navvia.sh update --beta   # sobe só o api da beta na porta 3093
+#   ./deploy/navvia.sh logs api --beta
+#   ./deploy/navvia.sh down --beta
 # =============================================================================
 set -euo pipefail
 
 # ── Bootstrap paths ──────────────────────────────────────────────────────────
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-COMPOSE_FILE="$SCRIPT_DIR/docker-compose.yml"
 ENV_FILE="$SCRIPT_DIR/.env"
+
+# Detecta flag --beta em qualquer posição da call e remove dos args.
+# Setado o flag, troca o compose file pra docker-compose.beta.yml.
+MODE="app"
+NEW_ARGS=()
+for arg in "$@"; do
+  case "$arg" in
+    --beta)  MODE="beta" ;;
+    *)       NEW_ARGS+=("$arg") ;;
+  esac
+done
+set -- "${NEW_ARGS[@]+"${NEW_ARGS[@]}"}"
+
+if [[ "$MODE" == "beta" ]]; then
+  COMPOSE_FILE="$SCRIPT_DIR/docker-compose.beta.yml"
+else
+  COMPOSE_FILE="$SCRIPT_DIR/docker-compose.yml"
+fi
 
 # Compose invocation — sempre referencia o env explícito (-e) e o file (-f).
 DC="docker compose --env-file $ENV_FILE -f $COMPOSE_FILE"
@@ -49,9 +74,16 @@ die()  { err "$*"; exit 1; }
 preflight() {
   [[ -d "$REPO_ROOT/.git" ]] || die "Não é um repo git: $REPO_ROOT"
   [[ -f "$COMPOSE_FILE" ]]   || die "Compose file não encontrado: $COMPOSE_FILE"
-  [[ -f "$ENV_FILE" ]]       || die "Env file não encontrado: $ENV_FILE — copie de .env.example"
+  local example_env=".env.example"
+  [[ "$MODE" == "beta" ]] && example_env=".env.beta.example"
+  [[ -f "$ENV_FILE" ]]       || die "Env file não encontrado: $ENV_FILE — copie de $example_env"
   command -v docker >/dev/null || die "docker não está instalado"
   docker compose version >/dev/null 2>&1 || die "docker compose v2 não está disponível"
+
+  if [[ "$MODE" == "beta" ]]; then
+    docker network inspect navvia_internal >/dev/null 2>&1 || \
+      die "rede navvia_internal não existe — suba o stack principal primeiro (./deploy/navvia.sh up)"
+  fi
 }
 
 current_commit() {
@@ -122,7 +154,7 @@ cmd_shell() {
 }
 
 cmd_update() {
-  log "═══ Update Navvia — $(date '+%F %T') ═══"
+  log "═══ Update Navvia [$MODE] — $(date '+%F %T') ═══"
   cmd_pull
   cmd_build
   log "Recriando containers que mudaram…"
@@ -133,7 +165,7 @@ cmd_update() {
 }
 
 cmd_help() {
-  sed -n '4,33p' "$0"
+  sed -n '4,36p' "$0"
 }
 
 # ── Dispatch ────────────────────────────────────────────────────────────────

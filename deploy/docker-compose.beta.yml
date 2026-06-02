@@ -1,0 +1,69 @@
+# =============================================================================
+# [EXT] Phase J.20 Navvia: compose da BETA
+# =============================================================================
+# Sobe APENAS o `api` da beta (LibreChat com a nova UI do branch dev).
+# Compartilha tudo do stack principal:
+#   - MongoDB (rede 4leads_network, externa)
+#   - Meilisearch, vectordb, rag_api (rede navvia_internal, do compose principal)
+#   - Volumes de uploads e imagens (bind-mount do host, mesmos paths que o app)
+#
+# Não sobe admin-ext nem admin-panel — esses ficam só no stack principal.
+# O scheduler de créditos roda no admin-ext do app; aqui é só UI.
+#
+# Pré-requisitos:
+#   1. Stack principal (deploy/docker-compose.yml) rodando — providencia
+#      as redes `navvia_internal` e `4leads_network` + meili/vectordb/rag.
+#   2. Repo clonado em /opt/navvia-beta com branch `dev` checked out.
+#   3. `deploy/.env` configurado a partir de `.env.beta.example` (aponta pros
+#      mesmos secrets/Mongo/JWT do app + CREDIT_SCHEDULER_CRON='').
+#
+# Uso:
+#   cd /opt/navvia-beta
+#   ./deploy/navvia.sh beta-update     # pull + build + up -d (beta)
+# =============================================================================
+
+services:
+  # LibreChat API (beta — nova UI)
+  api:
+    container_name: librechat-navvia-beta
+    build:
+      context: ..
+      dockerfile: Dockerfile.overlay
+      args:
+        WHITELABEL_CLIENT: navvia
+    image: librechat-navvia-beta:latest
+    restart: always
+    ports:
+      - "${BETA_PORT:-3093}:3080"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      - HOST=0.0.0.0
+      - MONGO_URI=${MONGO_URI}
+      - MEILI_HOST=http://meilisearch:7700
+      - RAG_PORT=${RAG_PORT:-8000}
+      - RAG_API_URL=http://rag_api:${RAG_PORT:-8000}
+    volumes:
+      - ./.env:/app/.env:ro
+      - ./librechat.yaml:/app/librechat.yaml:ro
+      # Bind-mount dos MESMOS paths que o app — uploads e imagens são compartilhados.
+      # APP_UPLOADS_DIR / APP_IMAGES_DIR são paths absolutos no host (ver .env.beta.example).
+      - ${APP_UPLOADS_DIR}:/app/uploads
+      - ${APP_IMAGES_DIR}:/app/client/public/images
+      - ./data/logs:/app/api/logs
+    networks:
+      - navvia_internal
+      - mongo_external
+    labels:
+      - "stack=navvia-beta"
+
+networks:
+  # Anexa-se à rede do stack principal pra resolver meilisearch / vectordb / rag_api
+  # pelos nomes de serviço.
+  navvia_internal:
+    external: true
+    name: navvia_internal
+
+  mongo_external:
+    external: true
+    name: 4leads_network
