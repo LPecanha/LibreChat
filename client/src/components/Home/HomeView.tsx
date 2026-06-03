@@ -13,6 +13,7 @@ import {
   Mic,
   Paperclip,
   Plus,
+  Settings as SettingsIcon,
   Search as SearchIcon,
   Send,
   Star,
@@ -23,14 +24,18 @@ import {
   RefreshCw,
 } from 'lucide-react';
 import { useAuthContext, useLocalize } from '~/hooks';
+import useKeyDialog from '~/hooks/Endpoint/useKeyDialog';
 import { useGetUserBalance } from '~/data-provider/Misc/queries';
 import { useConversationsInfiniteQuery, useGetAllPromptGroups } from '~/data-provider';
 import { useGetStartupConfig } from '~/data-provider';
+import { useGetEndpointsQuery } from '~/data-provider/Endpoints/queries';
 import { useAgentsMapContext, useBadgeRowContext } from '~/Providers';
 import { formatUsdBalance } from '~/components/Nav/BuyCredits/ExtBalanceDisplay';
 import ToolDialogs from '~/components/Chat/Input/ToolDialogs';
+import DialogManager from '~/components/Chat/Menus/Endpoints/DialogManager';
 import { icons } from '~/hooks/Endpoint/Icons';
 import { cn } from '~/utils';
+import { getEndpointField, EModelEndpoint } from 'librechat-data-provider';
 import type { TConversation, TPromptGroup } from 'librechat-data-provider';
 
 /**
@@ -322,6 +327,16 @@ function HomeView() {
     return (list.find((s) => s.label === activeModel)?.preset?.endpoint as string | undefined) ?? '';
   }, [activeModel, startupConfig?.modelSpecs]);
 
+  /* [EXT] Phase J.27 Navvia: indica quais endpoints precisam do user
+   * configurar a propria API key (userProvide: true em librechat.yaml).
+   * Trigger pro botao engrenagem ao lado do item no model picker. */
+  const { data: endpointsConfig } = useGetEndpointsQuery();
+  const endpointRequiresUserKey = useCallback(
+    (ep: string) => !!getEndpointField(endpointsConfig, ep, 'userProvide'),
+    [endpointsConfig],
+  );
+  const keyDialog = useKeyDialog();
+
   /* [EXT] Phase J.23 Navvia: prompts em destaque vêm de useGetAllPromptGroups.
    * Pega os 3 primeiros (em ordem de criação reversa = mais recentes).
    * Fallback pros PROMPT_HIGHLIGHTS_FALLBACK quando o user não tem prompts. */
@@ -385,24 +400,51 @@ function HomeView() {
                   {activeModel}
                   <ChevronDown className="h-[13px] w-[13px] text-text-tertiary" strokeWidth={1.8} />
                 </button>
-                <div className="pop bottom-12 left-0 w-[300px] rounded-lg border border-border-light bg-surface-overlay p-1">
+                <div className="pop bottom-12 left-0 w-[320px] rounded-lg border border-border-light bg-surface-overlay p-1">
                   <div className="menu-label">{localize('com_nav_home_models_label')}</div>
-                  {modelPickerItems.map((m) => (
-                    <button
-                      key={m.id}
-                      onClick={() => {
-                        setActiveModel(m.id);
-                        setModelOpen(false);
-                      }}
-                      className="menu-item"
-                    >
-                      <ProviderIcon endpoint={m.endpoint} />
-                      {m.id}
-                      {m.hint && (
-                        <span className="ml-auto text-[11px] text-text-tertiary">{m.hint}</span>
-                      )}
-                    </button>
-                  ))}
+                  {modelPickerItems.map((m) => {
+                    const needsKey = endpointRequiresUserKey(m.endpoint);
+                    return (
+                      <div
+                        key={m.id}
+                        className="group/menuitem flex w-full items-center"
+                      >
+                        <button
+                          onClick={() => {
+                            setActiveModel(m.id);
+                            setModelOpen(false);
+                          }}
+                          className="menu-item flex-1 min-w-0"
+                        >
+                          <ProviderIcon endpoint={m.endpoint} />
+                          <span className="truncate">{m.id}</span>
+                          {m.hint && (
+                            <span className="ml-auto truncate text-[11px] text-text-tertiary">
+                              {m.hint}
+                            </span>
+                          )}
+                        </button>
+                        {needsKey && (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              keyDialog.handleOpenKeyDialog(
+                                m.endpoint as EModelEndpoint,
+                                e,
+                              );
+                              setModelOpen(false);
+                            }}
+                            className="ml-1 grid h-7 w-7 shrink-0 place-items-center rounded-md text-text-secondary transition-colors hover:bg-surface-tertiary hover:text-text-primary"
+                            title={localize('com_endpoint_config_key')}
+                            aria-label={localize('com_endpoint_config_key')}
+                          >
+                            <SettingsIcon className="size-3.5" aria-hidden="true" />
+                          </button>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
 
@@ -784,6 +826,16 @@ function HomeView() {
        * Sem isso, o toggle de busca web chama `setIsDialogOpen(true)` no
        * useToolToggle mas nao renderiza nada — clique silencioso. */}
       <ToolDialogs />
+
+      {/* [EXT] Phase J.27 Navvia: dialog pra o usuario configurar a
+       * propria API key dos endpoints (cog ao lado de cada modelo no
+       * picker quando endpoint tem userProvide: true). */}
+      <DialogManager
+        keyDialogOpen={keyDialog.keyDialogOpen}
+        keyDialogEndpoint={keyDialog.keyDialogEndpoint ?? undefined}
+        onOpenChange={keyDialog.onOpenChange}
+        endpointsConfig={endpointsConfig ?? {}}
+      />
     </section>
   );
 }
