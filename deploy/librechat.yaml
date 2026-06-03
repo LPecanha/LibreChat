@@ -216,12 +216,21 @@ endpoints:
       fetch: false
     titleConvo: true
     titleMethod: "completion"
+    # [EXT] Navvia: titleModel real (gpt-4o-mini) — sem isso a geracao de
+    # titulo herda o modelo do chat (labels Navvia tipo gpt-5.5-pro que
+    # podem nao existir na API real do user), causando 404 no titleConvo.
+    titleModel: "gpt-4o-mini"
 
   anthropic:
     apiKey: "${ANTHROPIC_API_KEY}"
     models:
       - "claude-opus-4-7"
       - "claude-sonnet-4-6"
+    titleConvo: true
+    titleMethod: "completion"
+    # [EXT] Navvia: titleModel real (claude-3-5-haiku-latest) — barato e
+    # rapido pra gerar titulo sem depender dos labels da Navvia.
+    titleModel: "claude-3-5-haiku-latest"
 
   google:
     apiKey: "${GEMINI_API_KEY}"
