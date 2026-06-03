@@ -35,7 +35,7 @@ import ToolDialogs from '~/components/Chat/Input/ToolDialogs';
 import DialogManager from '~/components/Chat/Menus/Endpoints/DialogManager';
 import { icons } from '~/hooks/Endpoint/Icons';
 import { cn } from '~/utils';
-import { getEndpointField, EModelEndpoint } from 'librechat-data-provider';
+import { getEndpointField, EModelEndpoint, ArtifactModes } from 'librechat-data-provider';
 import type { TConversation, TPromptGroup } from 'librechat-data-provider';
 
 /**
@@ -523,12 +523,22 @@ function HomeView() {
                     },
                   ].map((item) => {
                     const isOn = Boolean(item.toggle?.toggleState);
+                    /* [EXT] Phase J.28 Navvia: artifacts não é boolean — é
+                     * uma capability com valor string ('default'/'shadcnui'/'').
+                     * Passar `true` faz o agente entender errado e não habilita
+                     * a coluna de artifacts auto. */
+                    const onValue =
+                      item.key === 'artifacts'
+                        ? isOn
+                          ? ''
+                          : ArtifactModes.DEFAULT
+                        : !isOn;
                     return (
                       <button
                         key={item.key}
                         type="button"
                         onClick={() =>
-                          item.toggle?.debouncedChange({ value: !isOn })
+                          item.toggle?.debouncedChange({ value: onValue })
                         }
                         className="menu-item w-full"
                       >
