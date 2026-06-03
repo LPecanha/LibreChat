@@ -251,7 +251,10 @@ function NavviaSidebar() {
           grouped.map(([groupName, convs]) => (
             <div key={groupName}>
               <p className="px-2 pb-1 pt-2 text-[11px] font-medium text-text-tertiary">
-                {groupName}
+                {/* [EXT] Phase J.29 Navvia: groupName vem como i18n key
+                 * ('com_ui_date_today' etc) — precisa localize(). Antes
+                 * renderizava o literal sem tradução. */}
+                {localize(groupName as Parameters<typeof localize>[0])}
               </p>
               {convs.slice(0, 8).map((c) => {
                 const isActive = location.pathname === `/c/${c.conversationId}`;
