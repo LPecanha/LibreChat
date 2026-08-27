@@ -229,6 +229,33 @@ const models = useMemo(() => {
 
 ---
 
+## Testes do upstream que falham de proposito
+
+`api/server/routes/__tests__/config.spec.js` — 2 casos no bloco
+`GET /api/config › unauthenticated`:
+
+- `should map tenant-scoped config fields in unauthenticated response`
+- `should return minimal payload without authenticated-only fields`
+
+Ambos afirmam `expect(response.body).not.toHaveProperty('modelSpecs')`. O overlay
+**inclui** `modelSpecs` nesse payload de proposito, porque `admin-ext` busca os specs
+via `GET {internalLibrechatUrl}/api/config` **sem autenticacao** (server-to-server na
+rede interna do Docker) — ver `admin-ext/src/routes/admin/modelAccess.ts`.
+
+Essa divergencia e **anterior ao merge do v0.8.8-rc1** — nao e regressao. Desde o
+v0.8.8-rc1 o valor vai por `sanitizeModelSpecs()`, que remove `promptPrefix`,
+`instructions`, `additional_instructions`, `system`, `context` e `examples`. Sem isso
+os system prompts vazariam para qualquer visitante anonimo. O `admin-ext` le somente
+`{ name, label }`, entao a sanitizacao nao muda nada para ele.
+
+> **Melhoria recomendada (nao aplicada):** expor os specs ao `admin-ext` por um
+> endpoint interno dedicado protegido por segredo compartilhado (ex.: estender
+> `extProxy`/`extConfig`) e remover a linha `[EXT]` de `config.js`. Isso elimina de
+> vez a exposicao pre-login, faz os 2 testes do upstream passarem e **remove um touch
+> point** da superficie de rebase. Exige uma env var nova nos servidores.
+
+---
+
 ## Credit system
 
 **Internal unit:** `tokenCredits` — 1 credit = $0.000001 USD (1 micro-dollar).
