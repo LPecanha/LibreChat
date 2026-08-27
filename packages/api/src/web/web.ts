@@ -1,3 +1,4 @@
+import { webSearchAuth } from '@librechat/data-schemas';
 import {
   AuthType,
   SafeSearchTypes,
@@ -6,14 +7,9 @@ import {
   ScraperProviders,
   extractVariableName,
 } from 'librechat-data-provider';
-import { webSearchAuth } from '@librechat/data-schemas';
-import type {
-  RerankerTypes,
-  TCustomConfig,
-  TWebSearchConfig,
-} from 'librechat-data-provider';
+import type { RerankerTypes, TCustomConfig, TWebSearchConfig } from 'librechat-data-provider';
 import type { TWebSearchKeys, TWebSearchCategories } from '@librechat/data-schemas';
-import { isSSRFTarget, resolveHostnameSSRF } from '../auth';
+import { isSSRFTarget, resolveHostnameSSRF, getEffectivePort } from '../auth';
 
 /**
  * User-provided URL keys that may pass through after SSRF preflight.
@@ -39,8 +35,10 @@ function isUserProvidedEnabled(field: string): boolean {
 /**
  * Returns true if the URL should be blocked for SSRF risk.
  * Fail-closed: unparseable URLs and non-HTTP(S) schemes return true.
+ * `allowedAddresses` keeps this preflight consistent with the connect-time agent
+ * so an admin-permitted private endpoint is not stripped before the agent runs.
  */
-async function isSSRFUrl(url: string): Promise<boolean> {
+async function isSSRFUrl(url: string, allowedAddresses?: string[] | null): Promise<boolean> {
   let parsed: URL;
   try {
     parsed = new URL(url);
@@ -50,10 +48,11 @@ async function isSSRFUrl(url: string): Promise<boolean> {
   if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') {
     return true;
   }
-  if (isSSRFTarget(parsed.hostname)) {
+  const port = getEffectivePort(parsed.protocol, parsed.port);
+  if (isSSRFTarget(parsed.hostname, allowedAddresses, port)) {
     return true;
   }
-  return resolveHostnameSSRF(parsed.hostname);
+  return resolveHostnameSSRF(parsed.hostname, allowedAddresses, port);
 }
 
 export function extractWebSearchEnvVars({
@@ -209,8 +208,7 @@ export async function loadWebSearchAuth({
           const isUserProvidedOptInUrlKey =
             originalKey != null && USER_PROVIDED_OPT_IN_URL_KEYS.has(originalKey);
           const isUserProvidedUrlEnabled =
-            isUserProvidedUrlKey ||
-            (isUserProvidedOptInUrlKey && isUserProvidedEnabled(field));
+            isUserProvidedUrlKey || (isUserProvidedOptInUrlKey && isUserProvidedEnabled(field));
           let contributed = false;
 
           if (isUserProvidedOptInUrlKey && isFieldUserProvided && !isUserProvidedUrlEnabled) {
@@ -221,7 +219,11 @@ export async function loadWebSearchAuth({
             continue;
           }
 
-          if (isUserProvidedUrlEnabled && isFieldUserProvided && (await isSSRFUrl(value))) {
+          if (
+            isUserProvidedUrlEnabled &&
+            isFieldUserProvided &&
+            (await isSSRFUrl(value, webSearchConfig?.allowedAddresses))
+          ) {
             if (!optionalSet.has(field)) {
               allFieldsAuthenticated = false;
               break;
@@ -252,6 +254,10 @@ export async function loadWebSearchAuth({
       } catch {
         continue;
       }
+    }
+    if (category === SearchCategories.RERANKERS && !webSearchConfig?.rerankerType) {
+      authResult.rerankerType = 'none' as RerankerTypes;
+      return [true, false];
     }
     return [false, isUserProvided];
   }

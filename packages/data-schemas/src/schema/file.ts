@@ -135,8 +135,19 @@ const file: Schema<IMongoFile> = new Schema(
         ),
         default: undefined,
       },
+      /** Dispatch-order stamp of the last writer (or claimant, on insert):
+       *  the background harvest's stale-output guard compares writer
+       *  dispatch order so an older task settling late cannot overwrite a
+       *  newer task's same-named output. */
+      sourceDispatchedAt: {
+        type: Number,
+        default: undefined,
+      },
     },
     expiresAt: {
+      /* Short-lived upload TTL managed by MongoDB. This is separate from
+       * retention-scoped `expiredAt`, which is swept by application code
+       * after storage cleanup succeeds. */
       type: Date,
       expires: 3600, // 1 hour in seconds
     },
@@ -144,12 +155,18 @@ const file: Schema<IMongoFile> = new Schema(
       type: String,
       index: true,
     },
+    expiredAt: {
+      /* Retention deadline for persisted files. The file sweep deletes the
+       * backing storage first, then removes this metadata record. */
+      type: Date,
+    },
   },
   {
     timestamps: true,
   },
 );
 
+file.index({ expiredAt: 1 });
 file.index({ createdAt: 1, updatedAt: 1 });
 file.index(
   { filename: 1, conversationId: 1, context: 1, tenantId: 1 },

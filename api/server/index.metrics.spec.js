@@ -4,6 +4,7 @@ const { MongoMemoryServer } = require('mongodb-memory-server');
 const mongoose = require('mongoose');
 
 jest.mock('~/server/services/Config', () => ({
+  syncStaticTools: jest.fn().mockResolvedValue(undefined),
   loadCustomConfig: jest.fn(() => Promise.resolve({})),
   getAppConfig: jest.fn().mockResolvedValue({
     paths: {
@@ -15,6 +16,7 @@ jest.mock('~/server/services/Config', () => ({
     fileStrategy: 'local',
     imageOutputType: 'PNG',
   }),
+  mergeAppTools: jest.fn().mockResolvedValue(undefined),
   setCachedTools: jest.fn(),
 }));
 
@@ -72,16 +74,18 @@ describe('Server metrics route', () => {
     mongoServer = await MongoMemoryServer.create();
     process.env.MONGO_URI = mongoServer.getUri();
     process.env.PORT = '0';
+    process.env.METRICS_SECRET = 'test-secret';
     app = require('~/server');
 
     await healthCheckPoll(app);
   });
 
   afterEach(() => {
-    delete process.env.METRICS_SECRET;
+    process.env.METRICS_SECRET = 'test-secret';
   });
 
   afterAll(async () => {
+    delete process.env.METRICS_SECRET;
     await mongoServer.stop();
     await mongoose.disconnect();
   });
