@@ -79,6 +79,7 @@ def generate_color_palette(base_color):
     palette['green-300'] = adjust_lightness(green_base, 1.6)
     palette['green-400'] = adjust_lightness(green_base, 1.3)
     palette['green-500'] = adjust_lightness(green_base, 1.1)
+    palette['green-550'] = adjust_lightness(green_base, 1.0)
     palette['green-600'] = adjust_lightness(green_base, 0.9)
     palette['green-700'] = adjust_lightness(green_base, 0.7)
     palette['green-800'] = adjust_lightness(green_base, 0.5)
@@ -158,6 +159,79 @@ def generate_css_variables(palette):
     return "\n".join(css_vars)
 
 
+def _css_color_literal(hex_color, sample):
+    """Devolve a cor no MESMO formato ja usado no arquivo.
+
+    O upstream migrou as custom properties de hex (`#ab68ff`) para triplete RGB
+    separado por espaco (`171 104 255`), porque o Tailwind as consome via
+    `rgb(var(--x) / <alpha-value>)`. Um regex fixo em hex parou de casar e o
+    whitelabel deixou de aplicar a paleta SEM falhar o build.
+    """
+    if sample.strip().startswith('#'):
+        return hex_color
+    r, g, b = hex_to_rgb(hex_color)
+    return f"{r} {g} {b}"
+
+
+def _sub_css_var(content, var_name, hex_color):
+    """Substitui `--<var>: <cor>;` aceitando hex OU triplete RGB."""
+    pattern = (
+        r'(--' + re.escape(var_name) + r':\s*)'
+        r'(#[0-9a-fA-F]{6}|\d{1,3}\s+\d{1,3}\s+\d{1,3})'
+        r'(\s*;)'
+    )
+    return re.sub(
+        pattern,
+        lambda m: m.group(1) + _css_color_literal(hex_color, m.group(2)) + m.group(3),
+        content,
+    )
+
+
+def update_tailwind_colors_js(
+    palette,
+    js_file='packages/client/src/theme/utils/createTailwindColors.js',
+):
+    """Atualiza a paleta `green` em createTailwindColors.js.
+
+    Ate a v0.8.6-rc1 esta paleta vivia em client/tailwind.config.cjs. O upstream
+    moveu para ca (client/tailwind.config.cjs faz require deste arquivo em src/),
+    entao o alvo antigo ficou orfao.
+    """
+    print(f"🎨 Atualizando paleta Tailwind (JS): {js_file}")
+    try:
+        with open(js_file, 'r', encoding='utf-8') as f:
+            content = f.read()
+    except FileNotFoundError:
+        print(f"⚠️  Aviso: Arquivo {js_file} não encontrado! Pulando...")
+        return False
+
+    with open(js_file + '.backup', 'w', encoding='utf-8') as f:
+        f.write(content)
+
+    match = re.search(r'green:\s*\{[^}]+\}', content)
+    if not match:
+        print("⚠️  Aviso: bloco `green:` não encontrado em createTailwindColors.js! Pulando...")
+        return False
+
+    block = match.group(0)
+    shades = re.findall(r"(\d+):\s*'#[0-9a-fA-F]{6}'", block)
+    lines = []
+    for shade in shades:
+        color = palette.get(f'green-{shade}')
+        if color is None:
+            # Tom que a paleta gerada nao cobre (ex.: 550): interpola vizinhos.
+            color = palette.get('green-500', palette['brand-primary'])
+        lines.append(f"    {shade}: '{color}',")
+    new_block = 'green: {\n' + '\n'.join(lines) + '\n  }'
+    content = content[: match.start()] + new_block + content[match.end():]
+
+    with open(js_file, 'w', encoding='utf-8') as f:
+        f.write(content)
+
+    print(f"✅ createTailwindColors.js atualizado: {len(shades)} tons de green")
+    return True
+
+
 def update_style_css(base_color, css_file='client/src/style.css'):
     """Atualiza o arquivo style.css com as novas cores"""
     
@@ -178,18 +252,12 @@ def update_style_css(base_color, css_file='client/src/style.css'):
         f.write(content)
     print(f"💾 Backup criado: {backup_file}")
     
-    # Substitui --brand-purple
-    content = re.sub(
-        r'--brand-purple:\s*#[0-9a-fA-F]{6};',
-        f'--brand-purple: {base_color};',
-        content
-    )
-    
-    # Substitui variações de verde
+    # Substitui --brand-purple (hex ou triplete RGB)
+    content = _sub_css_var(content, 'brand-purple', base_color)
+
+    # Substitui variações de verde (hex ou triplete RGB)
     for shade in [50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950]:
-        pattern = f'--green-{shade}:\\s*#[0-9a-fA-F]{{6}};'
-        replacement = f'--green-{shade}: {palette[f"green-{shade}"]};'
-        content = re.sub(pattern, replacement, content)
+        content = _sub_css_var(content, f'green-{shade}', palette[f'green-{shade}'])
 
     # Substitui rgba hardcoded usados pelo .btn-primary (não cobertos pelas variáveis CSS)
     # Deriva as três variantes a partir da cor base
@@ -305,10 +373,13 @@ def update_index_html(brand_name, base_color, description, html_file='client/ind
     )
     
     # Substitui meta description
+    # Tolerante a quebras de linha: o upstream reformatou esta tag em varias
+    # linhas, e o regex de linha unica deixou de casar silenciosamente.
     content = re.sub(
-        r'<meta name="description" content="[^"]*" />',
+        r'<meta\s+name="description"\s+content="[^"]*"\s*/>',
         f'<meta name="description" content="{description}" />',
-        content
+        content,
+        flags=re.DOTALL,
     )
     
     # Salva o arquivo atualizado
@@ -513,6 +584,7 @@ def main():
     
     # Atualiza tailwind.config.cjs
     tailwind_success = update_tailwind_config(palette)
+    tailwind_js_success = update_tailwind_colors_js(palette)
     
     # Atualiza index.html
     html_success = update_index_html(brand_name, base_color, description)
@@ -532,6 +604,8 @@ def main():
         if vite_success:
             print("  • client/vite.config.ts (atualizado)")
             print("  • client/vite.config.ts.backup (backup)")
+        if tailwind_js_success:
+            print("  • packages/client/src/theme/utils/createTailwindColors.js (atualizado)")
         if tailwind_success:
             print("  • client/tailwind.config.cjs (atualizado)")
             print("  • client/tailwind.config.cjs.backup (backup)")
