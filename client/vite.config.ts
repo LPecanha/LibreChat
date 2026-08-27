@@ -59,6 +59,12 @@ export default defineConfig(({ command }) => ({
         target: backendURL,
         changeOrigin: true,
       },
+      // [EXT] em dev o vite serve o index.html cru, entao __EXT_URL__ fica vazio
+      // e o cliente chama /ext relativo — que precisa chegar ao extProxy.
+      '/ext': {
+        target: backendURL,
+        changeOrigin: true,
+      },
       '/oauth': {
         target: backendURL,
         changeOrigin: true,

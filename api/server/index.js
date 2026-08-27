@@ -209,6 +209,29 @@ const startServer = async () => {
     }
   }
 
+  /**
+   * [EXT] Injeta a config do overlay inline no HTML.
+   *
+   * Isto substitui um `<script src="/api/ext-config.js">` sincrono no <head>.
+   * Aquela tag BLOQUEAVA a renderizacao: a rota respondia com `no-cache`, entao
+   * toda carga de pagina esperava um round-trip vivo ate a API antes de pintar
+   * qualquer coisa — tela em branco enquanto o container estivesse frio, sob
+   * carga ou reiniciando. Inline nao ha requisicao nenhuma.
+   *
+   * Executa durante o parsing, logo antes do bundle (que e `defer`), preservando
+   * a ordem que `EXT_URL` exige: ele e lido na avaliacao do modulo.
+   */
+  const injectExtConfig = (html) => {
+    const extUrl = process.env.EXT_URL ?? '';
+    const defaultLang = process.env.DEFAULT_LANG ?? 'pt-BR';
+    const tag =
+      '<script>' +
+      `window.__EXT_URL__=${JSON.stringify(extUrl)};` +
+      `try{if(!localStorage.getItem('i18nextLng'))localStorage.setItem('i18nextLng',${JSON.stringify(defaultLang)})}catch(e){}` +
+      '</script>';
+    return html.replace('</head>', `${tag}</head>`);
+  };
+
   const sendIndexHtml = (req, res) => {
     res.set({
       'Cache-Control': process.env.INDEX_CACHE_CONTROL || 'no-cache, no-store, must-revalidate',
@@ -221,6 +244,7 @@ const startServer = async () => {
     const saneLang = lang.replace(/"/g, '&quot;');
     let updatedIndexHtml = indexHTML.replace(/lang="en-US"/g, `lang="${saneLang}"`);
     updatedIndexHtml = maybeInjectQueryDevtoolsBootstrap(updatedIndexHtml, req);
+    updatedIndexHtml = injectExtConfig(updatedIndexHtml); // [EXT]
 
     res.type('html');
     res.send(updatedIndexHtml);
@@ -240,6 +264,19 @@ const startServer = async () => {
   app.use('/api/agents/chat', agentStartupIngressMiddleware);
   app.use(metricsMiddleware);
   app.use(noIndex);
+  /**
+   * [EXT] O proxy do admin-ext e montado ANTES do express.json() de proposito:
+   * ele repassa o corpo como stream (req.pipe). Se o parser JSON rodasse antes,
+   * qualquer content-type que ele nao entenda (multipart, por exemplo) chegaria
+   * vazio no upstream, porque o stream ja teria sido consumido.
+   */
+  if (process.env.EXT_INTERNAL_URL || process.env.EXT_PROXY_ENABLED) {
+    app.use('/ext', require('./routes/extProxy'));
+  }
+  // [EXT] catalogo de model specs para o admin-ext, protegido por segredo
+  // compartilhado. Substitui a exposicao de modelSpecs no /api/config pre-login.
+  app.use('/api/ext-specs', require('./routes/extSpecs'));
+
   app.use(express.json({ limit: '3mb' }));
   app.use(express.urlencoded({ extended: true, limit: '3mb' }));
   app.use(handleJsonParseError);
@@ -328,10 +365,6 @@ const startServer = async () => {
   app.use('/api/balance', routes.balance);
   app.use('/api/models', routes.models);
   app.use('/api/config', preAuthTenantMiddleware, optionalJwtAuth, modelAccessFilter, routes.config); // [EXT]
-  app.use('/api/ext-config.js', require('./routes/extConfig')); // [EXT] runtime config injection
-  if (process.env.EXT_INTERNAL_URL || process.env.EXT_PROXY_ENABLED) {
-    app.use('/ext', require('./routes/extProxy')); // [EXT] proxy to admin-ext
-  }
   app.use('/api/assistants', routes.assistants);
   app.use('/api/files', await routes.files.initialize());
   app.use('/images/', createValidateImageRequest(appConfig.secureImageLinks), routes.staticRoute);

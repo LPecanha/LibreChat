@@ -10,28 +10,41 @@ const router = Router();
 
 interface SpecItem { name: string; label: string; }
 
+/**
+ * Busca o catalogo de model specs no endpoint interno do LibreChat.
+ *
+ * Antes isto chamava `GET /api/config` SEM autenticacao, o que obrigava o
+ * overlay a injetar `modelSpecs` no payload pre-login — expondo a lista (e, ate
+ * ser sanitizada, os system prompts) a qualquer visitante anonimo. O endpoint
+ * dedicado e protegido por segredo compartilhado e devolve apenas name/label.
+ */
 async function fetchAvailableSpecs(): Promise<SpecItem[]> {
   const tenant = tenantContext.get();
   if (!tenant) {
     logger.warn('[modelAccess] fetchAvailableSpecs: no tenant in context');
     return [];
   }
+  const secret = process.env.EXT_SHARED_SECRET;
+  if (!secret) {
+    logger.error('[modelAccess] EXT_SHARED_SECRET nao configurado — nao e possivel buscar specs');
+    return [];
+  }
   const url = tenant.internalLibrechatUrl ?? tenant.librechatUrl;
-  logger.info(`[modelAccess] fetching specs from ${url}/api/config`);
   try {
-    const resp = await fetch(`${url}/api/config`);
+    const resp = await fetch(`${url}/api/ext-specs`, {
+      headers: { 'x-ext-secret': secret },
+      signal: AbortSignal.timeout(10_000),
+    });
     if (!resp.ok) {
-      logger.warn(`[modelAccess] /api/config responded ${resp.status}`);
+      logger.warn(`[modelAccess] /api/ext-specs respondeu ${resp.status}`);
       return [];
     }
-    const text = await resp.text();
-    logger.info(`[modelAccess] raw response (first 500 chars): ${text.slice(0, 500)}`);
-    const cfg = JSON.parse(text) as { modelSpecs?: { list?: { name: string; label?: string }[] } };
+    const cfg = (await resp.json()) as { modelSpecs?: { list?: { name: string; label?: string }[] } };
     const list = cfg.modelSpecs?.list ?? [];
-    logger.info(`[modelAccess] got ${list.length} specs`);
+    logger.debug(`[modelAccess] ${list.length} specs recebidos`);
     return list.map((s) => ({ name: s.name, label: s.label ?? s.name }));
   } catch (err) {
-    logger.error('[modelAccess] failed to fetch specs', { err });
+    logger.error('[modelAccess] falha ao buscar specs', { err });
     return [];
   }
 }

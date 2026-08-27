@@ -221,12 +221,6 @@ router.get('/', async function (req, res) {
         ...preLoginPayload,
         socialLogins: baseConfig?.registration?.socialLogins ?? defaultSocialLogins,
         turnstile: baseConfig?.turnstileConfig,
-        /* [EXT] admin-ext busca os specs via server-to-server em GET /api/config sem auth.
-           Sanitizado: strip de promptPrefix/instructions/system/context/examples — o
-           admin-ext le apenas { name, label }. Sem isso, os system prompts vazariam no
-           payload PRE-LOGIN. `showInMenu: false` NAO e filtrado de proposito: o admin
-           precisa enxergar specs ocultos para gerenciar acesso. */
-        modelSpecs: sanitizeModelSpecs(baseConfig?.modelSpecs),
         ...(rum ? { rum } : {}),
       };
 
