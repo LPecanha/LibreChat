@@ -5,16 +5,24 @@ services:
       context: ../../admin-ext
       dockerfile: Dockerfile
     restart: always
-    ports:
-      - "3092:3092"
+    # [SEC] Sem publicacao no host: o reverse proxy da 4leads_network alcanca o
+    # container pela rede interna. CORS nao e controle de acesso (curl ignora),
+    # entao publicar a porta expunha webhook e login direto.
+    # Para depurar localmente: docker compose run --rm --service-ports admin-ext
+    expose:
+      - "3092"
     environment:
       - EXT_PORT=3092
+      - NODE_ENV=production
+      - TRUST_PROXY_HOPS=${TRUST_PROXY_HOPS:-1}
       - CORS_ORIGINS=${CORS_ORIGINS}
       - ASAAS_API_KEY=${ASAAS_API_KEY:-}
       - ASAAS_SANDBOX=${ASAAS_SANDBOX:-false}
-      - ASAAS_WEBHOOK_TOKEN=${ASAAS_WEBHOOK_TOKEN:-}
+      # [SEC] sem default vazio: o boot falha se ASAAS_API_KEY existir sem este token
+      - ASAAS_WEBHOOK_TOKEN=${ASAAS_WEBHOOK_TOKEN:?defina ASAAS_WEBHOOK_TOKEN}
       - CREDIT_SCHEDULER_CRON=${CREDIT_SCHEDULER_CRON:-0 * * * *}
       - TENANTS_CONFIG=${TENANTS_CONFIG}
+      - EXT_SHARED_SECRET=${EXT_SHARED_SECRET:?defina EXT_SHARED_SECRET}
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3092/health"]
       interval: 30s
@@ -37,8 +45,8 @@ services:
         VITE_BRAND_NAME: ${VITE_BRAND_NAME:-Admin}
         VITE_BRAND_COLOR: ${VITE_BRAND_COLOR:-#2469E2}
     restart: always
-    ports:
-      - "3091:3091"
+    expose:
+      - "3091"
     depends_on:
       admin-ext:
         condition: service_healthy
