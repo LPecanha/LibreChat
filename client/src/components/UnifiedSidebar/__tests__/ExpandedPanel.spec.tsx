@@ -53,6 +53,14 @@ jest.mock('~/components/Nav/AccountSettings', () => ({
   default: () => <div data-testid="account-settings" />,
 }));
 
+// [EXT] ExpandedPanel renderiza <CreditNavButton /> logo acima de AccountSettings.
+// Ele chama useAuthContext(), que lanca fora de um AuthProvider — mesmo motivo pelo
+// qual AccountSettings ja e mockado acima.
+jest.mock('~/components/Nav/BuyCredits', () => ({
+  __esModule: true,
+  CreditNavButton: () => <div data-testid="credit-nav-button" />,
+}));
+
 import ExpandedPanel from '../ExpandedPanel';
 import store from '~/store';
 

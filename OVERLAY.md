@@ -30,6 +30,7 @@ overlay/main   ──────────●──   (our 5 touch points + a
 | `client/src/components/SidePanel/Agents/AgentPanel.tsx` | `startupConfig` destructure + models/labels useMemo + providers filter | `// [EXT]` |
 | `client/src/components/SidePanel/Agents/ModelPanel.tsx` | accept `modelLabels` prop + use in dropdown items | `// [EXT]` |
 | `client/src/components/UnifiedSidebar/ExpandedPanel.tsx` | 1 import + 1 JSX: `<CreditNavButton />` in the bottom action stack | `// [EXT]` |
+| `client/src/components/UnifiedSidebar/__tests__/ExpandedPanel.spec.tsx` | 1 `jest.mock` de `~/components/Nav/BuyCredits` (espelha o mock de `AccountSettings` que o arquivo ja tinha) | `// [EXT]` |
 | `client/src/common/types.ts` | add `modelLabels` field to `AgentModelPanelProps` | `// [EXT]` |
 | `client/index.html` | 1 line: load ext-config script | `<!-- [EXT] -->` |
 | `client/src/routes/Root.tsx` | 2 lines: import + mount `<PaymentToast />` | `// [EXT]` |
