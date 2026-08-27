@@ -12,6 +12,7 @@ import { tenantContext } from '../../lib/tenantContext';
 import { getTenants, isMultiTenant } from '../../config/tenants';
 import logger from '../../lib/logger';
 import { requireAdminJwt, requireUserJwt } from '../../middleware/auth';
+import { resolveBillingTarget } from '../../lib/billingTarget';
 import { CREDIT_PLANS, getPlanById } from './plans';
 import type { AuthenticatedRequest } from '../../middleware/auth';
 
@@ -248,8 +249,10 @@ router.post('/checkout/pix', requireUserJwt, async (req: AuthenticatedRequest, r
     const plan = getPlanById(planId);
     if (!plan) { res.status(400).json({ error: `Plano inválido: ${planId}` }); return; }
 
-    const entityId = bodyEntityId ?? req.user?.id ?? '';
-    if (!entityId) { res.status(400).json({ error: 'entityId required' }); return; }
+    // [SEC] identidade vem do JWT verificado; grupo exige associacao provada
+    const resolved = await resolveBillingTarget(req.user?.id, { entityType, entityId: bodyEntityId });
+    if (!resolved.ok) { res.status(resolved.status).json({ error: resolved.error }); return; }
+    const { entityType: billType, entityId } = resolved.target;
 
     const userEmail = req.user?.email ?? '';
     const idempotencyKey = `asaas-pix-${entityId}-${planId}-${Date.now()}`;
@@ -272,7 +275,7 @@ router.post('/checkout/pix', requireUserJwt, async (req: AuthenticatedRequest, r
     const qr = await asaasRequest<AsaasPixQr>('GET', `/v3/payments/${payment.id}/pixQrCode`);
 
     await getPaymentTxnModel().create({
-      entityType,
+      entityType: billType,
       entityId: new mongoose.Types.ObjectId(entityId),
       amount: plan.pricesBRL,
       currency: 'BRL',
@@ -281,7 +284,7 @@ router.post('/checkout/pix', requireUserJwt, async (req: AuthenticatedRequest, r
       idempotencyKey,
       creditsGranted: 0,
       externalTxnId: payment.id,
-      metadata: { planId, method: 'pix', credits: String(plan.credits), entityType },
+      metadata: { planId, method: 'pix', credits: String(plan.credits), entityType: billType },
     });
 
     res.json({
@@ -324,8 +327,10 @@ router.post('/checkout/card', requireUserJwt, async (req: AuthenticatedRequest, 
     const plan = getPlanById(planId);
     if (!plan) { res.status(400).json({ error: `Plano inválido: ${planId}` }); return; }
 
-    const entityId = bodyEntityId ?? req.user?.id ?? '';
-    if (!entityId) { res.status(400).json({ error: 'entityId required' }); return; }
+    // [SEC] identidade vem do JWT verificado; grupo exige associacao provada
+    const resolved = await resolveBillingTarget(req.user?.id, { entityType, entityId: bodyEntityId });
+    if (!resolved.ok) { res.status(resolved.status).json({ error: resolved.error }); return; }
+    const { entityType: billType, entityId } = resolved.target;
 
     const userEmail = req.user?.email ?? '';
     const idempotencyKey = `asaas-card-${entityId}-${planId}-${Date.now()}`;
@@ -362,7 +367,7 @@ router.post('/checkout/card', requireUserJwt, async (req: AuthenticatedRequest, 
     const entityObjectId = new mongoose.Types.ObjectId(entityId);
 
     await getPaymentTxnModel().create({
-      entityType,
+      entityType: billType,
       entityId: entityObjectId,
       amount: plan.pricesBRL,
       currency: 'BRL',
@@ -371,13 +376,13 @@ router.post('/checkout/card', requireUserJwt, async (req: AuthenticatedRequest, 
       idempotencyKey,
       creditsGranted: creditAmount,
       externalTxnId: payment.id,
-      metadata: { planId, method: 'card', credits: String(creditAmount), entityType },
+      metadata: { planId, method: 'card', credits: String(creditAmount), entityType: billType },
     });
 
-    await grantCredits(entityType, entityId, creditAmount);
+    await grantCredits(billType, entityId, creditAmount);
 
     if (plan.type === 'subscription') {
-      await upsertSubscription(entityType, entityId, planId, creditAmount, payment.id);
+      await upsertSubscription(billType, entityId, planId, creditAmount, payment.id);
     }
 
     logger.info('[asaas/card] credits granted', { creditAmount, planId, entityId });
@@ -420,8 +425,10 @@ router.post('/subscription', requireUserJwt, async (req: AuthenticatedRequest, r
       return;
     }
 
-    const entityId = bodyEntityId ?? req.user?.id ?? '';
-    if (!entityId) { res.status(400).json({ error: 'entityId required' }); return; }
+    // [SEC] identidade vem do JWT verificado; grupo exige associacao provada
+    const resolved = await resolveBillingTarget(req.user?.id, { entityType, entityId: bodyEntityId });
+    if (!resolved.ok) { res.status(resolved.status).json({ error: resolved.error }); return; }
+    const { entityType: billType, entityId } = resolved.target;
 
     const userEmail = req.user?.email ?? '';
     const customerId = await getOrCreateCustomer(entityId, customerName, userEmail, customerCpf);
@@ -461,7 +468,7 @@ router.post('/subscription', requireUserJwt, async (req: AuthenticatedRequest, r
     interface AsaasSubResp { id: string }
     const sub = await asaasRequest<AsaasSubResp>('POST', '/v3/subscriptions', subBody);
 
-    await upsertSubscription(entityType, entityId, planId, plan.credits, sub.id);
+    await upsertSubscription(billType, entityId, planId, plan.credits, sub.id);
 
     // For PIX: retrieve first pending payment and return QR code
     if (billingType === 'PIX') {
@@ -601,10 +608,17 @@ async function dispatchWebhook(event: string | undefined, payment: WebhookPaymen
 }
 
 router.post('/webhook', async (req, res) => {
-  // Security: validate asaas-access-token header (timing-safe)
+  // [SEC] Falha FECHADA: um segredo ausente recusa o webhook em vez de desligar
+  // a verificacao. Sem isto, qualquer um poderia forjar PAYMENT_RECEIVED e
+  // creditar uma cobranca pendente sem pagar.
   const token = (req.headers['asaas-access-token'] as string | undefined) ?? '';
   const expected = process.env.ASAAS_WEBHOOK_TOKEN ?? '';
-  if (expected && !timingSafeEqual(token, expected)) {
+  if (!expected) {
+    logger.error('[asaas/webhook] ASAAS_WEBHOOK_TOKEN nao configurado — webhook recusado');
+    res.status(503).json({ error: 'Webhook not configured' });
+    return;
+  }
+  if (!timingSafeEqual(token, expected)) {
     logger.warn('[asaas/webhook] Invalid access token');
     res.status(401).json({ error: 'Unauthorized' });
     return;

@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import mongoose, { type Model } from 'mongoose';
-import { getSubscriptionModel, getOrgProfileModel, getCreditAuditModel } from '../db/models';
+import { getSubscriptionModel, getCreditAuditModel } from '../db/models';
+import { checkOrgMembership } from '../lib/billingTarget';
 import { tenantContext } from '../lib/tenantContext';
 import logger from '../lib/logger';
 import { requireUserJwt } from '../middleware/auth';
@@ -38,37 +39,6 @@ function getCouponModel(): Model<CouponDoc> {
 }
 
 const router = Router();
-
-interface GroupDoc {
-  _id: mongoose.Types.ObjectId;
-  memberIds: string[];
-}
-
-function getGroupModel(): Model<GroupDoc> {
-  const db = tenantContext.getDb();
-  if (db.models['Group']) return db.models['Group'] as Model<GroupDoc>;
-  const schema = new mongoose.Schema<GroupDoc>(
-    { memberIds: [String] },
-    { collection: 'groups', strict: false },
-  );
-  return db.model<GroupDoc>('Group', schema);
-}
-
-async function checkOrgMembership(userId: string): Promise<{ isOrgMember: boolean; orgId?: string }> {
-  try {
-    const companyProfiles = await getOrgProfileModel().find({ type: 'company' }).select('groupId').lean();
-    if (!companyProfiles.length) return { isOrgMember: false };
-    const companyGroupIds = companyProfiles.map((p) => p.groupId);
-    const Group = getGroupModel();
-    const group = await Group.findOne({ _id: { $in: companyGroupIds }, memberIds: userId })
-      .select('_id')
-      .lean();
-    if (!group) return { isOrgMember: false };
-    return { isOrgMember: true, orgId: group._id.toString() };
-  } catch {
-    return { isOrgMember: false };
-  }
-}
 
 router.get('/subscription', requireUserJwt, async (req: AuthenticatedRequest, res) => {
   try {
@@ -137,57 +107,88 @@ router.post('/coupon/redeem', requireUserJwt, async (req: AuthenticatedRequest, 
 
     const normalizedCode = code.trim().toUpperCase();
     const Coupon = getCouponModel();
-    const coupon = await Coupon.findOne({ code: normalizedCode });
-
-    if (!coupon) {
-      res.status(404).json({ error: 'Cupom inválido ou não encontrado.' });
-      return;
-    }
-    if (!coupon.isActive) {
-      res.status(400).json({ error: 'Este cupom não está mais ativo.' });
-      return;
-    }
-    if (coupon.expiresAt && coupon.expiresAt < new Date()) {
-      res.status(400).json({ error: 'Este cupom expirou.' });
-      return;
-    }
-    if (coupon.maxUses != null && coupon.usages.length >= coupon.maxUses) {
-      res.status(400).json({ error: 'Este cupom atingiu o limite de usos.' });
-      return;
-    }
-    if (coupon.usages.some((u) => u.userId === userId)) {
-      res.status(400).json({ error: 'Você já utilizou este cupom.' });
-      return;
-    }
-
-    const creditsGranted = coupon.credits;
     const userObjectId = new mongoose.Types.ObjectId(userId);
+
+    // [SEC] Reivindicacao ATOMICA. As condicoes vivem na query, entao o MongoDB
+    // decide o vencedor entre requisicoes concorrentes. O padrao anterior lia as
+    // validacoes em memoria e escrevia depois — N requisicoes paralelas com o
+    // mesmo codigo passavam todas pelas checagens e creditavam N vezes.
+    const now = new Date();
+    const claim = await Coupon.findOneAndUpdate(
+      {
+        code: normalizedCode,
+        isActive: true,
+        'usages.userId': { $ne: userId },
+        $and: [
+          { $or: [{ expiresAt: { $exists: false } }, { expiresAt: null }, { expiresAt: { $gt: now } }] },
+          {
+            $or: [
+              { maxUses: { $exists: false } },
+              { maxUses: null },
+              { $expr: { $lt: [{ $size: '$usages' }, '$maxUses'] } },
+            ],
+          },
+        ],
+      },
+      {
+        $push: {
+          usages: { userId, userName, userEmail, usedAt: now, creditsGranted: 0 },
+        },
+      },
+      { new: false },
+    );
+
+    if (!claim) {
+      // Nao casou. Le o cupom so para dizer POR QUE — sem efeito colateral.
+      const existing = await Coupon.findOne({ code: normalizedCode }).lean();
+      if (!existing) {
+        res.status(404).json({ error: 'Cupom inválido ou não encontrado.' });
+      } else if (!existing.isActive) {
+        res.status(400).json({ error: 'Este cupom não está mais ativo.' });
+      } else if (existing.expiresAt && existing.expiresAt < now) {
+        res.status(400).json({ error: 'Este cupom expirou.' });
+      } else if (existing.usages.some((u) => u.userId === userId)) {
+        res.status(400).json({ error: 'Você já utilizou este cupom.' });
+      } else {
+        res.status(400).json({ error: 'Este cupom atingiu o limite de usos.' });
+      }
+      return;
+    }
+
+    // A partir daqui o uso ja esta registrado e e exclusivo deste usuario.
+    const creditsGranted = claim.credits;
     const Balance = getBalanceModel();
 
     const before = await Balance.findOne({ user: userObjectId }).lean();
     const balanceBefore = before?.tokenCredits ?? 0;
 
-    const updated = await Balance.findOneAndUpdate(
-      { user: userObjectId },
-      { $inc: { tokenCredits: creditsGranted } },
-      { upsert: true, new: true },
+    let updated;
+    try {
+      updated = await Balance.findOneAndUpdate(
+        { user: userObjectId },
+        { $inc: { tokenCredits: creditsGranted } },
+        { upsert: true, new: true },
+      );
+    } catch (err) {
+      // Credito falhou apos a reivindicacao — devolve o uso para nao queimar o cupom.
+      await Coupon.updateOne({ code: normalizedCode }, { $pull: { usages: { userId } } });
+      throw err;
+    }
+
+    await Coupon.updateOne(
+      { code: normalizedCode, 'usages.userId': userId },
+      { $set: { 'usages.$.creditsGranted': creditsGranted } },
     );
 
-    await Promise.all([
-      getCreditAuditModel().create({
-        entityType: 'user',
-        entityId: userObjectId,
-        adminId: userObjectId,
-        amount: creditsGranted,
-        reason: `coupon:${normalizedCode}`,
-        balanceBefore,
-        balanceAfter: updated?.tokenCredits ?? balanceBefore + creditsGranted,
-      }),
-      Coupon.updateOne(
-        { code: normalizedCode },
-        { $push: { usages: { userId, userName, userEmail, usedAt: new Date(), creditsGranted } } },
-      ),
-    ]);
+    await getCreditAuditModel().create({
+      entityType: 'user',
+      entityId: userObjectId,
+      adminId: userObjectId,
+      amount: creditsGranted,
+      reason: `coupon:${normalizedCode}`,
+      balanceBefore,
+      balanceAfter: updated?.tokenCredits ?? balanceBefore + creditsGranted,
+    });
 
     logger.info('[user/coupon] coupon redeemed', { userId, code: normalizedCode, creditsGranted });
     res.json({ creditsGranted });
