@@ -173,7 +173,7 @@ memory:
     # linha a extracao automatica NAO roda (memorias existentes ainda sao lidas).
     enabled: true
     provider: "openAI"
-    model: "gpt-5.5"
+    model: "gpt-5.6-luna"
     instructions: |
       Store memory using only the specified validKeys.
       Prioritize retaining context from uploaded files and user instructions.
@@ -261,19 +261,21 @@ endpoints:
     baseURL: "https://api.openai.com/v1"
     models:
       default:
-        - "gpt-5.5-pro"
-        - "gpt-5.5"
+        - "gpt-5.6-sol"
+        - "gpt-5.6-terra"
+        - "gpt-5.6-luna"
       fetch: false
     titleConvo: true
     titleMethod: "completion"
+    titleModel: "gpt-5.6-luna"
 
   anthropic:
     apiKey: "${ANTHROPIC_API_KEY}"
     models:
-      - "claude-opus-5"
       - "claude-fable-5"
-      - "claude-opus-4-8"
-      - "claude-sonnet-4-6"
+      - "claude-opus-5"
+      - "claude-sonnet-5"
+      - "claude-haiku-4-5"
 
   google:
     apiKey: "${GEMINI_API_KEY}"
@@ -304,94 +306,99 @@ endpoints:
 # MODEL SPECS
 # ==============================================================================
 modelSpecs:
+  # prioritize: true e o default — os specs aparecem primeiro no seletor, mas o
+  # usuario ainda consegue escolher um modelo cru do endpoint.
+  #
+  # enforce: true restringe a APENAS estes specs. Vale considerar: o catalogo e
+  # curado, a cobranca e por credito e o admin-ext controla acesso por spec —
+  # sem enforce, um usuario pode selecionar um modelo fora da lista, cuja
+  # precificacao voces nao revisaram.
+  # enforce: true
   addedEndpoints:
     - agents
   list:
 
-    # ── OpenAI ──────────────────────────────────────────────────────────────────
-    - name: "gpt-55-pro"
-      label: "GPT-5.5 Pro"
-      preset:
-        endpoint: openAI
-        model: "gpt-5.5-pro"
-        max_tokens: 8192
-        temperature: 0.7
-        top_p: 0.9
-
-    - name: "gpt-55-geral"
-      label: "GPT-5.5"
-      preset:
-        endpoint: openAI
-        model: "gpt-5.5"
-        max_tokens: 8192
-        temperature: 0.7
-        top_p: 0.9
-
-    - name: "gpt-55-raciocinio"
-      label: "GPT-5.5 (Raciocínio Profundo)"
-      preset:
-        endpoint: openAI
-        model: "gpt-5.5"
-        dropParams: ["temperature", "top_p", "frequency_penalty", "presence_penalty", "max_tokens"]
-        addParams:
-          reasoning:
-            effort: "high"
-
     # ── Anthropic ───────────────────────────────────────────────────────────────
+    # Fable 5, Opus 5 e Sonnet 5 sao "adaptive thinking always on" e REJEITAM
+    # parametros de sampling (temperature/top_p) — ver omitsSamplingParameters().
+    # Por isso os presets abaixo nao os definem. Esforco padrao: high.
+    - name: "claude-fable-5"
+      label: "Claude Fable 5"
+      description: "Inteligencia de proxima geracao para agentes de longa duracao."
+      preset:
+        endpoint: anthropic
+        model: "claude-fable-5"
+        maxContextTokens: 1000000
+        max_tokens: 128000
+
     - name: "claude-opus-5"
       label: "Claude Opus 5"
-      # [1.3.13] softDefault: default apenas para quem ainda nao escolheu nada.
-      # Diferente de `default: true`, nao sobrepoe a escolha ja feita pelo usuario.
+      description: "Programacao agentica complexa e trabalho corporativo."
+      # softDefault: default apenas para quem ainda nao escolheu nada; nao
+      # sobrepoe a escolha ja feita pelo usuario.
       softDefault: true
-      webSearch: false
-      fileSearch: false
       preset:
         endpoint: anthropic
         model: "claude-opus-5"
-        maxContextTokens: 200000
-        max_tokens: 16000
-
-    - name: "claude-opus-48"
-      label: "Claude Opus 4.8"
-      webSearch: false
-      fileSearch: false
-      preset:
-        endpoint: anthropic
-        model: "claude-opus-4-8"
-        maxContextTokens: 200000
-        max_tokens: 16000
-
-    - name: "claude-opus-48-thinking"
-      label: "Claude Opus 4.8 (Raciocínio)"
-      webSearch: false
-      fileSearch: false
-      preset:
-        endpoint: anthropic
-        model: "claude-opus-4-8"
-        maxContextTokens: 200000
-        max_tokens: 16000
-        addParams:
-          thinking:
-            type: "enabled"
-            budget_tokens: 10000
-
-    - name: "claude-sonnet-46-1m"
-      label: "Claude Sonnet 4.6 (1M ctx)"
-      webSearch: false
-      fileSearch: false
-      preset:
-        endpoint: anthropic
-        model: "claude-sonnet-4-6"
         maxContextTokens: 1000000
-        max_tokens: 8192
+        max_tokens: 128000
 
-    - name: "claude-sonnet-46-200k"
-      label: "Claude Sonnet 4.6 MAX - 200K"
+    - name: "claude-sonnet-5"
+      label: "Claude Sonnet 5"
+      description: "A melhor combinacao de velocidade e inteligencia."
       preset:
         endpoint: anthropic
-        model: "claude-sonnet-4-6"
+        model: "claude-sonnet-5"
+        maxContextTokens: 1000000
+        max_tokens: 128000
+
+    - name: "claude-haiku-45"
+      label: "Claude Haiku 4.5"
+      description: "O mais rapido, com inteligencia proxima da fronteira."
+      preset:
+        endpoint: anthropic
+        model: "claude-haiku-4-5"
         maxContextTokens: 200000
-        max_tokens: 8192
+        max_tokens: 64000
+        temperature: 0.7
+
+    # ── OpenAI ──────────────────────────────────────────────────────────────────
+    - name: "gpt-56-sol"
+      label: "GPT-5.6 Sol"
+      description: "Modelo de fronteira para trabalho profissional complexo."
+      preset:
+        endpoint: openAI
+        model: "gpt-5.6-sol"
+        maxContextTokens: 1050000
+        max_tokens: 128000
+
+    - name: "gpt-56-sol-raciocinio"
+      label: "GPT-5.6 Sol (Raciocinio Profundo)"
+      description: "Sol com esforco de raciocinio elevado, para problemas dificeis."
+      preset:
+        endpoint: openAI
+        model: "gpt-5.6-sol"
+        maxContextTokens: 1050000
+        max_tokens: 128000
+        reasoning_effort: "xhigh"
+
+    - name: "gpt-56-terra"
+      label: "GPT-5.6 Terra"
+      description: "Equilibrio entre inteligencia e custo."
+      preset:
+        endpoint: openAI
+        model: "gpt-5.6-terra"
+        maxContextTokens: 1050000
+        max_tokens: 128000
+
+    - name: "gpt-56-luna"
+      label: "GPT-5.6 Luna"
+      description: "Otimizado para cargas sensiveis a custo."
+      preset:
+        endpoint: openAI
+        model: "gpt-5.6-luna"
+        maxContextTokens: 1050000
+        max_tokens: 128000
 
     # ── Google ──────────────────────────────────────────────────────────────────
     - name: "gemini-31-pro"
