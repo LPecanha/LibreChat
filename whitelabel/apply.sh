@@ -77,4 +77,36 @@ find client/src -name "*.tsx" -o -name "*.ts" -o -name "*.css" | while IFS= read
   sed -i "s/#${LIBRECHAT_GREEN_UPPER}/#${BRAND_COLOR_UPPER}/g; s/#${LIBRECHAT_GREEN_LOWER}/#${BRAND_COLOR_LOWER}/g" "$file"
 done
 
+# ── Step 6: Swap the agent icon ──────────────────────────────────────────────
+# O LibreChat usa o icone `Feather` do lucide para representar agentes, em 4
+# pontos (avatar do agente, icone da mensagem, icone minimo e icone do
+# endpoint). Ele e reconhecivel como LibreChat, entao cada cliente escolhe o
+# seu por BRAND_AGENT_ICON no brand.env.
+#
+# A troca acontece SO aqui, no build: os arquivos do upstream permanecem
+# intocados no repositorio (zero superficie de rebase) e os testes, que mockam
+# `Feather`, continuam passando sobre a fonte original.
+#
+# O valor precisa ser um export valido do lucide-react (PascalCase). A classe
+# CSS que o lucide gera acompanha o nome automaticamente (lucide-bot etc.), e
+# nenhum estilo do projeto mira .lucide-feather.
+if [ -n "$BRAND_AGENT_ICON" ]; then
+  echo "==> Swapping agent icon: Feather -> ${BRAND_AGENT_ICON}"
+  for f in \
+    client/src/utils/agents.tsx \
+    client/src/components/Endpoints/MessageEndpointIcon.tsx \
+    client/src/components/Endpoints/MinimalIcon.tsx \
+    client/src/hooks/Endpoint/Icons.tsx
+  do
+    [ -f "$f" ] || { echo "    aviso: ${f} nao encontrado, pulando" >&2; continue; }
+    # Padroes explicitos em vez de \b: o suporte a word boundary varia entre
+    # BSD sed (macOS) e GNU/busybox (Alpine). Estas duas formas cobrem todos os
+    # usos e nao podem casar por acidente.
+    sed -i \
+      -e "s/{ Feather }/{ ${BRAND_AGENT_ICON} }/g" \
+      -e "s/<Feather /<${BRAND_AGENT_ICON} /g" \
+      "$f"
+  done
+fi
+
 echo "==> Whitelabel applied successfully."
