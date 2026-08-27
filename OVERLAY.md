@@ -34,7 +34,7 @@ overlay/main   ──────────●──   (our 5 touch points + a
 | `client/index.html` | 1 line: load ext-config script | `<!-- [EXT] -->` |
 | `client/src/routes/Root.tsx` | 2 lines: import + mount `<PaymentToast />` | `// [EXT]` |
 | `client/src/components/Nav/AccountSettings.tsx` | 1 import + 1 JSX: `<ExtBalanceDisplay />` | `// [EXT]` |
-| `client/src/components/Nav/SettingsTabs/Balance/Balance.tsx` | replace body: `<ExtBalancePanel />` | `// [EXT]` |
+| `client/src/components/Nav/Settings/registry.tsx` | 1 import + swap `Component` na entry `tokenCredits` → `ExtBalancePanel` | `// [EXT]` |
 | `client/src/locales/en/translation.json` | add-only: `com_nav_buy_credits*` keys | (no marker needed — add-only) |
 
 All core touches are marked `// [EXT]` or `<!-- [EXT] -->` so they are instantly visible in diffs.
@@ -167,17 +167,34 @@ And replace the balance display block with:
 <ExtBalanceDisplay tokenCredits={balanceQuery.data.tokenCredits} />
 ```
 
-**`client/src/components/Nav/SettingsTabs/Balance/Balance.tsx`** — replace the entire file body with:
+**`client/src/components/Nav/Settings/registry.tsx`** — desde o upstream v0.8.8-rc1 (PR #13722,
+"Redesign Settings with Registry-Driven Dialog") o dialogo de Settings e montado a partir de um
+registry declarativo, e `SettingsTabs/Balance/Balance.tsx` **nao existe mais**.
+
+Troque o import do `BillingControls`:
 ```tsx
-import React from 'react';
+import { AutoRefill } from './BillingControls';
 import { ExtBalancePanel } from '~/components/Nav/BuyCredits'; // [EXT]
-
-function Balance() {
-  return <ExtBalancePanel />; // [EXT]
-}
-
-export default React.memo(Balance);
 ```
+E, na entry `tokenCredits` (`section: 'billing'`), troque o `Component`:
+```tsx
+{
+  id: 'tokenCredits',
+  tab: ACCOUNT,
+  section: 'billing',
+  labelKey: 'com_ui_settings_label_credits',
+  keywords: ['credits', 'creditos', 'saldo', 'buy', 'comprar'], // [EXT]
+  show: (ctx) => ctx.balanceEnabled,
+  /* [EXT] substitui TokenCredits do upstream: exibe saldo em USD (nunca
+     tokenCredits crus) + botao Comprar Creditos. */
+  Component: ExtBalancePanel,
+},
+```
+`Content.tsx` renderiza cada entry como `<div className="px-4 py-3"><Cmp /></div>` — o `labelKey`
+so alimenta a busca, nao vira rotulo visivel. Por isso `ExtBalancePanel` nao aplica padding externo.
+
+> Adicionar um painel novo ao Settings agora custa **uma entry no registry**, nao um arquivo
+> reescrito. Prefira esse caminho a tocar qualquer arquivo de `Nav/Settings/`.
 
 **`client/src/locales/en/translation.json`** — add the `com_nav_buy_credits*` keys (see git log for the exact keys).
 
