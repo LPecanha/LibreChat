@@ -20,16 +20,28 @@ export function tenantFromHeader(req: Request, res: Response, next: NextFunction
   tenantContext.run(tenant, next);
 }
 
-export function tenantFromOrigin(req: Request, _res: Response, next: NextFunction): void {
+/**
+ * [SEC] Falha FECHADA em modo multi-tenant.
+ *
+ * Antes, uma origem nao reconhecida seguia com `next()` SEM contexto de tenant.
+ * A partir dai `getSecret()` caia para process.env.JWT_SECRET e `getDb()` para a
+ * conexao mongoose padrao — validando token e lendo dados no banco errado, em
+ * silencio. Com varios tenants isso e vazamento entre clientes.
+ */
+export function tenantFromOrigin(req: Request, res: Response, next: NextFunction): void {
   if (!isMultiTenant()) { next(); return; }
 
   const origin = req.headers.origin as string | undefined;
-  if (origin) {
-    const tenant = getTenantByOrigin(origin);
-    if (tenant) {
-      tenantContext.run(tenant, next);
-      return;
-    }
+  const tenant = origin ? getTenantByOrigin(origin) : null;
+
+  if (!tenant) {
+    res.status(400).json({
+      error: origin
+        ? `Unknown origin: ${origin}`
+        : 'Origin header is required in multi-tenant mode',
+    });
+    return;
   }
-  next();
+
+  tenantContext.run(tenant, next);
 }

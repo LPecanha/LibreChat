@@ -21,34 +21,61 @@ function getBalanceModel(): Model<BalanceDoc> {
   return db.model<BalanceDoc>('Balance', schema);
 }
 
+/**
+ * Reivindica o ciclo ANTES de creditar.
+ *
+ * A ordem anterior era: creditar -> avancar nextRefillAt, em duas escritas
+ * separadas. Uma queda entre elas fazia a proxima execucao creditar de novo, e
+ * sem lock entre instancias uma segunda replica creditaria em paralelo. Avancar
+ * a data primeiro, condicionado ao valor que lemos, faz o MongoDB eleger um
+ * unico vencedor por ciclo.
+ */
 async function processSubscription(sub: ISubscription): Promise<void> {
   const { entityType, entityId, creditsPerCycle, cycleIntervalDays } = sub;
-
-  if (entityType === 'group') {
-    await getOrgBalanceModel().findOneAndUpdate(
-      { groupId: entityId },
-      { $inc: { poolCredits: creditsPerCycle, totalPurchased: creditsPerCycle } },
-      { upsert: true },
-    );
-  } else {
-    const Balance = getBalanceModel();
-    await Balance.findOneAndUpdate(
-      { user: entityId },
-      { $inc: { tokenCredits: creditsPerCycle } },
-      { upsert: true },
-    );
-  }
 
   const nextRefillAt = new Date();
   nextRefillAt.setDate(nextRefillAt.getDate() + cycleIntervalDays);
 
-  await getSubscriptionModel().findByIdAndUpdate(sub._id, {
-    $set: {
-      nextRefillAt,
-      currentPeriodStart: new Date(),
-      currentPeriodEnd: nextRefillAt,
+  const claimed = await getSubscriptionModel().findOneAndUpdate(
+    { _id: sub._id, status: 'active', nextRefillAt: sub.nextRefillAt },
+    {
+      $set: {
+        nextRefillAt,
+        currentPeriodStart: new Date(),
+        currentPeriodEnd: nextRefillAt,
+      },
     },
-  });
+    { new: false },
+  );
+
+  // Outra instancia (ou outra rodada) ja levou este ciclo.
+  if (!claimed) {
+    logger.debug('Subscription cycle already claimed elsewhere', { id: sub._id.toString() });
+    return;
+  }
+
+  try {
+    if (entityType === 'group') {
+      await getOrgBalanceModel().findOneAndUpdate(
+        { groupId: entityId },
+        { $inc: { poolCredits: creditsPerCycle, totalPurchased: creditsPerCycle } },
+        { upsert: true },
+      );
+    } else {
+      await getBalanceModel().findOneAndUpdate(
+        { user: entityId },
+        { $inc: { tokenCredits: creditsPerCycle } },
+        { upsert: true },
+      );
+    }
+  } catch (err) {
+    // Credito falhou apos a reivindicacao — devolve o ciclo para a proxima rodada.
+    await getSubscriptionModel().updateOne(
+      { _id: sub._id },
+      { $set: { nextRefillAt: sub.nextRefillAt } },
+    );
+    throw err;
+  }
 
   logger.info('Subscription refilled', {
     entityType,
