@@ -24,15 +24,15 @@ overlay/main   ──────────●──   (our 5 touch points + a
 
 | File | What changed | Marker |
 |---|---|---|
-| `api/server/index.js` | 4 additions: require `modelAccessFilter` + inject on `/api/config` + mount `/api/ext-config.js` + conditional mount `/ext` proxy | `// [EXT]` |
-| `api/server/routes/config.js` | 1 line: include `modelSpecs` in unauthenticated `/api/config` response | `// [EXT]` |
-| `api/server/routes/extConfig.js` | set `DEFAULT_LANG` in localStorage (default pt-BR) for new users | `// [EXT]` |
+| `api/server/index.js` | require `modelAccessFilter` + inject on `/api/config` + mount `/ext` (ANTES do `express.json`) + mount `/api/ext-specs` | `// [EXT]` |
+| `api/server/index.js` (`sendIndexHtml`) | injeta `window.__EXT_URL__` inline no HTML — substitui o `<script src>` bloqueante | `// [EXT]` |
+| `api/server/routes/extSpecs.js` | **novo** — catalogo de model specs para o admin-ext, protegido por `EXT_SHARED_SECRET` | `// [EXT]` |
 | `client/src/components/SidePanel/Agents/AgentPanel.tsx` | `startupConfig` destructure + models/labels useMemo + providers filter | `// [EXT]` |
 | `client/src/components/SidePanel/Agents/ModelPanel.tsx` | accept `modelLabels` prop + use in dropdown items | `// [EXT]` |
 | `client/src/components/UnifiedSidebar/ExpandedPanel.tsx` | 1 import + 1 JSX: `<CreditNavButton />` in the bottom action stack | `// [EXT]` |
 | `client/src/components/UnifiedSidebar/__tests__/ExpandedPanel.spec.tsx` | 1 `jest.mock` de `~/components/Nav/BuyCredits` (espelha o mock de `AccountSettings` que o arquivo ja tinha) | `// [EXT]` |
 | `client/src/common/types.ts` | add `modelLabels` field to `AgentModelPanelProps` | `// [EXT]` |
-| `client/index.html` | 1 line: load ext-config script | `<!-- [EXT] -->` |
+| `client/vite.config.ts` | limite workbox 8MB + proxy `/ext` em dev | `// [EXT]` |
 | `client/src/routes/Root.tsx` | 2 lines: import + mount `<PaymentToast />` | `// [EXT]` |
 | `client/src/components/Nav/AccountSettings.tsx` | 1 import + 1 JSX: `<ExtBalanceDisplay />` | `// [EXT]` |
 | `client/src/components/Nav/Settings/registry.tsx` | 1 import + swap `Component` na entry `tokenCredits` → `ExtBalancePanel` | `// [EXT]` |
@@ -227,33 +227,6 @@ const models = useMemo(() => {
   return modelsQuery.data ?? {};
 }, [startupConfig?.modelSpecs?.list, modelsQuery.data]);
 ```
-
----
-
-## Testes do upstream que falham de proposito
-
-`api/server/routes/__tests__/config.spec.js` — 2 casos no bloco
-`GET /api/config › unauthenticated`:
-
-- `should map tenant-scoped config fields in unauthenticated response`
-- `should return minimal payload without authenticated-only fields`
-
-Ambos afirmam `expect(response.body).not.toHaveProperty('modelSpecs')`. O overlay
-**inclui** `modelSpecs` nesse payload de proposito, porque `admin-ext` busca os specs
-via `GET {internalLibrechatUrl}/api/config` **sem autenticacao** (server-to-server na
-rede interna do Docker) — ver `admin-ext/src/routes/admin/modelAccess.ts`.
-
-Essa divergencia e **anterior ao merge do v0.8.8-rc1** — nao e regressao. Desde o
-v0.8.8-rc1 o valor vai por `sanitizeModelSpecs()`, que remove `promptPrefix`,
-`instructions`, `additional_instructions`, `system`, `context` e `examples`. Sem isso
-os system prompts vazariam para qualquer visitante anonimo. O `admin-ext` le somente
-`{ name, label }`, entao a sanitizacao nao muda nada para ele.
-
-> **Melhoria recomendada (nao aplicada):** expor os specs ao `admin-ext` por um
-> endpoint interno dedicado protegido por segredo compartilhado (ex.: estender
-> `extProxy`/`extConfig`) e remover a linha `[EXT]` de `config.js`. Isso elimina de
-> vez a exposicao pre-login, faz os 2 testes do upstream passarem e **remove um touch
-> point** da superficie de rebase. Exige uma env var nova nos servidores.
 
 ---
 
