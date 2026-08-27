@@ -16,7 +16,7 @@ import type {
   Agent,
 } from 'librechat-data-provider';
 import type { Endpoint } from '~/common';
-import { useHasAccess, useShowMarketplace } from '~/hooks';
+import { useHasAccess, useShowMarketplace, useLocalize } from '~/hooks';
 import { useGetEndpointsQuery } from '~/data-provider';
 import { mapEndpoints, getIconKey } from '~/utils';
 import { icons } from './Icons';
@@ -34,6 +34,7 @@ export const useEndpoints = ({
   endpointsConfig: TEndpointsConfig;
   startupConfig: TStartupConfig | undefined;
 }) => {
+  const localize = useLocalize(); // [EXT]
   const modelsQuery = useGetModelsQuery();
   const { data: endpoints = [] } = useGetEndpointsQuery({ select: mapEndpoints });
   const interfaceConfig = startupConfig?.interface ?? defaultInterface;
@@ -103,7 +104,13 @@ export const useEndpoints = ({
       // Base result object with formatted default icon
       const result: Endpoint = {
         value: ep,
-        label: alternateName[ep] || ep,
+        /* [EXT] `alternateName` mistura nomes de provedor (OpenAI, Anthropic —
+           que NAO se traduzem) com uma frase de UI: 'My Agents'. Localizamos so
+           essa; o resto continua vindo do mapa. */
+        label:
+          ep === EModelEndpoint.agents
+            ? localize('com_ui_my_agents')
+            : alternateName[ep] || ep,
         hasModels,
         icon: Icon
           ? React.createElement(Icon, {
@@ -198,6 +205,7 @@ export const useEndpoints = ({
     azureAssistants,
     endpointsConfig,
     filteredEndpoints,
+    localize,
     modelsQuery.data,
     showAgentMarketplace,
   ]);
