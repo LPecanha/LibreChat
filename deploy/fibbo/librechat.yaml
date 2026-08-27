@@ -275,16 +275,14 @@ endpoints:
       - "claude-fable-5"
       - "claude-opus-5"
       - "claude-sonnet-5"
-      - "claude-haiku-4-5"
 
   google:
     apiKey: "${GEMINI_API_KEY}"
     models:
       default:
-        - "gemini-3.1-pro-preview"
-        - "gemini-3-flash-preview"
-        - "gemini-2.5-flash-image"
-        - "imagen-4"
+        - "gemini-3.6-flash"
+        - "gemini-3.5-flash"
+        - "gemini-3.5-flash-lite"
       fetch: false
 
   custom:
@@ -293,14 +291,86 @@ endpoints:
       baseURL: "https://api.x.ai/v1"
       models:
         default:
-          - "grok-4.3"
-          - "grok-4-0709"
-          - "grok-code-fast-1"
+          - "grok-4.6"
         fetch: false
       titleConvo: true
       titleMethod: "completion"
-      titleModel: "grok-code-fast-1"
+      titleModel: "grok-4.6"
       modelDisplayLabel: "Grok"
+      # [1.3.13] tokenConfig — OBRIGATORIO aqui. Nenhum grok-4.x novo existe na
+      # tabela do LibreChat, e findMatchingPattern cai no maior `includes`, que e
+      # 'grok-4' (3.00/15.00). O preco real do grok-4.6 e 2/6 — ou seja, sem isto
+      # a plataforma cobra 1,5x a mais na entrada e 2,5x a mais na saida.
+      #
+      # tokenConfig NAO suporta faixa: a xAI dobra a tarifa a partir de 200k
+      # tokens de prompt (2/6 -> 4/12). Fixamos a tarifa BAIXA, que e a correta
+      # para a variante 200K e para a maioria das requisicoes na variante 500K.
+      # Acima de 200k na variante completa a cobranca fica ABAIXO do custo real.
+      tokenConfig:
+        grok-4.6:
+          prompt: 2
+          completion: 6
+          context: 500000
+          cacheRead: 0.5
+
+    # ── Moonshot / Kimi ─────────────────────────────────────────────────────────
+    # O nome "moonshot" nao e arbitrario: bate com KnownEndpoints.moonshot, que
+    # ativa o icone dedicado (MoonshotIcon) e o tratamento de provider proprio.
+    - name: "moonshot"
+      apiKey: "${MOONSHOT_API_KEY}"
+      baseURL: "https://api.moonshot.ai/v1"
+      models:
+        default:
+          - "kimi-k3"
+        fetch: false
+      titleConvo: true
+      titleMethod: "completion"
+      titleModel: "kimi-k3"
+      modelDisplayLabel: "Kimi"
+      # [1.3.13] tokenConfig — OBRIGATORIO. kimi-k3 nao existe na tabela do
+      # LibreChat (e mais novo que o v0.8.8-rc1) e nao casa com nenhuma chave:
+      # as entradas kimi-* param no k2. Sem override cai no defaultRate de 6/6,
+      # cobrando o dobro na entrada e 2,5x MENOS na saida que o custo real.
+      # Preco oficial: 3.00 entrada / 15.00 saida / 0.30 cache hit. Sem faixas.
+      tokenConfig:
+        kimi-k3:
+          prompt: 3
+          completion: 15
+          context: 1048576
+          cacheRead: 0.3
+
+    # ── Z.ai / GLM ──────────────────────────────────────────────────────────────
+    - name: "zai"
+      apiKey: "${ZAI_API_KEY}"
+      baseURL: "https://api.z.ai/api/paas/v4"
+      models:
+        default:
+          - "glm-5.3"
+          - "glm-5.3-flash"
+        fetch: false
+      titleConvo: true
+      titleMethod: "completion"
+      titleModel: "glm-5.3-flash"
+      modelDisplayLabel: "GLM"
+      # [1.3.13] tokenConfig — OBRIGATORIO. Nenhum glm-5.x existe na tabela do
+      # LibreChat (ela para no glm-4.6) e nao casa com nenhuma chave, entao cai
+      # no defaultRate de 6/6. Para o Flash isso seria 40x a mais na entrada.
+      # Sem faixas de contexto em nenhum dos dois.
+      #
+      # NOTA: o Flash esta com 50% de desconto promocional ate 09/09/2026
+      # (0.075 / 0.25). Usamos a tarifa CHEIA — se a promo fosse lancada aqui,
+      # apos o vencimento a plataforma cobraria metade do custo real, em silencio.
+      tokenConfig:
+        glm-5.3:
+          prompt: 1.4
+          completion: 4.4
+          context: 1048576
+          cacheRead: 0.26
+        glm-5.3-flash:
+          prompt: 0.15
+          completion: 0.5
+          context: 1048576
+          cacheRead: 0.03
 
 # ==============================================================================
 # MODEL SPECS
@@ -321,117 +391,272 @@ modelSpecs:
     # ── Anthropic ───────────────────────────────────────────────────────────────
     # Fable 5, Opus 5 e Sonnet 5 sao "adaptive thinking always on" e REJEITAM
     # parametros de sampling (temperature/top_p) — ver omitsSamplingParameters().
-    # Por isso os presets abaixo nao os definem. Esforco padrao: high.
-    - name: "claude-fable-5"
-      label: "Claude Fable 5"
-      description: "Inteligencia de proxima geracao para agentes de longa duracao."
+    # Nao ha faixa de preco premium para Claude: 1M e 200K custam a MESMA tarifa
+    # por token. A versao reduzida serve para limitar o custo POR REQUISICAO,
+    # evitando que o contexto cresca sem teto numa conversa longa.
+    - name: "claude-fable-5-1m"
+      label: "Claude Fable 5 Raciocínio Profundo"
+      description: "Percorre bases de código inteiras e acervos longos sem perder o fio da meada. Para agentes que trabalham por horas."
       preset:
         endpoint: anthropic
         model: "claude-fable-5"
         maxContextTokens: 1000000
         max_tokens: 128000
 
-    - name: "claude-opus-5"
-      label: "Claude Opus 5"
-      description: "Programacao agentica complexa e trabalho corporativo."
-      # softDefault: default apenas para quem ainda nao escolheu nada; nao
-      # sobrepoe a escolha ja feita pelo usuario.
-      softDefault: true
+    - name: "claude-fable-5-200k"
+      label: "Claude Fable 5"
+      description: "Inteligência de próxima geração para tarefas complexas e agentes autônomos."
+      preset:
+        endpoint: anthropic
+        model: "claude-fable-5"
+        maxContextTokens: 200000
+        max_tokens: 128000
+
+    - name: "claude-opus-5-1m"
+      label: "Claude Opus 5 Raciocínio Profundo"
+      description: "Raciocina sobre repositórios completos e conjuntos extensos de documentos numa única conversa."
       preset:
         endpoint: anthropic
         model: "claude-opus-5"
         maxContextTokens: 1000000
         max_tokens: 128000
 
-    - name: "claude-sonnet-5"
-      label: "Claude Sonnet 5"
-      description: "A melhor combinacao de velocidade e inteligencia."
+    - name: "claude-opus-5-200k"
+      label: "Claude Opus 5"
+      description: "Programação agêntica complexa e trabalho corporativo. Recomendado para a maioria das tarefas difíceis."
+      # softDefault: default apenas para quem ainda nao escolheu nada; nao
+      # sobrepoe a escolha ja feita. Aponta para a variante reduzida de
+      # proposito — mesma tarifa, teto de custo por requisicao menor.
+      softDefault: true
+      preset:
+        endpoint: anthropic
+        model: "claude-opus-5"
+        maxContextTokens: 200000
+        max_tokens: 128000
+
+    - name: "claude-sonnet-5-1m"
+      label: "Claude Sonnet 5 Raciocínio Profundo"
+      description: "Une velocidade e profundidade em material extenso: pesquisa longa e revisão de código em escala."
       preset:
         endpoint: anthropic
         model: "claude-sonnet-5"
         maxContextTokens: 1000000
         max_tokens: 128000
 
-    - name: "claude-haiku-45"
-      label: "Claude Haiku 4.5"
-      description: "O mais rapido, com inteligencia proxima da fronteira."
+    - name: "claude-sonnet-5-200k"
+      label: "Claude Sonnet 5"
+      description: "A melhor combinação de velocidade e inteligência para o dia a dia."
       preset:
         endpoint: anthropic
-        model: "claude-haiku-4-5"
+        model: "claude-sonnet-5"
         maxContextTokens: 200000
-        max_tokens: 64000
-        temperature: 0.7
+        max_tokens: 128000
 
     # ── OpenAI ──────────────────────────────────────────────────────────────────
-    - name: "gpt-56-sol"
+    # A familia GPT-5.6 TEM faixa premium: acima de 272.000 tokens de entrada a
+    # tarifa DOBRA (Sol 5/30 -> 10/45; Terra 2.5/15 -> 5/22.5; Luna 1/6 -> 2/9).
+    # O corte e `inputTokenCount <= threshold`, entao 272000 exatos ainda pagam a
+    # tarifa padrao. As variantes reduzidas usam esse teto — e literalmente
+    # metade do preco, nao so metade do contexto.
+    - name: "gpt-56-sol-1m"
+      label: "GPT-5.6 Sol Raciocínio Profundo"
+      description: "Para trabalho que exige cruzar muitas fontes: análises longas, auditorias e relatórios densos."
+      preset:
+        endpoint: openAI
+        model: "gpt-5.6-sol"
+        maxContextTokens: 1050000
+        max_tokens: 128000
+
+    - name: "gpt-56-sol-272k"
       label: "GPT-5.6 Sol"
       description: "Modelo de fronteira para trabalho profissional complexo."
       preset:
         endpoint: openAI
         model: "gpt-5.6-sol"
-        maxContextTokens: 1050000
+        maxContextTokens: 272000
         max_tokens: 128000
 
-    - name: "gpt-56-sol-raciocinio"
-      label: "GPT-5.6 Sol (Raciocinio Profundo)"
-      description: "Sol com esforco de raciocinio elevado, para problemas dificeis."
-      preset:
-        endpoint: openAI
-        model: "gpt-5.6-sol"
-        maxContextTokens: 1050000
-        max_tokens: 128000
-        reasoning_effort: "xhigh"
-
-    - name: "gpt-56-terra"
-      label: "GPT-5.6 Terra"
-      description: "Equilibrio entre inteligencia e custo."
+    - name: "gpt-56-terra-1m"
+      label: "GPT-5.6 Terra Raciocínio Profundo"
+      description: "Capacidade analítica aplicada a grandes volumes de texto e dados."
       preset:
         endpoint: openAI
         model: "gpt-5.6-terra"
         maxContextTokens: 1050000
         max_tokens: 128000
 
-    - name: "gpt-56-luna"
-      label: "GPT-5.6 Luna"
-      description: "Otimizado para cargas sensiveis a custo."
+    - name: "gpt-56-terra-272k"
+      label: "GPT-5.6 Terra"
+      description: "Equilíbrio entre capacidade e agilidade nas tarefas do dia a dia."
+      preset:
+        endpoint: openAI
+        model: "gpt-5.6-terra"
+        maxContextTokens: 272000
+        max_tokens: 128000
+
+    - name: "gpt-56-luna-1m"
+      label: "GPT-5.6 Luna Raciocínio Profundo"
+      description: "Processa grandes volumes de conteúdo mantendo resposta rápida."
       preset:
         endpoint: openAI
         model: "gpt-5.6-luna"
         maxContextTokens: 1050000
         max_tokens: 128000
 
+    - name: "gpt-56-luna-272k"
+      label: "GPT-5.6 Luna"
+      description: "Rápido e direto, para tarefas objetivas e alto volume."
+      preset:
+        endpoint: openAI
+        model: "gpt-5.6-luna"
+        maxContextTokens: 272000
+        max_tokens: 128000
+
     # ── Google ──────────────────────────────────────────────────────────────────
-    - name: "gemini-31-pro"
-      label: "Gemini 3.1 Pro (Preview)"
+    # Sem faixa premium na tabela do LibreChat para a familia 3.5/3.6 Flash
+    # (apenas gemini-3.1 tem, em 200k). A variante reduzida aqui e teto de custo
+    # por requisicao, nao mudanca de tarifa — por isso metade do contexto.
+    - name: "gemini-36-flash-1m"
+      label: "Gemini 3.6 Flash Raciocínio Profundo"
+      description: "Multimodal sobre material extenso: vídeos longos e documentos com muitas imagens."
       preset:
         endpoint: google
-        model: "gemini-3.1-pro-preview"
+        model: "gemini-3.6-flash"
         maxContextTokens: 1048576
         maxOutputTokens: 65536
 
-    - name: "gemini-3-flash"
-      label: "Gemini 3 Flash (Preview)"
+    - name: "gemini-36-flash-500k"
+      label: "Gemini 3.6 Flash"
+      description: "Rápido e multimodal, para tarefas gerais do dia a dia."
       preset:
         endpoint: google
-        model: "gemini-3-flash-preview"
+        model: "gemini-3.6-flash"
+        maxContextTokens: 524288
+        maxOutputTokens: 65536
+
+    - name: "gemini-35-flash-1m"
+      label: "Gemini 3.5 Flash Raciocínio Profundo"
+      description: "Contexto amplo com a velocidade da família Flash, para leitura em volume."
+      preset:
+        endpoint: google
+        model: "gemini-3.5-flash"
         maxContextTokens: 1048576
+        maxOutputTokens: 65536
+
+    - name: "gemini-35-flash-500k"
+      label: "Gemini 3.5 Flash"
+      description: "Desempenho consistente em tarefas rotineiras de alto volume."
+      preset:
+        endpoint: google
+        model: "gemini-3.5-flash"
+        maxContextTokens: 524288
+        maxOutputTokens: 65536
+
+    - name: "gemini-35-flash-lite-1m"
+      label: "Gemini 3.5 Flash-Lite Raciocínio Profundo"
+      description: "Leitura de grandes volumes com a menor latência da família 3.5."
+      preset:
+        endpoint: google
+        model: "gemini-3.5-flash-lite"
+        maxContextTokens: 1048576
+        maxOutputTokens: 65536
+
+    - name: "gemini-35-flash-lite-500k"
+      label: "Gemini 3.5 Flash-Lite"
+      description: "O mais ágil da família 3.5, para respostas rápidas e diretas."
+      preset:
+        endpoint: google
+        model: "gemini-3.5-flash-lite"
+        maxContextTokens: 524288
         maxOutputTokens: 65536
 
     # ── xAI ─────────────────────────────────────────────────────────────────────
-    - name: "grok-4.3"
-      label: "Grok 4.3"
+    # A xAI DOBRA a tarifa a partir de 200k tokens de prompt (2/6 -> 4/12), entao
+    # a variante reduzida fica sob esse teto: e metade do PRECO, nao so do contexto.
+    # maxContextTokens reserva max_tokens para a saida, entao o prompt efetivo
+    # fica confortavelmente abaixo de 200k.
+    - name: "grok-46-500k"
+      label: "Grok 4.6 Raciocínio Profundo"
+      description: "Raciocina sobre projetos inteiros e conversas muito longas, com busca em tempo real."
       preset:
         endpoint: xai
-        model: "grok-4.3"
-        maxContextTokens: 2000000
+        model: "grok-4.6"
+        maxContextTokens: 500000
+        max_tokens: 32000
         temperature: 0.7
 
-    - name: "grok-code-fast"
-      label: "Grok Code Fast"
+    - name: "grok-46-200k"
+      label: "Grok 4.6"
+      description: "O modelo mais inteligente e rápido da xAI, para chat e código."
       preset:
         endpoint: xai
-        model: "grok-code-fast-1"
-        maxContextTokens: 2000000
+        model: "grok-4.6"
+        maxContextTokens: 200000
+        max_tokens: 32000
+        temperature: 0.7
+
+    # ── Moonshot / Kimi ─────────────────────────────────────────────────────────
+    # Sem faixa premium: a tarifa do K3 e unica em qualquer tamanho de contexto.
+    - name: "kimi-k3-1m"
+      label: "Kimi K3 Raciocínio Profundo"
+      description: "Contexto completo de 1M com entendimento visual nativo, para engenharia de software e raciocínio profundo."
+      preset:
+        endpoint: moonshot
+        model: "kimi-k3"
+        maxContextTokens: 1048576
+        max_tokens: 32000
+        temperature: 0.7
+
+    - name: "kimi-k3-500k"
+      label: "Kimi K3"
+      description: "Modelo de fronteira da Kimi, com entendimento visual nativo e forte desempenho em código."
+      preset:
+        endpoint: moonshot
+        model: "kimi-k3"
+        maxContextTokens: 524288
+        max_tokens: 32000
+        temperature: 0.7
+
+    # ── Z.ai / GLM ──────────────────────────────────────────────────────────────
+    # Sem faixa premium: tarifa unica em qualquer tamanho de contexto.
+    - name: "glm-53-1m"
+      label: "GLM-5.3 Raciocínio Profundo"
+      description: "Contexto completo de 1M para tarefas de longo horizonte: refatorações amplas e agentes que trabalham por horas."
+      preset:
+        endpoint: zai
+        model: "glm-5.3"
+        maxContextTokens: 1048576
+        max_tokens: 128000
+        temperature: 0.7
+
+    - name: "glm-53-500k"
+      label: "GLM-5.3"
+      description: "Capacidade de código e agentes no nível dos modelos de fronteira, com forte desempenho em tarefas complexas."
+      preset:
+        endpoint: zai
+        model: "glm-5.3"
+        maxContextTokens: 524288
+        max_tokens: 128000
+        temperature: 0.7
+
+    - name: "glm-53-flash-1m"
+      label: "GLM-5.3 Flash Raciocínio Profundo"
+      description: "Contexto completo de 1M em um modelo multimodal nativo de resposta rápida."
+      preset:
+        endpoint: zai
+        model: "glm-5.3-flash"
+        maxContextTokens: 1048576
+        max_tokens: 128000
+        temperature: 0.7
+
+    - name: "glm-53-flash-500k"
+      label: "GLM-5.3 Flash"
+      description: "Multimodal nativo com inteligência de fronteira e a melhor relação capacidade/agilidade do catálogo."
+      preset:
+        endpoint: zai
+        model: "glm-5.3-flash"
+        maxContextTokens: 524288
+        max_tokens: 128000
         temperature: 0.7
 
     # ── Geração de Imagem ────────────────────────────────────────────────────────
