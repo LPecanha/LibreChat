@@ -1,11 +1,11 @@
 # Dockerfile.overlay
 # Builds LibreChat from local sources with our [EXT] overlay applied.
-# Based on Dockerfile.multi, with the ghcr.io/uv dependency removed
+# Based on Dockerfile.multi (v0.8.8-rc1), with the ghcr.io/uv dependency removed
 # (uv is only needed for MCP server support, not for our overlay).
 
-ARG NODE_MAX_OLD_SPACE_SIZE=4096
+ARG NODE_MAX_OLD_SPACE_SIZE=6144
 
-FROM node:20-alpine AS base-min
+FROM node:24.16.0-alpine AS base-min
 RUN apk upgrade --no-cache && apk add --no-cache jemalloc curl
 ENV LD_PRELOAD=/usr/lib/libjemalloc.so.2
 WORKDIR /app
@@ -53,6 +53,7 @@ COPY client ./client
 COPY --from=data-provider-build /app/packages/data-provider/dist ./packages/data-provider/dist
 COPY --from=client-package-build /app/packages/client/dist ./packages/client/dist
 COPY --from=client-package-build /app/packages/client/src ./packages/client/src
+COPY --from=client-package-build /app/packages/client/tailwind.preset.cjs ./packages/client/tailwind.preset.cjs
 # Whitelabel injection — only active when WHITELABEL_CLIENT build arg is set
 COPY whitelabel ./whitelabel
 COPY whitelabel_color_generator.py ./
@@ -70,10 +71,19 @@ WORKDIR /app
 RUN npm ci --omit=dev
 COPY api ./api
 COPY config ./config
+COPY skill ./skill
+RUN mkdir -p /app/data && chmod 1777 /app/data
 COPY --from=data-provider-build /app/packages/data-provider/dist ./packages/data-provider/dist
 COPY --from=data-schemas-build /app/packages/data-schemas/dist ./packages/data-schemas/dist
 COPY --from=api-package-build /app/packages/api/dist ./packages/api/dist
 COPY --from=client-build /app/client/dist ./client/dist
+ARG BUILD_COMMIT
+ARG BUILD_BRANCH
+ARG BUILD_DATE
+ENV BUILD_COMMIT=${BUILD_COMMIT}
+ENV BUILD_BRANCH=${BUILD_BRANCH}
+ENV BUILD_DATE=${BUILD_DATE}
+
 EXPOSE 3080
 ENV HOST=0.0.0.0
 CMD ["node", "api/server/index.js"]
