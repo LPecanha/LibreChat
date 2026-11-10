@@ -537,10 +537,14 @@ export default function AgentPanel() {
       }
       return { models: map, modelLabels: labels };
     }
-    const fetched =
-      modelsQuery.isFetchedAfterMount && !modelsError ? (modelsQuery.data ?? {}) : {};
+    const fetched = modelsQuery.isFetchedAfterMount && !modelsError ? (modelsQuery.data ?? {}) : {};
     return { models: fetched, modelLabels: {} as Record<string, string> };
-  }, [startupConfig?.modelSpecs?.list, modelsError, modelsQuery.isFetchedAfterMount, modelsQuery.data]);
+  }, [
+    startupConfig?.modelSpecs?.list,
+    modelsError,
+    modelsQuery.isFetchedAfterMount,
+    modelsQuery.data,
+  ]);
   const methods = useForm<AgentForm>({
     defaultValues: getDefaultAgentFormValues(defaultStatefulCodeEnvironment),
     mode: 'onChange',

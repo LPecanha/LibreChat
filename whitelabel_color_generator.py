@@ -13,6 +13,7 @@ Autor: Sistema Navvia
 Data: 24/12/2024
 """
 
+import os
 import sys
 import re
 from colorsys import rgb_to_hls, hls_to_rgb
@@ -187,30 +188,34 @@ def _sub_css_var(content, var_name, hex_color):
     )
 
 
-def update_tailwind_colors_js(
-    palette,
-    js_file='packages/client/src/theme/utils/createTailwindColors.js',
-):
-    """Atualiza a paleta `green` em createTailwindColors.js.
+TAILWIND_GREEN_FILES = (
+    'packages/client/tailwind.compat.cjs',
+    'packages/client/src/theme/utils/createTailwindColors.js',
+)
 
-    Ate a v0.8.6-rc1 esta paleta vivia em client/tailwind.config.cjs. O upstream
-    moveu para ca (client/tailwind.config.cjs faz require deste arquivo em src/),
-    entao o alvo antigo ficou orfao.
+
+def update_tailwind_colors_js(palette, js_files=TAILWIND_GREEN_FILES):
+    """Atualiza a paleta `green` do Tailwind.
+
+    Ate a v0.8.6-rc1 ela vivia em client/tailwind.config.cjs; depois em
+    packages/client/src/theme/utils/createTailwindColors.js; desde o v0.8.9-rc1
+    (upstream #16041) em packages/client/tailwind.compat.cjs, que o
+    client/tailwind.config.cjs carrega via require. Usa o primeiro que existir.
     """
-    print(f"🎨 Atualizando paleta Tailwind (JS): {js_file}")
-    try:
-        with open(js_file, 'r', encoding='utf-8') as f:
-            content = f.read()
-    except FileNotFoundError:
-        print(f"⚠️  Aviso: Arquivo {js_file} não encontrado! Pulando...")
+    js_file = next((f for f in js_files if os.path.exists(f)), None)
+    if js_file is None:
+        print("❌ Erro: paleta `green` do Tailwind não encontrada em " + ", ".join(js_files))
         return False
+    print(f"🎨 Atualizando paleta Tailwind (JS): {js_file}")
+    with open(js_file, 'r', encoding='utf-8') as f:
+        content = f.read()
 
     with open(js_file + '.backup', 'w', encoding='utf-8') as f:
         f.write(content)
 
     match = re.search(r'green:\s*\{[^}]+\}', content)
     if not match:
-        print("⚠️  Aviso: bloco `green:` não encontrado em createTailwindColors.js! Pulando...")
+        print(f"❌ Erro: bloco `green:` não encontrado em {js_file}!")
         return False
 
     block = match.group(0)
@@ -228,30 +233,61 @@ def update_tailwind_colors_js(
     with open(js_file, 'w', encoding='utf-8') as f:
         f.write(content)
 
-    print(f"✅ createTailwindColors.js atualizado: {len(shades)} tons de green")
+    print(f"✅ {js_file} atualizado: {len(shades)} tons de green")
     return True
 
 
-def update_style_css(base_color, css_file='client/src/style.css'):
-    """Atualiza o arquivo style.css com as novas cores"""
-    
+# Desde o v0.8.9-rc1 as custom properties (--brand-purple, --green-*) vivem em
+# packages/client/src/theme/defaults.css (importado via tokens.css pelo style.css);
+# o style.css ainda guarda os rgba do .btn-primary. Processamos os dois.
+CSS_FILES = (
+    'client/src/style.css',
+    'packages/client/src/theme/defaults.css',
+)
+
+
+def update_style_css(base_color, css_files=CSS_FILES):
+    """Aplica a paleta da marca nas folhas de estilo do client.
+
+    Falha (retorna False) se NENHUMA substituicao acontecer: e o sintoma de que o
+    upstream moveu as variaveis de novo e o whitelabel deixaria de aplicar a cor
+    sem quebrar o build.
+    """
     print(f"🎨 Gerando paleta de cores a partir de: {base_color}")
     palette = generate_color_palette(base_color)
-    
+    changed_files = 0
+    for css_file in css_files:
+        if _update_css_file(base_color, palette, css_file):
+            changed_files += 1
+
+    if changed_files == 0:
+        print("❌ Erro: nenhuma variavel de cor encontrada em " + ", ".join(css_files))
+        return False
+
+    report = generate_report(base_color, palette)
+    report_file = 'color_palette_report.md'
+    with open(report_file, 'w', encoding='utf-8') as f:
+        f.write(report)
+    print(f"📊 Relatório gerado: {report_file}")
+    return True
+
+
+def _update_css_file(base_color, palette, css_file):
+    """Substitui as cores em um arquivo CSS; retorna True se algo mudou."""
     print(f"📝 Lendo arquivo: {css_file}")
     try:
         with open(css_file, 'r', encoding='utf-8') as f:
             content = f.read()
     except FileNotFoundError:
-        print(f"❌ Erro: Arquivo {css_file} não encontrado!")
+        print(f"⚠️  Aviso: Arquivo {css_file} não encontrado! Pulando...")
         return False
-    
-    # Backup do arquivo original
+    original = content
+
     backup_file = css_file + '.backup'
     with open(backup_file, 'w', encoding='utf-8') as f:
         f.write(content)
     print(f"💾 Backup criado: {backup_file}")
-    
+
     # Substitui --brand-purple (hex ou triplete RGB)
     content = _sub_css_var(content, 'brand-purple', base_color)
 
@@ -276,19 +312,13 @@ def update_style_css(base_color, css_file='client/src/style.css'):
     # rgba(25, 195, 125, …) — focus ring
     content = re.sub(r'rgba\(25,\s*195,\s*125,', f'rgba({ring_r}, {ring_g}, {ring_b},', content)
 
-    # Salva o arquivo atualizado
+    if content == original:
+        print(f"ℹ️  {css_file}: nenhuma cor da marca encontrada")
+        return False
+
     with open(css_file, 'w', encoding='utf-8') as f:
         f.write(content)
-    
     print(f"✅ Arquivo {css_file} atualizado com sucesso!")
-    
-    # Gera relatório
-    report = generate_report(base_color, palette)
-    report_file = 'color_palette_report.md'
-    with open(report_file, 'w', encoding='utf-8') as f:
-        f.write(report)
-    print(f"📊 Relatório gerado: {report_file}")
-    
     return True
 
 
@@ -592,20 +622,20 @@ def main():
     # Atualiza Startup.tsx
     tsx_success = update_startup_tsx(brand_name)
     
-    if css_success:
+    if css_success and tailwind_js_success:
         print()
         print("=" * 60)
         print("✅ Processo concluído com sucesso!")
         print("=" * 60)
         print()
         print("📁 Arquivos gerados:")
-        print("  • client/src/style.css (atualizado)")
-        print("  • client/src/style.css.backup (backup)")
+        for css_file in CSS_FILES:
+            print(f"  • {css_file} (atualizado se continha cores da marca)")
         if vite_success:
             print("  • client/vite.config.ts (atualizado)")
             print("  • client/vite.config.ts.backup (backup)")
         if tailwind_js_success:
-            print("  • packages/client/src/theme/utils/createTailwindColors.js (atualizado)")
+            print("  • paleta green do Tailwind (atualizada)")
         if tailwind_success:
             print("  • client/tailwind.config.cjs (atualizado)")
             print("  • client/tailwind.config.cjs.backup (backup)")

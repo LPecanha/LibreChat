@@ -1,13 +1,15 @@
 # Dockerfile.overlay
 # Builds LibreChat from local sources with our [EXT] overlay applied.
-# Based on Dockerfile.multi (v0.8.8-rc1), with the ghcr.io/uv dependency removed
+# Based on Dockerfile.multi (v0.8.9-rc1), with the ghcr.io/uv dependency removed
 # (uv is only needed for MCP server support, not for our overlay).
 
 ARG NODE_MAX_OLD_SPACE_SIZE=6144
 
-FROM node:24.16.0-alpine AS base-min
-RUN apk upgrade --no-cache && apk add --no-cache jemalloc curl
+FROM node:24.22.1-alpine AS base-min
+RUN apk upgrade --no-cache && apk add --no-cache bash jemalloc curl
 ENV LD_PRELOAD=/usr/lib/libjemalloc.so.2
+# Disable dependency installation analytics before any npm lifecycle scripts run.
+ENV SCARF_ANALYTICS=false
 WORKDIR /app
 RUN npm config set fetch-retry-maxtimeout 600000 && \
     npm config set fetch-retries 5 && \
@@ -15,8 +17,10 @@ RUN npm config set fetch-retry-maxtimeout 600000 && \
 COPY package*.json ./
 COPY packages/data-provider/package*.json ./packages/data-provider/
 COPY packages/api/package*.json ./packages/api/
+COPY vendor/code ./vendor/code
 COPY packages/data-schemas/package*.json ./packages/data-schemas/
 COPY packages/client/package*.json ./packages/client/
+COPY packages/chat/package*.json ./packages/chat/
 COPY client/package*.json ./client/
 COPY api/package*.json ./api/
 
@@ -46,6 +50,12 @@ WORKDIR /app/packages/client
 COPY packages/client ./
 RUN npm run build
 
+FROM base AS chat-package-build
+WORKDIR /app/packages/chat
+COPY packages/chat ./
+COPY --from=data-provider-build /app/packages/data-provider/dist /app/packages/data-provider/dist
+RUN npm run build
+
 FROM base AS client-build
 ARG WHITELABEL_CLIENT
 WORKDIR /app
@@ -54,6 +64,10 @@ COPY --from=data-provider-build /app/packages/data-provider/dist ./packages/data
 COPY --from=client-package-build /app/packages/client/dist ./packages/client/dist
 COPY --from=client-package-build /app/packages/client/src ./packages/client/src
 COPY --from=client-package-build /app/packages/client/tailwind.preset.cjs ./packages/client/tailwind.preset.cjs
+COPY --from=client-package-build /app/packages/client/tailwind.compat.cjs ./packages/client/tailwind.compat.cjs
+# The client's Tailwind content scans the chat sources, and the app resolves the package's dist.
+COPY --from=chat-package-build /app/packages/chat/dist ./packages/chat/dist
+COPY --from=chat-package-build /app/packages/chat/src ./packages/chat/src
 # Whitelabel injection — only active when WHITELABEL_CLIENT build arg is set
 COPY whitelabel ./whitelabel
 COPY whitelabel_color_generator.py ./
@@ -61,6 +75,7 @@ RUN if [ -n "$WHITELABEL_CLIENT" ]; then \
       apk add --no-cache python3 && \
       sh whitelabel/apply.sh "$WHITELABEL_CLIENT"; \
     fi
+ARG VITE_MCP_SANDBOX_URL=
 ARG NODE_MAX_OLD_SPACE_SIZE
 ENV NODE_OPTIONS="--max-old-space-size=${NODE_MAX_OLD_SPACE_SIZE}"
 WORKDIR /app/client
@@ -77,6 +92,7 @@ COPY --from=data-provider-build /app/packages/data-provider/dist ./packages/data
 COPY --from=data-schemas-build /app/packages/data-schemas/dist ./packages/data-schemas/dist
 COPY --from=api-package-build /app/packages/api/dist ./packages/api/dist
 COPY --from=client-build /app/client/dist ./client/dist
+COPY --from=client-build /app/client/public/mcp-sandbox.html ./client/public/mcp-sandbox.html
 ARG BUILD_COMMIT
 ARG BUILD_BRANCH
 ARG BUILD_DATE

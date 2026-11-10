@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { Zap } from 'lucide-react';
 import * as Menu from '@ariakit/react/menu';
-import { useLocalize } from '~/hooks';
 import { BuyCreditsModal } from './BuyCreditsModal';
 import { useExtProfile } from './useExtProfile';
+import { useLocalize } from '~/hooks';
 
 /** Formats raw tokenCredits (micro-USD: 1 credit = $0.000001) as a dollar string. */
 export function formatUsdBalance(tokenCredits: number): string {
@@ -31,10 +31,10 @@ export function ExtBalanceDisplay({ tokenCredits }: { tokenCredits: number }) {
           <Menu.MenuSeparator className="bg-surface-hover -mx-1 my-1 h-px border-0" />
           <button
             onClick={() => setShowModal(true)}
-            className="select-item w-full text-sm hover:bg-surface-hover hover:text-text-primary"
+            className="select-item hover:bg-surface-hover hover:text-text-primary w-full text-sm"
             aria-label={localize('com_nav_buy_credits')}
           >
-            <Zap className="icon-md text-blue-500" aria-hidden="true" />
+            <Zap className="icon-md text-link" aria-hidden="true" />
             {localize('com_nav_buy_credits')}
           </button>
         </>

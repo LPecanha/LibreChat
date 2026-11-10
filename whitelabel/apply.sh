@@ -92,19 +92,23 @@ done
 # nenhum estilo do projeto mira .lucide-feather.
 if [ -n "$BRAND_AGENT_ICON" ]; then
   echo "==> Swapping agent icon: Feather -> ${BRAND_AGENT_ICON}"
-  for f in \
-    client/src/utils/agents.tsx \
-    client/src/components/Endpoints/MessageEndpointIcon.tsx \
-    client/src/components/Endpoints/MinimalIcon.tsx \
-    client/src/hooks/Endpoint/Icons.tsx
-  do
-    [ -f "$f" ] || { echo "    aviso: ${f} nao encontrado, pulando" >&2; continue; }
-    # Padroes explicitos em vez de \b: o suporte a word boundary varia entre
-    # BSD sed (macOS) e GNU/busybox (Alpine). Estas duas formas cobrem todos os
-    # usos e nao podem casar por acidente.
+  # Os arquivos sao descobertos, nao listados: o upstream ja moveu esses pontos
+  # mais de uma vez (#15148 consolidou Icons.tsx em useEndpoints.ts e criou
+  # ConvoIcon/EntityEndpointMark). Testes ficam de fora — eles mockam `Feather`.
+  ICON_FILES=$(grep -rlE "import \{[^}]*Feather[^}]*\} from 'lucide-react'" client/src \
+    | grep -vE '(__tests__|\.(spec|test)\.)' || true)
+  if [ -z "$ICON_FILES" ]; then
+    echo "Error: nenhum uso de Feather encontrado em client/src; revise o passo 6" >&2
+    exit 1
+  fi
+  for f in $ICON_FILES; do
+    echo "    ${f}"
+    # Padroes explicitos em vez de \b no sed: o suporte a word boundary varia
+    # entre BSD sed (macOS) e GNU/busybox (Alpine).
     sed -i \
       -e "s/{ Feather }/{ ${BRAND_AGENT_ICON} }/g" \
       -e "s/<Feather /<${BRAND_AGENT_ICON} /g" \
+      -e "s/createElement(Feather,/createElement(${BRAND_AGENT_ICON},/g" \
       "$f"
   done
 fi

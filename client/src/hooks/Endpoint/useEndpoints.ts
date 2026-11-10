@@ -141,9 +141,7 @@ export const useEndpoints = ({
            que NAO se traduzem) com uma frase de UI: 'My Agents'. Localizamos so
            essa; o resto continua vindo do mapa. */
         label:
-          ep === EModelEndpoint.agents
-            ? localize('com_ui_my_agents')
-            : alternateName[ep] || ep,
+          ep === EModelEndpoint.agents ? localize('com_ui_my_agents') : alternateName[ep] || ep,
         hasModels,
         icon: createEndpointIcon(ep, resolveProviderIcon({ endpoint: ep, endpointsConfig })),
       };

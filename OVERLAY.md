@@ -34,7 +34,7 @@ overlay/main   ──────────●──   (our 5 touch points + a
 | `client/src/common/types.ts` | add `modelLabels` field to `AgentModelPanelProps` | `// [EXT]` |
 | `client/vite.config.ts` | limite workbox 8MB + proxy `/ext` em dev | `// [EXT]` |
 | `client/src/routes/Root.tsx` | 2 lines: import + mount `<PaymentToast />` | `// [EXT]` |
-| `client/src/components/Nav/AccountSettings.tsx` | 1 import + 1 JSX: `<ExtBalanceDisplay />` | `// [EXT]` |
+| `client/src/components/Nav/AccountSettings.tsx` | `useGetUserBalance` + 1 import + bloco de saldo com `<ExtBalanceDisplay />` (o upstream removeu o saldo do menu no v0.8.9-rc1) | `// [EXT]` |
 | `client/src/components/Nav/Settings/registry.tsx` | 1 import + swap `Component` na entry `tokenCredits` → `ExtBalancePanel` | `// [EXT]` |
 | `client/src/locales/en/translation.json` | add-only: `com_nav_buy_credits*` keys | (no marker needed — add-only) |
 
@@ -162,10 +162,22 @@ And inside the `<div className="mt-auto">` block, before the `<Suspense>` wrappi
 ```tsx
 import { ExtBalanceDisplay } from './BuyCredits'; // [EXT]
 ```
-And replace the balance display block with:
+Desde o v0.8.9-rc1 o menu e Ariakit (`Menu.*`) e o upstream **nao mostra mais o saldo** nele.
+Reponha a query e o bloco logo apos a linha do e-mail:
 ```tsx
-{/* [EXT] balance display with buy-credits button */}
-<ExtBalanceDisplay tokenCredits={balanceQuery.data.tokenCredits} />
+const { user, logout, isAuthenticated } = useAuthContext();
+const balanceQuery = useGetUserBalance({
+  enabled: !!isAuthenticated && startupConfig?.balance?.enabled,
+});
+// ...
+<Menu.MenuSeparator className="bg-surface-hover -mx-1 my-1 h-px border-0" />
+{startupConfig?.balance?.enabled === true && balanceQuery.data != null && (
+  <>
+    {/* [EXT] balance display with buy-credits button */}
+    <ExtBalanceDisplay tokenCredits={balanceQuery.data.tokenCredits} />
+    <Menu.MenuSeparator className="bg-surface-hover -mx-1 my-1 h-px border-0" />
+  </>
+)}
 ```
 
 **`client/src/components/Nav/Settings/registry.tsx`** — desde o upstream v0.8.8-rc1 (PR #13722,
@@ -280,9 +292,10 @@ Without `WHITELABEL_CLIENT`, the image builds as vanilla LibreChat (no brand app
 **What `apply.sh` does (in order):**
 1. Sources `brand.env` → `BRAND_NAME`, `BRAND_COLOR`, `BRAND_DESCRIPTION`
 2. Copies `assets/` over `client/public/assets/` (logos, favicons, icons)
-3. Runs `whitelabel_color_generator.py` → updates `style.css`, `tailwind.config.cjs`, `index.html`, `Startup.tsx`, `vite.config.ts` (including `rgba(16, 163, 127, …)` in `.btn-primary`)
+3. Runs `whitelabel_color_generator.py` → updates the CSS custom properties (`packages/client/src/theme/defaults.css` since v0.8.9-rc1, plus `client/src/style.css`), the Tailwind `green` palette (`packages/client/tailwind.compat.cjs`), `tailwind.config.cjs`, `index.html`, `vite.config.ts`. **Fails the build** if no color target is found — upstream has moved these files three times.
 4. Replaces `LibreChat` → `$BRAND_NAME` in all `client/src/locales/*/translation.json`
 5. Replaces `LibreChat` → `$BRAND_NAME` and `#10A37F`/`#10a37f` → `$BRAND_COLOR` in all `client/src/**/*.tsx` and `*.ts`
+6. Swaps the agent icon `Feather` → `$BRAND_AGENT_ICON` in every non-test file under `client/src` that imports it from `lucide-react` (auto-discovered; fails if none found)
 
 **Adding a new client:**
 1. Create `whitelabel/clients/<id>/brand.env` with `BRAND_NAME`, `BRAND_COLOR`, `BRAND_DESCRIPTION`
