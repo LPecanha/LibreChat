@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Zap } from 'lucide-react';
-import { DropdownMenuSeparator } from '@librechat/client';
+import * as Menu from '@ariakit/react/menu';
 import { useLocalize } from '~/hooks';
 import { BuyCreditsModal } from './BuyCreditsModal';
 import { useExtProfile } from './useExtProfile';
@@ -23,12 +23,12 @@ export function ExtBalanceDisplay({ tokenCredits }: { tokenCredits: number }) {
 
   return (
     <>
-      <div className="ml-3 mr-2 py-2 text-sm text-token-text-secondary" role="note">
+      <div className="text-text-secondary ms-3 me-2 py-2 text-sm" role="note">
         {localize('com_nav_balance')}: {formatUsdBalance(tokenCredits)}
       </div>
       {!isOrgMember && (
         <>
-          <DropdownMenuSeparator />
+          <Menu.MenuSeparator className="bg-surface-hover -mx-1 my-1 h-px border-0" />
           <button
             onClick={() => setShowModal(true)}
             className="select-item w-full text-sm hover:bg-surface-hover hover:text-text-primary"
